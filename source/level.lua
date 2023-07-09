@@ -1,6 +1,5 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-
 import "jsonloader"
 
 class('Level').extends(playdate.graphics.sprite)
@@ -25,18 +24,26 @@ function Level:init(levelPath)
     self:ParceTileMap() 
     self:RenderTilemap()
     self:ParceProps()
-    self:addSprite()
-    self:add() -- Add to draw list
-end
-
-function Level:draw(x, y, width, height)
-	self.tilemap:draw(0, 0)
-    print("[Level] Draw")
 end
 
 function Level:CreateTile(ID, X, Y, Solid)
     print("[Level] Creating Tile "..ID.." on X "..X.." Y "..Y)
     self.tilemap:setTileAtPosition(X, Y, ID)
+    --[[
+    if ID == 2 then
+        local SlapColider = gfx.sprite.new()
+        local TileW = 14
+        local TileH = 14
+        local WorldX = self.jsonTable.root_x+14*(X-1)
+        local WorldY = self.jsonTable.root_y+14*(Y-1)
+        SlapColider:setUpdatesEnabled(false) 
+        SlapColider:setVisible(false)
+        SlapColider:setCenter(0, 0)
+        SlapColider:setBounds(WorldX, WorldY, TileW, TileH)
+        SlapColider:setCollideRect(0, 0, TileW, TileH)
+        SlapColider:addSprite()
+    end
+    --]]
 end
 
 function Level:ParceTileMap()
@@ -58,7 +65,7 @@ function Level:ParceProps()
     for i=1, #self.jsonTable.props do
         local prop = self.jsonTable.props[i]
         self:CreateProp(prop.propType, prop.x, prop.y)
-    end  
+    end
 end
 
 function Level:RenderTilemap()
@@ -70,5 +77,5 @@ function Level:RenderTilemap()
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
     layerSprite:add()
-    gfx.sprite.addWallSprites(tilemap,  _ , self.jsonTable.root_x, self.jsonTable.root_y) 
+    gfx.sprite.addWallSprites(tilemap,  {501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
 end

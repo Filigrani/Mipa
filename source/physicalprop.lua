@@ -8,7 +8,7 @@ function PhysicalProp:init(x, y)
     self:setImage(img)
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
-    self:setCenter(0, 0)
+    --self:setCenter(0, 0)
     self:setCollideRect(0,0,12,12)
     self:add() -- Add to draw list
     self:setTag(TAG.PropPushable)
@@ -20,6 +20,7 @@ function PhysicalProp:init(x, y)
     self.gravity = 0.35
     self.movingflag = false
     self.onground = true
+    self.freefall = 0
 end
 
 function PhysicalProp:IsFalling()
@@ -60,6 +61,7 @@ function PhysicalProp:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
     local _, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
     local lastground = self.onground
+    local lastfreefall = self.freefall
     self.onground = false
     for i=1,length do
         local collision = collisions[i]
@@ -70,29 +72,65 @@ function PhysicalProp:ApplyVelocity()
             if collision.normal.y == -1 then
                 self.onground = true
                 self.velocityY = 0
-            elseif collision.normal.y == 1 then
+                self.freefall = 0
+                if collisionTag == TAG.Player and not lastground then
+                    print("Damage "..lastfreefall)
+
+                    if lastfreefall > 10 then
+                        collisionObject:Damage(2)
+                    else
+                        collisionObject:Damage(1)
+                    end                   
+                end                   
+            elseif collision.normal.y == 1 then       
                 self.velocityY = 0
             end
             if collisionTag == TAG.PropPushable and lastground then
                 if self.velocityX > 0 then
                     if collision.normal.x < 0 then
                         collisionObject:TryMoveRight()
-                        collisionObject:ApplyVelocity()                            
+                        collisionObject:ApplyVelocity()  
+                        SoundManager:PlaySound("Push")                        
                     end                  
                 end
                 if self.velocityX < 0 then
-                    if collision.normal.x < 0 then
+                    if collision.normal.x > 0 then
                         collisionObject:TryMoveLeft()
-                        collisionObject:ApplyVelocity()             
+                        collisionObject:ApplyVelocity()    
+                        SoundManager:PlaySound("Push")          
                     end                  
                 end
-            end            
+            end    
+            if collisionTag == TAG.Player and collisionObject:IsDead() and lastground then
+                if self.velocityX > 0 then
+                    if collision.normal.x < 0 then
+                        collisionObject:TryMoveRight()
+                        collisionObject:ApplyVelocity()    
+                        SoundManager:PlaySound("MetalPush")
+                    end                  
+                end
+                if self.velocityX < 0 then
+                    if collision.normal.x > 0 then
+                        collisionObject:TryMoveLeft()
+                        collisionObject:ApplyVelocity() 
+                        SoundManager:PlaySound("MetalPush")            
+                    end                  
+                end
+            end                     
         end
     end
+
+    if not self.onground then
+        self.freefall = self.freefall + self.gravity
+    end 
+
     if self.velocityX ~= 0 or self.velocityY ~= 0 then
         self.movingflag = true
     else
         self.movingflag = false
+    end
+    if self.y > 400 then
+        gfx.sprite.removeSprite(self)
     end
 end
 
