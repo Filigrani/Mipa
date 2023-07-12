@@ -4,10 +4,12 @@ TAG =
 	Enemy = 2,
 	Prop = 3,
 	PropPushable = 4,
+	Effect = 5,
+	Interactive = 6,
 }
 Z_Index = 
 {
-	Player = 1,
+	Player = 5,
 	Enemy = 2,
 	Object = 3,
 	BG = 4,

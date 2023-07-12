@@ -6,9 +6,14 @@ class('UI').extends(playdate.graphics.sprite)
 function UI:init()
     self:add() -- Add to draw list
     self.hearts = {}
+    self.equipment = {}
     self.lasthearts = 0
     self.lastcontainers = 0
+    self.lastequipment = 0
     self.deathtriggered = false
+    self.dialogdata = {}
+    self.currentdialogindex = 0
+    self:LoadDialogUI()
     print("[UI] Init...")
     return self
 end
@@ -26,6 +31,23 @@ function UI:PopulateHearts(containers)
         print("[UI] Removing "..needToRemove.." heart(s)")
         for i=1, needToRemove do
             self:RemoveHeart()
+        end
+    end
+end
+
+function UI:PopulateEquipment(equipment)
+    local ExistenEQ = #self.equipment
+    if #equipment > ExistenEQ then
+        local needToAdd = #equipment-ExistenEQ
+        print("[UI] Adding "..needToAdd.." equipment(s)")
+        for i=1, needToAdd do
+            self:AddEquipment(1)
+        end
+    elseif #equipment < ExistenEQ then
+        local needToRemove = ExistenEQ-#equipment
+        print("[UI] Removing "..needToRemove.." equipment(s)")
+        for i=1, needToRemove do
+            self:RemoveEquipment()
         end
     end
 end
@@ -64,11 +86,40 @@ function UI:UpdateHP(hearts, containers)
     end
 end
 
+function UI:UpdateEquipment(equipment, selectedIndex)
+    for i=1, #self.equipment do
+        local eq = self.equipment[i]
+        local style = ""
+        local item = equipment[i]
+        if i == selectedIndex then
+            style = "_active"
+        end
+        if style ~= eq.style then
+            if style == "" then
+                print("Equipment slot frame "..i.." updated to style none active")
+            else
+                print("Equipment slot frame "..i.." updated to style active")
+            end
+            eq.style = style
+            eq:setImage(gfx.image.new("images/UI/equip_slot"..style))
+        end       
+        if eq.icon.style ~= item then
+            print("Equipment slot icon "..i.." updated with item "..item)
+            eq.icon.style = item
+            eq.icon:setImage(gfx.image.new("images/UI/equip"..item))
+        end
+    end
+end
+
 function UI:Update()
     local hearts = 0;
     local containers = 0
+    local equipment = {}
+    local selectedequipment = 1
     if MipaInst then
         containers = MipaInst.hpmax/2
+        equipment = MipaInst.equipment
+        selectedequipment = MipaInst.selectedequipment
         if MipaInst.hp > 0 then
             hearts = MipaInst.hp/2
         end
@@ -78,9 +129,15 @@ function UI:Update()
         self:PopulateHearts(containers)
     end
 
+    if #self.equipment ~= #equipment then
+        self:PopulateEquipment(equipment)
+        self:UpdateEquipment(equipment, selectedequipment)
+    end
+
     if self.lasthearts ~= hearts then
         self:UpdateHP(hearts, containers)
     end
+    self:ProcessDialog()
 end
 
 function UI:RemoveHeart()
@@ -89,7 +146,7 @@ function UI:RemoveHeart()
         local heart = self.hearts[lastindex]
         if heart then
             table.remove(self.hearts, lastindex)
-            heart:remove()
+            gfx.sprite.removeSprite(heart)
         end
     end
 end
@@ -174,4 +231,98 @@ function UI:Death()
     end
     self.animationtimer.repeats = true
     self.animationtimer:start()
+end
+
+function UI:AddEquipment(style)
+    local eq = gfx.sprite.new()
+    local img = gfx.image.new("images/UI/equip_slot")
+    eq:setImage(img)
+    eq:setCenter(0, 0)
+    eq:moveTo(371-30*#self.equipment, 2)
+    eq:add()
+    eq.style = ""
+    self.equipment[#self.equipment+1] = eq
+    eq.icon = gfx.sprite.new()
+    eq.icon.style = 0
+    local imgSlice = gfx.image.new("images/UI/equip0")
+    eq.icon:setImage(imgSlice)
+    eq.icon:setCenter(0, 0)
+    eq.icon:moveTo(eq.x, eq.y)
+    eq.icon:add()
+end
+
+function UI:RemoveEquipment()
+    local lastindex = #self.equipment
+    if lastindex > 0 then
+        local eq = self.equipment[lastindex]
+        if eq then
+            table.remove(self.equipment, lastindex)
+            gfx.sprite.removeSprite(eq.icon)
+            gfx.sprite.removeSprite(eq)
+        end
+    end
+end
+
+function UI:ProcessDialog()
+    if self.currentdialogindex ~= 0 and #self.dialogdata > 0 then
+        if not self.dialogbg:isVisible() then
+            self.dialogbg:setVisible(true)
+        end
+        if not self.dialogactor:isVisible() then
+            self.dialogactor:setVisible(true)
+        end
+        if not self.dialogtextsprite:isVisible() then
+            self.dialogtextsprite:setVisible(true)
+        end
+    else
+        if self.dialogbg:isVisible() then
+            self.dialogbg:setVisible(false)
+        end
+        if self.dialogactor:isVisible() then
+            self.dialogactor:setVisible(false)
+        end
+        if self.dialogtextsprite:isVisible() then
+            self.dialogtextsprite:setVisible(false)
+        end
+    end
+end
+
+function UI:LoadDialogUI()
+    local BGimg = gfx.image.new("images/UI/dialog")
+    local BG = gfx.sprite.new()
+    BG:setImage(BGimg)
+    BG:setCenter(0, 0)
+    BG:moveTo(39, 180)
+    BG:setZIndex(Z_Index.BG)
+    BG:add() -- Add to draw list
+    BG:setVisible(false)
+    local Actorimg = gfx.image.new("images/UI/DialogMipa")
+    local Actor = gfx.sprite.new()
+    Actor:setImage(Actorimg)
+    Actor:setCenter(0, 0)
+    Actor:moveTo(39, 180)
+    Actor:setZIndex(Z_Index.BG)
+    Actor:add() -- Add to draw list
+    Actor:setVisible(false)
+    local DialogTextSprite = gfx.sprite.new()
+    DialogTextSprite:setCenter(0, 0)
+    DialogTextSprite:moveTo(120, 176)
+    DialogTextSprite:setZIndex(Z_Index.BG)
+    DialogTextSprite:add() -- Add to draw list
+    DialogTextSprite:setVisible(false)
+    local Textimg = gfx.image.new(217, 45)
+    gfx.pushContext(Textimg)
+        gfx.setColor(gfx.kColorBlack)
+        gfx.drawText("Test dialog", 0, 0)
+    gfx.popContext()
+    DialogTextSprite:setImage(Textimg)
+    self.dialogbg = BG
+    self.dialogactor = Actor
+    self.dialogtextimage = Textimg
+    self.dialogtextsprite = DialogTextSprite
+end
+
+function UI:StartDialog(data)
+    --self.currentdialogindex = 1
+    --self.dialogdata = data
 end

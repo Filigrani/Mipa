@@ -21,6 +21,9 @@ AddSound("Scream")
 AddSound("Talk",4)
 AddSound("Push",2)
 AddSound("MetalPush",1)
+AddSound("Door")
+AddSound("No")
+AddSound("Button")
 
 function SoundManager:PlaySound(name, vol)
     local volume = 1
