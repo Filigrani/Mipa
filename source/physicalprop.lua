@@ -38,12 +38,20 @@ function PhysicalProp:IsMoving()
     return self.movingflag
 end
 
-function PhysicalProp:TryMoveRight()
-    self.velocityX = self.speed
+function PhysicalProp:TryMoveRight(s)
+    local speed = self.speed
+    if s then
+        speed = s
+    end
+    self.velocityX = speed
 end
 
-function PhysicalProp:TryMoveLeft()
-    self.velocityX = -self.speed
+function PhysicalProp:TryMoveLeft(s)
+    local speed = self.speed
+    if s then
+        speed = s
+    end
+    self.velocityX = -speed
 end
 
 function PhysicalProp:TryJump()  
@@ -54,6 +62,9 @@ function PhysicalProp:TryJump()
 end
 
 function PhysicalProp:collisionResponse(other)
+    if other and other:getTag() == TAG.Effect then
+        return gfx.sprite.kCollisionTypeOverlap
+    end
     return gfx.sprite.kCollisionTypeSlide
 end
 

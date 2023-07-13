@@ -14,6 +14,11 @@ import "ui"
 import "soundmanager"
 import "crankmanager"
 import "crankdisk"
+import "bullet"
+import "activemanager"
+import "activator"
+import "activatable"
+import "trigger"
 
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
@@ -25,13 +30,17 @@ CanStartAgain = false
 
 StartGame = function ()
 	gfx.sprite.removeAll()
-	MipaInst = Mipa(151, 134)
-	Mipa(165, 134).IsClone = true
-	CurrentLevel = Level("levels/level_template.json")
+	ActiveManager.Reset()
+	--MipaInst = Mipa(151, 134)
+	--local clone = Mipa(165, 134)
+	if clone then
+		clone.IsClone = true
+		clone.hp = 1
+	end
+	CurrentLevel = Level("levels/lvl0.json")
 	UIIsnt = UI()
-	CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
+	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
 end
-
 
 DeathTrigger = function ()
 	CanStartAgain = true
@@ -79,11 +88,13 @@ end
 
 local function loadGame()
 	pd.display.setInverted(true)
+	gfx.setFont(gfx.font.new('font/Mini Sans 2X'))
 	StartGame()
 end
 
 local function updateGame()
-    gfx.sprite.update()
+    ActiveManager.Update()
+	gfx.sprite.update()
 	pd.frameTimer.updateTimers()
 	pd.timer.updateTimers()
 	UIIsnt:Update()
@@ -108,5 +119,5 @@ loadGame()
 function pd.update()
 	updateGame()
 	drawGame()
-	pd.drawFPS(385,0) -- FPS widget
+	--pd.drawFPS(385,0) -- FPS widget
 end

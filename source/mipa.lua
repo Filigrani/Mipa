@@ -11,10 +11,11 @@ function Mipa:init(x, y)
     self:setCollideRect(3,1,8,13)
     self:add() -- Add to draw list
     self:setTag(TAG.Player)
-
     -- Stats
-    self.hp = 1
-    self.hpmax = 6
+    self.hp = 4
+    self.hpmax = 4
+    self.equipment = {0, 1}
+    self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
     self.pushingspeed = 1.1
@@ -51,6 +52,11 @@ function Mipa:init(x, y)
     self.mirrored = gfx.kImageUnflipped
     self.IsClone = false
     self.skipdeathscreen = false
+    self.pulltimer = pd.frameTimer.new(3)
+    self.pulltimer.repeats = true
+    self.pulltimer.timerEndedCallback = function(timer)
+        self:ProcessPulling()    
+    end
 end
 function Mipa:IsDead()
     if self.hp == 0 then
@@ -91,6 +97,22 @@ function Mipa:IsPushing()
     return self.pusing
 end
 
+function Mipa:IsPulling()
+    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and self.equipment[self.selectedequipment] == 1 then
+        return pd.buttonIsPressed(pd.kButtonB) 
+    end
+    return false
+end
+
+function Mipa:NextEquipment()
+    if self.selectedequipment == #self.equipment then
+        self.selectedequipment = 1
+    else
+        self.selectedequipment = self.selectedequipment +1;
+    end
+    UIIsnt:UpdateEquipment(self.equipment, self.selectedequipment)
+end
+
 function Mipa:SetAnimation(anim)
     if self.currentanimation == anim then
         return
@@ -117,6 +139,8 @@ function Mipa:SetAnimation(anim)
             self.loop = false           
         elseif anim == "push" then
             self.maxframes = 1
+        elseif anim == "pull" then
+            self.maxframes = 1          
         elseif anim == "deathstart" then
             self.maxframes = 5
             self.loop = false
@@ -179,7 +203,7 @@ function Mipa:CloneEffect(img)
     return img
 end
 
-function Mipa:UpdateAnimation()
+function Mipa:PickAnimation()
     if not self:IsDead() then
         if self:IsOnFloor() then
             if self:IsDown() then
@@ -190,9 +214,13 @@ function Mipa:UpdateAnimation()
                         self:SetAnimation("push")
                     else
                         self:SetAnimation("walk")
-                    end       
-                else 
-                    self:SetAnimation("idle")
+                    end
+                else
+                    if self:IsPulling() then
+                        self:SetAnimation("pull")
+                    else
+                        self:SetAnimation("idle")
+                    end
                 end
             end
         elseif self:IsFlying() then
@@ -216,6 +244,10 @@ function Mipa:UpdateAnimation()
             UIIsnt:Death()
         end
     end
+end
+
+function Mipa:UpdateAnimation()
+    self:PickAnimation()
     local spritePath = "images/Mipa/"..self.currentanimation.."/"..self.animationframe
     if self.lastimage ~= spritePath then
         local img = gfx.image.new(spritePath)
@@ -282,13 +314,16 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
 end
 
 function Mipa:TryJump()  
-    if self.canjump then
+    if self.canjump and self:IsOnFloor() then
         self.canjump = false
         self.velocityY = self.maxjumpvelocity
     end
 end
 
 function Mipa:collisionResponse(other)
+    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive) then
+        return gfx.sprite.kCollisionTypeOverlap
+    end
     return gfx.sprite.kCollisionTypeSlide
 end
 
@@ -296,7 +331,7 @@ function Mipa:Damage(damage)
     if self:IsDead() then
         return
     end
-    
+
     if damage > self.hp then
         self.hp = 0
     else
@@ -382,7 +417,13 @@ function Mipa:ApplyVelocity()
 
             if collision.normal.x ~= 0 then
                 self.pusing = true
-            end            
+            end
+        elseif collisionType == gfx.sprite.kCollisionTypeOverlap then
+            if collisionTag == TAG.Interactive then
+                if collisionObject.IsTrigger then
+                    collisionObject:Trigger()
+                end
+            end
         end
     end
     if self.velocityX ~= 0 or self.velocityY ~= 0 then
@@ -405,12 +446,64 @@ function Mipa:ApplyVelocity()
     end
 end
 
+function Mipa:ProcessPulling()
+    if self:IsPulling() then
+        local bullet = Bullet(self.x, self.y-2)
+        bullet:setImage(gfx.image.new("images/Effects/pull"), self.mirrored)
+        bullet:setCollideRect(0, 0, 10, 10)
+        if self.mirrored == gfx.kImageUnflipped then
+            bullet.speed = 5
+        else
+            bullet.speed = -5
+        end
+        bullet.lifedistance = 49
+        bullet.OnHit = function (collision)
+            local collisionObject = collision.other
+            local collisionTag = collisionObject:getTag()
+            if collisionTag == TAG.PropPushable then
+                if collision.normal.x > 0 then
+                    collisionObject:TryMoveRight()
+                    collisionObject:ApplyVelocity()
+                    SoundManager:PlaySound("Push")
+                elseif collision.normal.x < 0 then
+                    collisionObject:TryMoveLeft()
+                    collisionObject:ApplyVelocity()
+                    SoundManager:PlaySound("Push")                     
+                end
+            end
+        end
+    end
+end
+
+function Mipa:Interact()
+    local _, _, collisions, length = self:checkCollisions(self.x, self.y)
+    for i=1,length do
+        local collision = collisions[i]
+        local collisionType = collision.type
+        local collisionObject = collision.other
+        local collisionTag = collisionObject:getTag()
+        if collisionType == gfx.sprite.kCollisionTypeOverlap then
+            if collisionTag == TAG.Interactive then
+                if collisionObject.IsButton then
+                    collisionObject:PressButton()
+                end
+            end
+        end
+    end
+end
+
 function Mipa:update()
     self.velocityX = 0
     if not self:IsDead() then
         self:ProcessWalking()
         if pd.buttonJustPressed(pd.kButtonA) then
             self:TryJump()
+        end
+        if pd.buttonJustPressed(pd.kButtonB) and self:IsDown() then
+            self:NextEquipment()
+        end
+        if pd.buttonJustPressed(pd.kButtonUp) then
+            self:Interact()
         end
     end
     self:ApplyVelocity()

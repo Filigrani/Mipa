@@ -24,10 +24,10 @@ function Level:init(levelPath)
     self:ParceTileMap() 
     self:RenderTilemap()
     self:ParceProps()
+    self:ParceZones()
 end
 
 function Level:CreateTile(ID, X, Y, Solid)
-    print("[Level] Creating Tile "..ID.." on X "..X.." Y "..Y)
     self.tilemap:setTileAtPosition(X, Y, ID)
     --[[
     if ID == 2 then
@@ -54,17 +54,119 @@ function Level:ParceTileMap()
     end
 end
 
-function Level:CreateProp(type, X, Y)
+function Level:CreateProp(propData)
+    local type = propData.propType
     if type == "box" then
-        PhysicalProp(X, Y)
+        PhysicalProp(propData.x, propData.y)
+    elseif type == "button" then
+        local butt = Activator(propData.x, propData.y, propData.group)
+        local img = gfx.image.new("images/Props/Button")
+        butt:setImage(img)
+        butt:setCollideRect(4,5,6,5)
+    elseif type == "indicator" then
+        local indi = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
+        local img = gfx.image.new("images/Props/Indicator0")
+        indi:setImage(img)
+        indi.CustomUpdate = function()
+            if indi.activated ~= indi.lastactive then
+                if indi.activated then
+                    img = gfx.image.new("images/Props/Indicator1")
+                else
+                    img = gfx.image.new("images/Props/Indicator0")
+                end
+                indi:setImage(img)
+            end
+        end
+    elseif type == "door" then
+        local door = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
+        
+        door.defaultH = propData.h
+        door.currentH = door.defaultH
+        door.firstchange = true
+        door.CustomUpdate = function()
+            local targetH = door.defaultH
+            if door.activated then
+                targetH = 3
+            end
+            local changed = false
+            if targetH > door.currentH then
+                door.currentH = door.currentH+1
+                changed = true
+            elseif targetH < door.currentH then
+                door.currentH = door.currentH-1
+                changed = true
+            end
+            if changed or door.firstchange then
+                if not door.firstchange then
+                    SoundManager:PlaySound("Door")
+                end
+                door.firstchange = false
+                door:setCollideRect(0,0,4,door.currentH)
+                local img = gfx.image.new(4, door.currentH)
+                local Skip = false
+                gfx.pushContext(img)
+                    gfx.setColor(gfx.kColorBlack)
+                    for i = 0, door.currentH-1, 1 do
+                        if not Skip then
+                            gfx.drawLine(0, i, 4, i)
+                            Skip =  true
+                        else
+                            Skip = false
+                        end
+                    end
+                gfx.popContext()
+                door:setImage(img)
+            end
+        end
+    end
+end
+
+function Level:CreateZone(zoneData)
+    local type = zoneData.zoneType
+    if type == "spawn" then
+        MipaInst = Mipa(zoneData.x, zoneData.y)
+    elseif type == "dialog" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        local rawText = zoneData.text
+        local rawLines = {}
+        if string.find(rawText, "\n") then
+            for l in string.gmatch(rawText, '([^\n]+)') do
+                table.insert(rawLines, l)
+            end
+        else
+            table.insert(rawLines, rawText)
+        end
+        local DialogData = {}
+        local Prefix = "#"
+        local LastActor = "#Mipa"
+        for i = 1, #rawLines, 1 do
+            local rawLine = rawLines[i]
+            if string.sub(rawLine,1,string.len(Prefix)) == Prefix then
+                LastActor = rawLine
+            else
+                local lineData = {}
+                lineData.actor = LastActor
+                lineData.text = rawLine
+                table.insert(DialogData, lineData)
+            end
+        end
+        t.dialogdata = DialogData
+        t.OnTrigger = function ()
+            UIIsnt:StartDialog(t.dialogdata)
+        end
     end
 end
 
 function Level:ParceProps()
     print("[Level] Parcing props...")
     for i=1, #self.jsonTable.props do
-        local prop = self.jsonTable.props[i]
-        self:CreateProp(prop.propType, prop.x, prop.y)
+        self:CreateProp(self.jsonTable.props[i])
+    end
+end
+function Level:ParceZones()
+    print("[Level] Parcing zones...")
+    for i=1, #self.jsonTable.zones do
+        self:CreateZone(self.jsonTable.zones[i])
     end
 end
 
