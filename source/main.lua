@@ -19,25 +19,28 @@ import "activemanager"
 import "activator"
 import "activatable"
 import "trigger"
+import "spike"
 
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
+DEFAULT_FONT = nil
 gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
 MipaInst = nil
 CurrentLevel = nil
+NextLevel = "lvl0"
+LoadNextLevel = false
 CanStartAgain = false
 
 StartGame = function ()
 	gfx.sprite.removeAll()
 	ActiveManager.Reset()
-	--MipaInst = Mipa(151, 134)
 	--local clone = Mipa(165, 134)
 	if clone then
 		clone.IsClone = true
 		clone.hp = 1
 	end
-	CurrentLevel = Level("levels/lvl0.json")
+	CurrentLevel = Level("levels/"..NextLevel..".json")
 	UIIsnt = UI()
 	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
 end
@@ -46,32 +49,32 @@ DeathTrigger = function ()
 	CanStartAgain = true
 	local again = gfx.sprite.new()
 	again:setCenter(0, 0)
-	again:setImage(gfx.image.new("images/UI/again0"))
+	again:setImage(deathimagetable:getImage(18))
 	again:add()
 	again:setZIndex(Z_Index.BG)
 	again.fadealpha = 1
 	again.anim = pd.frameTimer.new(7)
-	again.frame = 0
+	again.frame = 18
 	again.anim.timerEndedCallback = function(timer)  
-		if again.frame == 0 then
-			again.frame = 1
+		if again.frame == 19 then
+			again.frame = 18
 		else
-			again.frame = 0
+			again.frame = 19
 		end
-		again:setImage(gfx.image.new("images/UI/again"..again.frame))
+		again:setImage(deathimagetable:getImage(again.frame))
 	end
 	again.anim.repeats = true
 	again.anim:start()
 
 	local overlay = gfx.sprite.new()
 	overlay:setCenter(0, 0)
-	overlay:setImage(gfx.image.new("images/UI/death_16"))
+	overlay:setImage(deathimagetable:getImage(17))
 	overlay:add()
 	overlay:setZIndex(Z_Index.BG)
 	overlay.fadealpha = 1
 	overlay.fader = pd.frameTimer.new(3)
 	overlay.fader.timerEndedCallback = function(timer)  
-		local Ditherimg = gfx.image.new("images/UI/death_16")
+		local Ditherimg = deathimagetable:getImage(17)
 		if overlay.fadealpha <= 0 then
 			overlay.fadealpha = 0  
 			gfx.sprite.removeSprite(overlay)
@@ -85,10 +88,12 @@ DeathTrigger = function ()
 	overlay.fader.repeats = true
 	overlay.fader:start()
 end
-
 local function loadGame()
 	pd.display.setInverted(true)
-	gfx.setFont(gfx.font.new('font/Mini Sans 2X'))
+	local menu = pd.getSystemMenu()
+	local menuItem, error = menu:addMenuItem("Restart level", function()
+		StartGame()
+	end)
 	StartGame()
 end
 
@@ -97,7 +102,9 @@ local function updateGame()
 	gfx.sprite.update()
 	pd.frameTimer.updateTimers()
 	pd.timer.updateTimers()
-	UIIsnt:Update()
+	if UIIsnt ~= nil then
+		UIIsnt:Update()
+	end
 	if CanStartAgain then
 		if pd.buttonJustPressed(pd.kButtonA) then
 			CanStartAgain = false

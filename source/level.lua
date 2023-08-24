@@ -12,7 +12,7 @@ function Level:init(levelPath)
         return
 	end
     print("[Level] Creating tilemap...")
-    self.imagetable = pd.graphics.imagetable.new("levels/tileset-table-14-14")
+    self.imagetable = pd.graphics.imagetable.new("images/tileset")
 
     if self.imagetable == nil then
         print("[Level] Imagetable is null")
@@ -29,13 +29,12 @@ end
 
 function Level:CreateTile(ID, X, Y, Solid)
     self.tilemap:setTileAtPosition(X, Y, ID)
-    --[[
+    local WorldX = self.jsonTable.root_x+14*(X-1)
+    local WorldY = self.jsonTable.root_y+14*(Y-1)
     if ID == 2 then
         local SlapColider = gfx.sprite.new()
         local TileW = 14
-        local TileH = 14
-        local WorldX = self.jsonTable.root_x+14*(X-1)
-        local WorldY = self.jsonTable.root_y+14*(Y-1)
+        local TileH = 7
         SlapColider:setUpdatesEnabled(false) 
         SlapColider:setVisible(false)
         SlapColider:setCenter(0, 0)
@@ -43,7 +42,22 @@ function Level:CreateTile(ID, X, Y, Solid)
         SlapColider:setCollideRect(0, 0, TileW, TileH)
         SlapColider:addSprite()
     end
+    --[[
+    if ID == 302 then
+        local Colider = gfx.sprite.new()
+        local TileW = 14
+        local TileH = 14
+        Colider:setUpdatesEnabled(false) 
+        Colider:setVisible(false)
+        Colider:setCenter(0, 0)
+        Colider:setBounds(WorldX, WorldY, TileW, TileH)
+        Colider:setCollideRect(0, 0, TileW, TileH)
+        Colider:addSprite()
+    end    
     --]]
+    if ID == 302 then
+        Spike(WorldX, WorldY)
+    end
 end
 
 function Level:ParceTileMap()
@@ -60,8 +74,19 @@ function Level:CreateProp(propData)
         PhysicalProp(propData.x, propData.y)
     elseif type == "button" then
         local butt = Activator(propData.x, propData.y, propData.group)
-        local img = gfx.image.new("images/Props/Button")
+        local img = gfx.image.new("images/Props/Button0")
         butt:setImage(img)
+        butt.CustomUpdate = function()
+            if butt.activated ~= butt.lastactive then
+                if butt.activated then
+                    img = gfx.image.new("images/Props/Button1")
+                else
+                    img = gfx.image.new("images/Props/Button0")
+                end
+                butt.lastactive = butt.activated
+                butt:setImage(img)
+            end
+        end
         butt:setCollideRect(4,5,6,5)
     elseif type == "indicator" then
         local indi = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
@@ -154,6 +179,14 @@ function Level:CreateZone(zoneData)
         t.OnTrigger = function ()
             UIIsnt:StartDialog(t.dialogdata)
         end
+    elseif type == "exit" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        t.nextlevel = zoneData.nextLevel
+        t.OnTrigger = function ()
+            NextLevel = t.nextlevel
+            LoadNextLevel = true
+            print("Going outbounds will load "..NextLevel)
+        end
     end
 end
 
@@ -179,5 +212,5 @@ function Level:RenderTilemap()
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
     layerSprite:add()
-    gfx.sprite.addWallSprites(tilemap,  {501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
+    gfx.sprite.addWallSprites(tilemap,  {2,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
 end

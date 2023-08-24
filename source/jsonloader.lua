@@ -11,7 +11,7 @@ function GetJSONData(path)
 		levelData = f:read(s)
 		f:close()
 		
-		if not levelData then
+		if levelData == nil then
 			print('ERROR LOADING DATA for ' .. path)
 			return nil
 		end
@@ -19,7 +19,7 @@ function GetJSONData(path)
 
 	local jsonTable = json.decode(levelData)
 	
-	if not jsonTable then
+	if jsonTable == nil then
 		print('ERROR PARSING JSON DATA for ' .. levelPath)
 		return nil
 	end

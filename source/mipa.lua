@@ -4,8 +4,8 @@ local gfx <const> = pd.graphics
 class("Mipa").extends(gfx.sprite)
 
 function Mipa:init(x, y)
-    local img = gfx.image.new("images/Mipa/idle/0")
-    self:setImage(img)
+    self.mipaimages = gfx.imagetable.new("images/mipa")
+    self.mipaimagedithered = nil
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Player)
     self:setCollideRect(3,1,8,13)
@@ -33,12 +33,12 @@ function Mipa:init(x, y)
     self.freefall = 0
     self.highestY = self.y
     -- Animation
+    self.animationtable = {}
+    self:RegisterAnimations()
+    self.currentanimationdata = nil
     self.currentanimation = ""
-    self.animationframe = 0
-    self.maxframes = 0
-    self.animtable = {}
-    self.loop = true
-    self.pingpong = false
+    self.animationframe = 1
+    self.animationindex = 1
     self.inverseanim = false
     self.animationfinished = false
     self.skipnextframechange = false
@@ -113,44 +113,70 @@ function Mipa:NextEquipment()
     UIIsnt:UpdateEquipment(self.equipment, self.selectedequipment)
 end
 
+function Mipa:AddAnimation(name, frames, speed, loop, pingpong)
+    local data = {}
+    data.name = name
+    data.frames = frames
+    if speed == nil then
+        data.speed = 4
+    else
+        data.speed = speed
+    end
+    if loop == nil then
+        data.loop = true
+    else
+        data.loop = loop
+    end
+    if pingpong == nil then
+        data.pingpong = false
+    else
+        data.pingpong = pingpong
+    end
+    self.animationtable[name] = data
+end
+
+function Mipa:RegisterAnimations()
+    self:AddAnimation("idle", {1, 2})
+    self:AddAnimation("walk", {3, 4, 5})
+    self:AddAnimation("falling", {28, 29})
+    self:AddAnimation("fallingstart", {6, 7, 8}, 4, false)
+    self:AddAnimation("flying", {9, 10})
+    self:AddAnimation("down", {11})
+    self:AddAnimation("push", {12, 13})
+    self:AddAnimation("pull", {14, 15})
+    self:AddAnimation("deathstart", {16, 17, 18, 19, 20, 21}, 3, false)
+    self:AddAnimation("death", {22, 23, 24, 25, 26, 27}, 7, false)
+end
+
 function Mipa:SetAnimation(anim)
     if self.currentanimation == anim then
         return
     else
-        self.animationfinished = false
-        self.animationframe = 0
-        self.currentanimation = anim
-        self.animationtimer.duration = 4
-        self.loop = true
-        self.pingpong = false
-        if anim == "idle" then
-            self.maxframes = 1
-        elseif anim == "falling" then
-            self.maxframes = 1     
-        elseif anim == "fallingstart" then
-            self.maxframes = 2
-            self.loop = false   
-        elseif anim == "flying" then
-            self.maxframes = 1
-        elseif anim == "walk" then
-            self.maxframes = 2    
-        elseif anim == "down" then
-            self.maxframes = 0
-            self.loop = false           
-        elseif anim == "push" then
-            self.maxframes = 1
-        elseif anim == "pull" then
-            self.maxframes = 1          
-        elseif anim == "deathstart" then
-            self.maxframes = 5
-            self.loop = false
-            self.animationtimer.duration = 3            
-        elseif anim == "death" then
-            self.maxframes = 5
-            self.loop = false
-            self.animationtimer.duration = 7                  
+        local data = self.animationtable[anim]
+        if data ~= nil then
+            self.currentanimationdata = data
+        else
+            return
         end
+        self.animationfinished = false
+        self.animationindex = 1
+        self.currentanimation = anim
+        self.animationframe = data.frames[self.animationindex]
+        self.animationtimer.duration = data.speed
     end
+end
+
+function Mipa:GetCurrentAnimationData()
+    if self.currentanimationdata then
+        return self.currentanimationdata
+    end
+    local data = {}
+    data.name = ""
+    data.frames = {1}
+    data.speed = 4
+    data.loop = true
+    data.pingpong = false
+    return data
 end
 
 function Mipa:MayNextFrame()
@@ -159,48 +185,61 @@ function Mipa:MayNextFrame()
         return
     end
 
+    local data = self:GetCurrentAnimationData()
+    local firstIndex = 1
+    local lastIndex = #data.frames
+
+    if first == lastIndex then
+        self.animationindex = firstIndex
+        self.animationframe = data.frames[self.animationindex]
+        return
+    end
+    
     if not self.animationfinished then
         if not self.inverseanim then
-            if self.animationframe == self.maxframes then
-                if self.loop then
-                    if self.pingpong ~= true then
-                        self.animationframe = 0
+            if self.animationindex == lastIndex then
+                if data.loop then
+                    if data.pingpong ~= true then
+                        self.animationindex = firstIndex
                     else
                         self.inverseanim = true
-                        self.animationframe = self.animationframe - 1
-                    end
-                else
-                    self.animationfinished = true            
-                end
-            else
-                self.animationframe = self.animationframe + 1
-            end   
-        else
-            if self.animationframe == 0 then
-                if self.loop then
-                    if self.pingpong ~= true then
-                        self.animationframe = self.maxframes
-                    else
-                        self.inverseanim = false
-                        self.animationframe = self.animationframe + 1
+                        self.animationindex = self.animationindex - 1
                     end
                 else
                     self.animationfinished = true
                 end
             else
-                self.animationframe = self.animationframe - 1
+                self.animationindex = self.animationindex + 1
+            end   
+        else
+            if self.animationindex == firstIndex then
+                if data.loop then
+                    if data.pingpong ~= true then
+                        self.animationindex = lastIndex
+                    else
+                        self.inverseanim = false
+                        self.animationindex = self.animationindex + 1
+                    end
+                else
+                    self.animationfinished = true
+                end
+            else
+                self.animationindex = self.animationindex - 1
             end            
         end  
     end
+    self.animationframe = data.frames[self.animationindex]
 end
-function Mipa:CloneEffect(img)
+function Mipa:ToggleEvenFrame()
     if self.evenframe then
-        img = img:fadedImage(0.5, gfx.image.kDitherTypeBayer2x2)
         self.evenframe = false
     else
         self.evenframe = true
     end
-    return img
+end
+
+function Mipa:IsEvenFrame()
+    return self.evenframe
 end
 
 function Mipa:PickAnimation()
@@ -246,23 +285,43 @@ function Mipa:PickAnimation()
     end
 end
 
+function Mipa:SetDitherImageTable()
+    self.mipaimagedithered = gfx.imagetable.new("images/mipa")
+    for i = 1, #self.mipaimages, 1 do
+        local img = self.mipaimages:getImage(i)
+        self.mipaimagedithered:setImage(i, img:fadedImage(0.5, gfx.image.kDitherTypeBayer2x2))
+    end
+end
+
 function Mipa:UpdateAnimation()
     self:PickAnimation()
-    local spritePath = "images/Mipa/"..self.currentanimation.."/"..self.animationframe
+    local spritePath = self.currentanimation.."/"..self.animationframe
     if self.lastimage ~= spritePath then
-        local img = gfx.image.new(spritePath)
-        if self.IsClone then
-            img = self:CloneEffect(img)
+        local imagetable = self.mipaimages
+        if self.IsClone and self:IsEvenFrame() then
+            if self.mipaimagedithered == nil then
+                self:SetDitherImageTable()
+            end
+            imagetable = self.mipaimagedithered
         end
-
-        self:setImage(img, self.mirrored)      
+        local img = imagetable:getImage(self.animationframe)
+        self:setImage(img, self.mirrored) 
         self.lastimage = spritePath 
     else
         if self.IsClone then
-            local img = gfx.image.new(spritePath)
-            img = self:CloneEffect(img)
-            self:setImage(img, self.mirrored) 
+            local imagetable = self.mipaimages
+            if self:IsEvenFrame()  then
+                if self.mipaimagedithered == nil then
+                    self:SetDitherImageTable()
+                end
+                imagetable = self.mipaimagedithered
+            end
+            local img = imagetable:getImage(self.animationframe)
+            self:setImage(img, self.mirrored)
         end
+    end
+    if self.IsClone then
+        self:ToggleEvenFrame()
     end
 end
 
@@ -321,7 +380,7 @@ function Mipa:TryJump()
 end
 
 function Mipa:collisionResponse(other)
-    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive) then
+    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard) then
         return gfx.sprite.kCollisionTypeOverlap
     end
     return gfx.sprite.kCollisionTypeSlide
@@ -336,15 +395,16 @@ function Mipa:Damage(damage)
         self.hp = 0
     else
         self.hp = self.hp-damage
-        pd.display.setInverted(false)
-        local t = pd.frameTimer.new(4)
-        t.timerEndedCallback = function(timer)
-            pd.display.setInverted(true)   
-        end       
-        t:start()
-        --SoundManager:PlaySound("Hit")
-        SoundManager:PlaySound("Scream")      
     end
+
+    pd.display.setInverted(false)
+    local t = pd.frameTimer.new(4)
+    t.timerEndedCallback = function(timer)
+        pd.display.setInverted(true)
+    end
+    t:start()
+    --SoundManager:PlaySound("Hit")
+    SoundManager:PlaySound("Scream")
 
     if self.hp == 0 then
         self.speed = 1 -- so will be able to push her body without animation glitched, like a box
@@ -363,6 +423,9 @@ function Mipa:ApplyVelocity()
         local collisionType = collision.type
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
+        if collisionTag == TAG.Hazard and not self:IsDead() then
+            self:Damage(self.hpmax)
+        end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
             if collision.normal.y == -1 then
                 self.onground = true
@@ -437,7 +500,7 @@ function Mipa:ApplyVelocity()
             --print("highestY "..self.highestY)
         end
     end
-    if self.y > 400 and not self:IsDead() then
+    if self.y > 400 and not self:IsDead() and not LoadNextLevel then
         self.skipdeathscreen = true
         self.hp = 0
         if not self.IsClone then
@@ -457,6 +520,7 @@ function Mipa:ProcessPulling()
             bullet.speed = -5
         end
         bullet.lifedistance = 49
+        bullet.lastpushonhit = true
         bullet.OnHit = function (collision)
             local collisionObject = collision.other
             local collisionTag = collisionObject:getTag()
@@ -465,10 +529,12 @@ function Mipa:ProcessPulling()
                     collisionObject:TryMoveRight()
                     collisionObject:ApplyVelocity()
                     SoundManager:PlaySound("Push")
+                    bullet.lastpushonhit = false
                 elseif collision.normal.x < 0 then
                     collisionObject:TryMoveLeft()
                     collisionObject:ApplyVelocity()
-                    SoundManager:PlaySound("Push")                     
+                    SoundManager:PlaySound("Push")
+                    bullet.lastpushonhit = false
                 end
             end
         end
@@ -508,4 +574,12 @@ function Mipa:update()
     end
     self:ApplyVelocity()
     self:UpdateAnimation()
+    if LoadNextLevel then
+        if not self:IsDead() then
+            if self.x > 450 or self.x < 50 or self.y > 290 then
+                LoadNextLevel = false
+                StartGame()
+            end 
+        end
+    end
 end

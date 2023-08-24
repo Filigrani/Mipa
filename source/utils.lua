@@ -6,6 +6,7 @@ TAG =
 	PropPushable = 4,
 	Effect = 5,
 	Interactive = 6,
+	Hazard = 7,
 }
 Z_Index = 
 {

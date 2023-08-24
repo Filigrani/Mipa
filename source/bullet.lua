@@ -23,6 +23,7 @@ function Bullet:init(x, y)
     self.lifedistance = -1
     self.spawnX = x
     self.spawnY = y
+    self.lastpushonhit = false
 end
 
 function Bullet:IsFalling()
@@ -50,6 +51,20 @@ function Bullet:LastHit(collision, lastfreefall)
     end
 end
 
+function Bullet:LastPush()
+    self:moveBy(self.speed, 0)
+    local _, _, collisions, length = self:checkCollisions(self.x, self.y)
+    for i=1,length do
+        local collision = collisions[i]
+        local collisionType = collision.type
+        local collisionObject = collision.other
+        local collisionTag = collisionObject:getTag()
+        if collisionType == gfx.sprite.kCollisionTypeSlide then
+            self:LastHit(collision, lastfreefall)
+        end
+    end
+end
+
 function Bullet:ProcessLastContact(collision, lastfreefall)
     if self.OnContact == nil then
         local collisionType = collision.type
@@ -59,9 +74,13 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
             if collision.normal.y == -1 then
                 self.velocityY = 0
                 self.freefall = 0
+                self:LastHit(collision, lastfreefall)
+                self:LastPush()
                 gfx.sprite.removeSprite(self)
             elseif collision.normal.y == 1 then       
                 self.velocityY = 0
+                self:LastHit(collision, lastfreefall)
+                self:LastPush()
                 gfx.sprite.removeSprite(self)
             end
 
@@ -69,6 +88,7 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
                 if collision.normal.x < 0 then
                     self.velocityX = 0
                     self:LastHit(collision, lastfreefall)
+                    self:LastPush()
                     gfx.sprite.removeSprite(self)
                 end                  
             end
@@ -76,6 +96,7 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
                 if collision.normal.x > 0 then     
                     self.velocityX = 0
                     self:LastHit(collision, lastfreefall)
+                    self:LastPush()
                     gfx.sprite.removeSprite(self)
                 end                  
             end                  

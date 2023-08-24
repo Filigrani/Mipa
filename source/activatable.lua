@@ -7,7 +7,7 @@ function Activatable:init(x, y, group, defaultactive, activetype)
     local img = gfx.image.new("images/Props/Box")
     self:setImage(img)
     self:moveTo(x, y)
-    self:setZIndex(Z_Index.Object)
+    self:setZIndex(Z_Index.BG)
     self:setCenter(0, 0)
     self:add() -- Add to draw list
     self.activegroup = {}

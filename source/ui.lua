@@ -1,9 +1,11 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-
+deathimagetable = gfx.imagetable.new("images/ui/death")
 class('UI').extends(playdate.graphics.sprite)
 
 function UI:init()
+    UI.super.init(self)
+    self.heartsimagetable = gfx.imagetable.new("images/ui/hp")
     self:add() -- Add to draw list
     self.hearts = {}
     self.equipment = {}
@@ -13,6 +15,8 @@ function UI:init()
     self.deathtriggered = false
     self.dialogdata = {}
     self.currentdialogindex = 0
+    self.currenttext = ""
+    self.currdialoglineindex = 1
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -58,11 +62,11 @@ function UI:UpdateHP(hearts, containers)
         local style = -1
         if i <= containers then
             if i-0.5 == hearts then
-                style = 2
+                style = 3
             elseif i <= hearts then
-                style = 1
+                style = 2
             elseif i > hearts then
-                style = 0                   
+                style = 1                   
             end        
         end
 
@@ -77,10 +81,10 @@ function UI:UpdateHP(hearts, containers)
             if heart.style ~= style then
                 print("Heart "..i.." updated to style "..style)
                 heart.style  = style
-                if heart.myIndex == 1 and style == 2 then
-                    style = 0
+                if heart.myIndex == 1 and style == 3 then
+                    style = 1
                 end
-                heart:setImage(gfx.image.new("images/UI/hp"..style))
+                heart:setImage(self.heartsimagetable:getImage(style))
             end
         end
     end
@@ -136,6 +140,7 @@ function UI:Update()
 
     if self.lasthearts ~= hearts then
         self:UpdateHP(hearts, containers)
+        self.lasthearts = hearts
     end
     self:ProcessDialog()
 end
@@ -153,8 +158,6 @@ end
 
 function UI:AddHeart(style)
     local heart = gfx.sprite.new()
-    local img = gfx.image.new("images/UI/hp"..style)
-    heart:setImage(img)
     heart:setCenter(0, 0)
     heart:moveTo(2+30*#self.hearts, 2)
     heart:add()
@@ -166,8 +169,7 @@ function UI:AddHeart(style)
     heart.slice = nil
     if heart.myIndex == 1 then
         local slice = gfx.sprite.new()
-        local imgSlice = gfx.image.new("images/UI/hpslice")
-        slice:setImage(imgSlice)
+        slice:setImage(self.heartsimagetable:getImage(6))
         slice:setCenter(0, 0)
         slice:moveTo(heart.x, heart.y)
         slice:setVisible(false)
@@ -179,7 +181,7 @@ function UI:AddHeart(style)
                 if not heart.slice:isVisible() then
                     heart.slice:setVisible(true)
                 end                   
-                local Ditherimg = gfx.image.new("images/UI/hpslice")
+                local Ditherimg = self.heartsimagetable:getImage(6)
                 if heart.fadded then
                     heart.fadealpha = heart.fadealpha+0.1
                     if heart.fadealpha >= 1 then
@@ -212,25 +214,23 @@ function UI:Death()
     self.deathtriggered = true
     
     local overlay = gfx.sprite.new()
-    local img = gfx.image.new("images/UI/death_0")
     overlay:setCenter(0, 0)
     overlay:add()
     overlay:setZIndex(Z_Index.BG)
-    self.frame = 0
-    self.animationtimer = pd.frameTimer.new(1)
-    self.animationtimer.timerEndedCallback = function(timer)             
-        if self.frame < 16 then
-            self.frame = self.frame +1
-            img = gfx.image.new("images/UI/death_"..self.frame)
-            overlay:setImage(img)          
+    overlay.frame = 1
+    overlay.animationtimer = pd.frameTimer.new(1)
+    overlay.animationtimer.timerEndedCallback = function(timer)             
+        if overlay.frame < 16 then
+            overlay.frame = overlay.frame +1
+            overlay:setImage(deathimagetable:getImage(overlay.frame))          
         else
-            self.animationtimer.repeats = false
+            overlay.animationtimer.repeats = false
             gfx.sprite.removeAll()
             DeathTrigger()
         end
     end
-    self.animationtimer.repeats = true
-    self.animationtimer:start()
+    overlay.animationtimer.repeats = true
+    overlay.animationtimer:start()
 end
 
 function UI:AddEquipment(style)
@@ -274,6 +274,21 @@ function UI:ProcessDialog()
         if not self.dialogtextsprite:isVisible() then
             self.dialogtextsprite:setVisible(true)
         end
+        local LineText = self.dialogdata[self.currdialoglineindex].text
+        if self.currenttext ~= LineText then
+            local character = string.sub(LineText, self.currentdialogindex, self.currentdialogindex)
+            local charID = 4
+            local charX = (self.currentdialogindex-1)*8
+            local charY = 0
+            gfx.pushContext(self.dialogtextimage)
+            local CharImg = self.heartsimagetable:getImage(charID)
+            CharImg:draw(charX, charY)
+            gfx.popContext()
+            self.currenttext = self.currenttext..character
+            self.currentdialogindex = self.currentdialogindex+1
+            print("character "..character)
+        end
+        self.dialogtextsprite:setImage(self.dialogtextimage)
     else
         if self.dialogbg:isVisible() then
             self.dialogbg:setVisible(false)
@@ -306,23 +321,20 @@ function UI:LoadDialogUI()
     Actor:setVisible(false)
     local DialogTextSprite = gfx.sprite.new()
     DialogTextSprite:setCenter(0, 0)
-    DialogTextSprite:moveTo(120, 176)
+    DialogTextSprite:moveTo(120, 185)
     DialogTextSprite:setZIndex(Z_Index.BG)
     DialogTextSprite:add() -- Add to draw list
     DialogTextSprite:setVisible(false)
-    local Textimg = gfx.image.new(217, 45)
-    gfx.pushContext(Textimg)
-        gfx.setColor(gfx.kColorBlack)
-        gfx.drawText("Test dialog", 0, 0)
-    gfx.popContext()
-    DialogTextSprite:setImage(Textimg)
+    self.dialogtextimage = gfx.image.new(200, 48)
     self.dialogbg = BG
     self.dialogactor = Actor
-    self.dialogtextimage = Textimg
     self.dialogtextsprite = DialogTextSprite
 end
 
 function UI:StartDialog(data)
-    --self.currentdialogindex = 1
-    --self.dialogdata = data
+    self.dialogtextimage = gfx.image.new(200, 48)
+    self.currentdialogindex = 1
+    self.currdialoglineindex = 1
+    self.dialogdata = data
+    self.currenttext = ""
 end
