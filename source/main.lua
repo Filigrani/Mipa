@@ -16,6 +16,7 @@ import "crankmanager"
 import "crankdisk"
 import "bullet"
 import "activemanager"
+import "trackablemanager"
 import "activator"
 import "activatable"
 import "trigger"
@@ -31,10 +32,12 @@ CurrentLevel = nil
 NextLevel = "lvl0"
 LoadNextLevel = false
 CanStartAgain = false
+local font = gfx.font.new('font/FiliFont')
 
 StartGame = function ()
 	gfx.sprite.removeAll()
 	ActiveManager.Reset()
+	TrackableManager.Reset()
 	--local clone = Mipa(165, 134)
 	if clone then
 		clone.IsClone = true
@@ -89,6 +92,7 @@ DeathTrigger = function ()
 	overlay.fader:start()
 end
 local function loadGame()
+	gfx.setFont(font)
 	pd.display.setInverted(true)
 	local menu = pd.getSystemMenu()
 	local menuItem, error = menu:addMenuItem("Restart level", function()

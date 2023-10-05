@@ -24,8 +24,17 @@ AddSound("MetalPush",1)
 AddSound("Door")
 AddSound("No")
 AddSound("Button")
+AddSound("Sqeak", 4)
+AddSound("Peaw", 3)
+AddSound("Woop")
+AddSound("Pap")
+AddSound("Oop")
+
 
 function SoundManager:PlaySound(name, vol)
+    if name == "Land" then
+        return
+    end
     local volume = 1
     if vol ~= nil then
         volume = vol

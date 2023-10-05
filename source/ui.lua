@@ -9,6 +9,7 @@ function UI:init()
     self:add() -- Add to draw list
     self.hearts = {}
     self.equipment = {}
+    self.passiveitems = {}
     self.lasthearts = 0
     self.lastcontainers = 0
     self.lastequipment = 0
@@ -17,6 +18,10 @@ function UI:init()
     self.currentdialogindex = 0
     self.currenttext = ""
     self.currdialoglineindex = 1
+    self.textwrapingindex = 0
+    self.textwrapinglimit = 99
+    self.currentdialogactor = "Mipa"
+    self.textwaittime = 0
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -39,19 +44,33 @@ function UI:PopulateHearts(containers)
     end
 end
 
-function UI:PopulateEquipment(equipment)
+function UI:PopulateEquipment(equipment, passive)
     local ExistenEQ = #self.equipment
+    local ExistenPI = #self.passiveitems
     if #equipment > ExistenEQ then
         local needToAdd = #equipment-ExistenEQ
         print("[UI] Adding "..needToAdd.." equipment(s)")
         for i=1, needToAdd do
-            self:AddEquipment(1)
+            self:AddEquipment(1, false)
         end
     elseif #equipment < ExistenEQ then
         local needToRemove = ExistenEQ-#equipment
         print("[UI] Removing "..needToRemove.." equipment(s)")
         for i=1, needToRemove do
-            self:RemoveEquipment()
+            self:RemoveEquipment(false)
+        end
+    end
+    if #passive > ExistenPI then
+        local needToAdd = #passive-ExistenPI
+        print("[UI] Adding "..needToAdd.." passive item(s)")
+        for i=1, needToAdd do
+            self:AddEquipment(1, true)
+        end
+    elseif #passive < ExistenPI then
+        local needToRemove = ExistenPI-#passive
+        print("[UI] Removing "..needToRemove.." passive item(s)")
+        for i=1, needToRemove do
+            self:RemoveEquipment(true)
         end
     end
 end
@@ -90,7 +109,7 @@ function UI:UpdateHP(hearts, containers)
     end
 end
 
-function UI:UpdateEquipment(equipment, selectedIndex)
+function UI:UpdateEquipment(equipment, selectedIndex, passiveitems)
     for i=1, #self.equipment do
         local eq = self.equipment[i]
         local style = ""
@@ -113,6 +132,15 @@ function UI:UpdateEquipment(equipment, selectedIndex)
             eq.icon:setImage(gfx.image.new("images/UI/equip"..item))
         end
     end
+    for i=1, #self.passiveitems do
+        local eq = self.passiveitems[i]
+        local item = passiveitems[i]
+        if eq.icon.style ~= item then
+            print("Passive item slot icon "..i.." updated with item "..item)
+            eq.icon.style = item
+            eq.icon:setImage(gfx.image.new("images/UI/passive"..item))
+        end
+    end
 end
 
 function UI:Update()
@@ -120,6 +148,7 @@ function UI:Update()
     local containers = 0
     local equipment = {}
     local selectedequipment = 1
+    local passive = {}
     if MipaInst then
         containers = MipaInst.hpmax/2
         equipment = MipaInst.equipment
@@ -127,15 +156,16 @@ function UI:Update()
         if MipaInst.hp > 0 then
             hearts = MipaInst.hp/2
         end
+        passive = MipaInst.passiveitems
     end
 
     if self.lastcontainers ~= containers then
         self:PopulateHearts(containers)
     end
 
-    if #self.equipment ~= #equipment then
-        self:PopulateEquipment(equipment)
-        self:UpdateEquipment(equipment, selectedequipment)
+    if #self.equipment ~= #equipment or #self.passiveitems ~= #passive then
+        self:PopulateEquipment(equipment, passive)
+        self:UpdateEquipment(equipment, selectedequipment, passive)
     end
 
     if self.lasthearts ~= hearts then
@@ -233,15 +263,24 @@ function UI:Death()
     overlay.animationtimer:start()
 end
 
-function UI:AddEquipment(style)
+function UI:AddEquipment(style, ispassive)
     local eq = gfx.sprite.new()
-    local img = gfx.image.new("images/UI/equip_slot")
-    eq:setImage(img)
     eq:setCenter(0, 0)
-    eq:moveTo(371-30*#self.equipment, 2)
+    if not ispassive then
+        eq:setImage(gfx.image.new("images/UI/equip_slot"))
+        eq:moveTo(371-30*#self.equipment, 2)
+    else
+        eq:setImage(gfx.image.new("images/UI/passive_slot"))
+        local lastEQPosition = 378-30*#self.equipment
+        eq:moveTo(lastEQPosition-27*#self.passiveitems, 9)
+    end
     eq:add()
     eq.style = ""
-    self.equipment[#self.equipment+1] = eq
+    if not ispassive then
+        self.equipment[#self.equipment+1] = eq
+    else
+        self.passiveitems[#self.passiveitems+1] = eq
+    end
     eq.icon = gfx.sprite.new()
     eq.icon.style = 0
     local imgSlice = gfx.image.new("images/UI/equip0")
@@ -251,44 +290,113 @@ function UI:AddEquipment(style)
     eq.icon:add()
 end
 
-function UI:RemoveEquipment()
-    local lastindex = #self.equipment
-    if lastindex > 0 then
-        local eq = self.equipment[lastindex]
-        if eq then
-            table.remove(self.equipment, lastindex)
-            gfx.sprite.removeSprite(eq.icon)
-            gfx.sprite.removeSprite(eq)
+function UI:RemoveEquipment(ispassive)
+    if not ispassive then
+        local lastindex = #self.equipment
+        if lastindex > 0 then
+            local eq = self.equipment[lastindex]
+            if eq then
+                table.remove(self.equipment, lastindex)
+                gfx.sprite.removeSprite(eq.icon)
+                gfx.sprite.removeSprite(eq)
+            end
+        end
+    else
+        local lastindex = #self.passiveitems
+        if lastindex > 0 then
+            local p = self.passiveitems[lastindex]
+            if p then
+                table.remove(self.passiveitems, lastindex)
+                gfx.sprite.removeSprite(p.icon)
+                gfx.sprite.removeSprite(p)
+            end
         end
     end
 end
 
 function UI:ProcessDialog()
     if self.currentdialogindex ~= 0 and #self.dialogdata > 0 then
+        local ShowActor = true
+        local ActorChanged = false
+        local currentLineData = self.dialogdata[self.currdialoglineindex]
+        if self.currentdialogactor ~= currentLineData.actor then
+            self.currentdialogactor = currentLineData.actor
+            ActorChanged = true
+        end
+        if self.currentdialogactor == "None" then
+            ShowActor = false
+        end
         if not self.dialogbg:isVisible() then
             self.dialogbg:setVisible(true)
         end
-        if not self.dialogactor:isVisible() then
+        if not self.dialogactor:isVisible() and ShowActor then
             self.dialogactor:setVisible(true)
+        elseif self.dialogactor:isVisible() and not ShowActor then
+            self.dialogactor:setVisible(false)
         end
         if not self.dialogtextsprite:isVisible() then
             self.dialogtextsprite:setVisible(true)
         end
-        local LineText = self.dialogdata[self.currdialoglineindex].text
+        if ActorChanged then
+            if ShowActor then
+                self.dialogactor:setImage(gfx.image.new("images/UI/Dialog"..self.currentdialogactor))
+            end
+            print("Actor changed "..self.currentdialogactor)
+        end
+        local LineText = currentLineData.text
         if self.currenttext ~= LineText then
             local character = string.sub(LineText, self.currentdialogindex, self.currentdialogindex)
-            local charID = 4
-            local charX = (self.currentdialogindex-1)*8
-            local charY = 0
-            gfx.pushContext(self.dialogtextimage)
-            local CharImg = self.heartsimagetable:getImage(charID)
-            CharImg:draw(charX, charY)
-            gfx.popContext()
             self.currenttext = self.currenttext..character
             self.currentdialogindex = self.currentdialogindex+1
-            print("character "..character)
+            self.textwaittime = self.currentdialogindex*2
+            --self.textwrapingindex = self.textwrapingindex+1
+            --if self.textwrapingindex >= self.textwrapinglimit then
+            --    self.textwrapingindex = 0
+            --    self.currenttext = self.currenttext.."\n"
+            --end
+            if self.currentdialogactor == "None" then
+                SoundManager:PlaySound("Pap")
+            elseif self.currentdialogactor == "Mipa" then
+                SoundManager:PlaySound("Peaw")
+            else
+                SoundManager:PlaySound("Pap")
+            end
+            local drawingW = 300
+            local darwingH = 62
+            if not ShowActor then
+                drawingW = 388
+            end
+            gfx.setImageDrawMode(gfx.kDrawModeCopy)
+                gfx.pushContext(self.dialogtextimage)
+                gfx.drawTextInRect(self.currenttext, 0, 0, drawingW, darwingH, nil, "")
+            gfx.popContext()
+            gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
+            self.dialogtextsprite:setImage(self.dialogtextimage)
+            --print("character "..character)
+            --print("Fulltext "..self.currenttext)
+            if ActorChanged then
+                if ShowActor then
+                    self.dialogtextsprite:moveTo(91, 175)
+                else
+                    self.dialogtextsprite:moveTo(7, 175)
+                end
+            end
+        else
+            if self.textwaittime > 0 then
+                self.textwaittime = self.textwaittime-1
+            else
+                if self.currdialoglineindex+1 <= #self.dialogdata then
+                    self.currdialoglineindex = self.currdialoglineindex+1
+                    self.currentdialogindex = 1
+                    self.currenttext = ""
+                    self.dialogtextimage = gfx.image.new(388, 62)
+                else             
+                    self.currentdialogindex = 0
+                    self.dialogdata = {}
+                    self.dialogtextimage = gfx.image.new(388, 62)
+                end
+            end
         end
-        self.dialogtextsprite:setImage(self.dialogtextimage)
     else
         if self.dialogbg:isVisible() then
             self.dialogbg:setVisible(false)
@@ -307,7 +415,7 @@ function UI:LoadDialogUI()
     local BG = gfx.sprite.new()
     BG:setImage(BGimg)
     BG:setCenter(0, 0)
-    BG:moveTo(39, 180)
+    BG:moveTo(0, 170)
     BG:setZIndex(Z_Index.BG)
     BG:add() -- Add to draw list
     BG:setVisible(false)
@@ -315,26 +423,27 @@ function UI:LoadDialogUI()
     local Actor = gfx.sprite.new()
     Actor:setImage(Actorimg)
     Actor:setCenter(0, 0)
-    Actor:moveTo(39, 180)
+    Actor:moveTo(0, 170)
     Actor:setZIndex(Z_Index.BG)
     Actor:add() -- Add to draw list
     Actor:setVisible(false)
     local DialogTextSprite = gfx.sprite.new()
     DialogTextSprite:setCenter(0, 0)
-    DialogTextSprite:moveTo(120, 185)
+    DialogTextSprite:moveTo(91, 175)
     DialogTextSprite:setZIndex(Z_Index.BG)
     DialogTextSprite:add() -- Add to draw list
     DialogTextSprite:setVisible(false)
-    self.dialogtextimage = gfx.image.new(200, 48)
+    self.dialogtextimage = gfx.image.new(388, 62)
     self.dialogbg = BG
     self.dialogactor = Actor
     self.dialogtextsprite = DialogTextSprite
 end
 
 function UI:StartDialog(data)
-    self.dialogtextimage = gfx.image.new(200, 48)
+    self.dialogtextimage = gfx.image.new(388, 62)
     self.currentdialogindex = 1
     self.currdialoglineindex = 1
     self.dialogdata = data
     self.currenttext = ""
+    self.textwrapingindex = 0
 end

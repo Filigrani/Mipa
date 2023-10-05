@@ -25,23 +25,23 @@ if (!$dontbuild)
 }
 
 # Close Simulator
-# $sim = Get-Process "PlaydateSimulator" -ErrorAction SilentlyContinue
+$sim = Get-Process "PlaydateSimulator" -ErrorAction SilentlyContinue
 
-# if ($sim)
-# {
-    # $sim.CloseMainWindow()
-    # $count = 0
-    # while (!$sim.HasExited) 
-    # {
-        # Start-Sleep -Milliseconds 10
-        # $count += 1
+if ($sim)
+{
+    $sim.CloseMainWindow()
+    $count = 0
+    while (!$sim.HasExited) 
+    {
+        Start-Sleep -Milliseconds 10
+        $count += 1
 
-        # if ($count -ge 5)
-        # {
-            # $sim | Stop-Process -Force
-        # }
-    # }
-# }
+        if ($count -ge 5)
+        {
+            $sim | Stop-Process -Force
+        }
+    }
+}
 
 # Run (Simulator)
-#& "$Env:PLAYDATE_SDK_PATH\bin\PlaydateSimulator.exe" "$pdx"
+& "$Env:PLAYDATE_SDK_PATH\bin\PlaydateSimulator.exe" "$pdx"

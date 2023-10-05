@@ -14,7 +14,8 @@ function Mipa:init(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
-    self.equipment = {0, 1}
+    self.equipment = {1}
+    self.passiveitems = {1}
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
@@ -30,6 +31,8 @@ function Mipa:init(x, y)
     self.onground = true
     self.fallspeed = 7.2
     self.canjump = true
+    self.candoublejump = true
+    self.midfalljump = false
     self.freefall = 0
     self.highestY = self.y
     -- Animation
@@ -58,6 +61,16 @@ function Mipa:init(x, y)
         self:ProcessPulling()    
     end
 end
+
+function Mipa:HasPassiveItem(item)
+    for i = 1, #self.passiveitems, 1 do
+        if self.passiveitems[i] == item then
+            return true
+        end
+    end
+    return false
+end
+
 function Mipa:IsDead()
     if self.hp == 0 then
         return true
@@ -98,7 +111,7 @@ function Mipa:IsPushing()
 end
 
 function Mipa:IsPulling()
-    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and self.equipment[self.selectedequipment] == 1 then
+    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self.equipment[self.selectedequipment] == 1 then
         return pd.buttonIsPressed(pd.kButtonB) 
     end
     return false
@@ -110,7 +123,7 @@ function Mipa:NextEquipment()
     else
         self.selectedequipment = self.selectedequipment +1;
     end
-    UIIsnt:UpdateEquipment(self.equipment, self.selectedequipment)
+    UIIsnt:UpdateEquipment(self.equipment, self.selectedequipment, self.passiveitems)
 end
 
 function Mipa:AddAnimation(name, frames, speed, loop, pingpong)
@@ -146,6 +159,7 @@ function Mipa:RegisterAnimations()
     self:AddAnimation("pull", {14, 15})
     self:AddAnimation("deathstart", {16, 17, 18, 19, 20, 21}, 3, false)
     self:AddAnimation("death", {22, 23, 24, 25, 26, 27}, 7, false)
+    self:AddAnimation("walkpull", {30, 31, 32})
 end
 
 function Mipa:SetAnimation(anim)
@@ -252,7 +266,11 @@ function Mipa:PickAnimation()
                     if self:IsPushing() then
                         self:SetAnimation("push")
                     else
-                        self:SetAnimation("walk")
+                        if not self:IsPulling() then
+                            self:SetAnimation("walk")
+                        else
+                            self:SetAnimation("walkpull")
+                        end
                     end
                 else
                     if self:IsPulling() then
@@ -336,7 +354,7 @@ function Mipa:ProcessWalking()
 end
 
 function Mipa:TryMoveRight()
-    if not self:IsDead() then -- So when push her body she not facing to motion direction
+    if not self:IsDead() and (not self:IsPulling() and not self:IsPulling())then -- So when push her body she not facing to motion direction
         self.mirrored = gfx.kImageUnflipped
     end
     if not self:IsDown() then
@@ -355,7 +373,7 @@ function Mipa:TryMoveRight()
 end
 
 function Mipa:TryMoveLeft() -- So when push her body she not facing to motion direction
-    if not self:IsDead() then
+    if not self:IsDead() and (not self:IsPulling() and not self:IsPulling()) then
         self.mirrored = gfx.kImageFlippedX
     end
     if not self:IsDown() then
@@ -373,9 +391,18 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
 end
 
 function Mipa:TryJump()  
-    if self.canjump and self:IsOnFloor() then
-        self.canjump = false
+    local canDoubleJump = self:HasPassiveItem(1) and self.candoublejump
+    if self:IsOnFloor() then
+        if self.canjump then
+            self.canjump = false
+            self.velocityY = self.maxjumpvelocity
+            return true
+        end
+    end
+    if not self:IsOnFloor() and canDoubleJump then
+        self.candoublejump = false
         self.velocityY = self.maxjumpvelocity
+        return true
     end
 end
 
@@ -430,6 +457,7 @@ function Mipa:ApplyVelocity()
             if collision.normal.y == -1 then
                 self.onground = true
                 self.canjump = true
+                self.candoublejump = true
                 self.velocityY = 0
                 self.highestY = self.y
 
@@ -507,6 +535,9 @@ function Mipa:ApplyVelocity()
             UIIsnt:Death()
         end
     end
+    if self:IsFalling() and not self.midfalljump then
+         self.canjump = false
+    end
 end
 
 function Mipa:ProcessPulling()
@@ -563,7 +594,10 @@ function Mipa:update()
     if not self:IsDead() then
         self:ProcessWalking()
         if pd.buttonJustPressed(pd.kButtonA) then
-            self:TryJump()
+            local jumped = self:TryJump()
+            if jumped then
+                SoundManager:PlaySound("Oop")
+            end
         end
         if pd.buttonJustPressed(pd.kButtonB) and self:IsDown() then
             self:NextEquipment()

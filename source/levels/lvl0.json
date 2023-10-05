@@ -2385,6 +2385,22 @@
       "text": "#Mipa\nThe passage is blocked. But I think I can try to move this box.\n#None\nKeep moving on a box to push it."
     },
     {
+      "zoneType": "dialog",
+      "x": 308,
+      "y": 113,
+      "w": 3,
+      "h": 14,
+      "text": "#Mipa\nThis door is locked...\n#Mipa\nShould be the way to open it!"
+    },
+    {
+      "zoneType": "dialog",
+      "x": 183,
+      "y": 71,
+      "w": 3,
+      "h": 27,
+      "text": "#Mipa\nOH! Button!\nWhat does it do?\nThere only one way to check this out!\n#None\nPress Up to interact with buttons and switches."
+    },
+    {
       "zoneType": "spawn",
       "x": 25,
       "y": 134

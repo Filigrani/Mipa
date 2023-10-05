@@ -71,7 +71,7 @@ end
 function Level:CreateProp(propData)
     local type = propData.propType
     if type == "box" then
-        PhysicalProp(propData.x, propData.y)
+        TrackableManager.Add(PhysicalProp(propData.x, propData.y), propData.UID)
     elseif type == "button" then
         local butt = Activator(propData.x, propData.y, propData.group)
         local img = gfx.image.new("images/Props/Button0")
@@ -88,6 +88,7 @@ function Level:CreateProp(propData)
             end
         end
         butt:setCollideRect(4,5,6,5)
+        TrackableManager.Add(butt, propData.UID)
     elseif type == "indicator" then
         local indi = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
         local img = gfx.image.new("images/Props/Indicator0")
@@ -102,6 +103,7 @@ function Level:CreateProp(propData)
                 indi:setImage(img)
             end
         end
+        TrackableManager.Add(indi, propData.UID)
     elseif type == "door" then
         local door = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
         
@@ -143,6 +145,7 @@ function Level:CreateProp(propData)
                 door:setImage(img)
             end
         end
+        TrackableManager.Add(door, propData.UID)
     end
 end
 
@@ -163,14 +166,14 @@ function Level:CreateZone(zoneData)
         end
         local DialogData = {}
         local Prefix = "#"
-        local LastActor = "#Mipa"
+        local LastActor = "Mipa"
         for i = 1, #rawLines, 1 do
             local rawLine = rawLines[i]
             if string.sub(rawLine,1,string.len(Prefix)) == Prefix then
                 LastActor = rawLine
             else
                 local lineData = {}
-                lineData.actor = LastActor
+                lineData.actor = LastActor:sub(2)
                 lineData.text = rawLine
                 table.insert(DialogData, lineData)
             end
@@ -179,6 +182,7 @@ function Level:CreateZone(zoneData)
         t.OnTrigger = function ()
             UIIsnt:StartDialog(t.dialogdata)
         end
+        TrackableManager.Add(t, zoneData.UID)
     elseif type == "exit" then
         local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
         t.nextlevel = zoneData.nextLevel
@@ -187,6 +191,16 @@ function Level:CreateZone(zoneData)
             LoadNextLevel = true
             print("Going outbounds will load "..NextLevel)
         end
+        TrackableManager.Add(t, zoneData.UID)
+    elseif type == "logic" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        t.nextlevel = zoneData.nextLevel
+        t.OnTrigger = function ()
+            NextLevel = t.nextlevel
+            LoadNextLevel = true
+            print("Going outbounds will load "..NextLevel)
+        end
+        TrackableManager.Add(t, zoneData.UID)
     end
 end
 
