@@ -2331,39 +2331,46 @@
     {
       "propType": "box",
       "x": 178,
-      "y": 135
+      "y": 135,
+      "UID": 20
     },
     {
       "propType": "box",
       "x": 109,
-      "y": 191
+      "y": 191,
+      "UID": 13
     },
     {
       "propType": "box",
       "x": 53,
-      "y": 190
+      "y": 190,
+      "UID": 15
     },
     {
       "propType": "box",
       "x": 305,
-      "y": 121
+      "y": 121,
+      "UID": 22
     },
     {
       "propType": "button",
       "x": 18,
       "y": 182,
+      "UID": 16,
       "group": "B"
     },
     {
       "propType": "button",
       "x": 228,
       "y": 98,
+      "UID": 21,
       "group": "A"
     },
     {
       "propType": "door",
       "x": 312,
       "y": 141,
+      "UID": 14,
       "h": 28,
       "group": "A,B",
       "active": 0,
@@ -2373,6 +2380,7 @@
       "propType": "indicator",
       "x": 300,
       "y": 127,
+      "UID": 18,
       "group": "A",
       "active": 0,
       "activeType": "Every"
@@ -2381,13 +2389,42 @@
       "propType": "indicator",
       "x": 314,
       "y": 127,
+      "UID": 19,
       "group": "B",
       "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "logic",
+      "command": "Remove 29",
+      "group": "A,B",
       "activeType": "Every"
     }
    ],
   "zones":
    [
+    {
+      "zoneType": "dialog",
+      "x": 102,
+      "y": 85,
+      "w": 14,
+      "h": 55,
+      "UID": 28,
+      "dialogstart": "",
+      "dialogfinish": "",
+      "text": "#Mipa\nThis pit down there looks very dangerous.\nI think I can try use my Manget Hand to pull that box on the right.\n#None\nPress and hold B button to use Magnet hand."
+    },
+    {
+      "zoneType": "dialog",
+      "x": 298,
+      "y": 140,
+      "w": 14,
+      "h": 28,
+      "UID": 29,
+      "dialogstart": "",
+      "dialogfinish": "",
+      "text": "#Mipa\nThere is two indicators above this door...\n...\nLooks like more than one button need to be pressed to open the door."
+    },
     {
       "zoneType": "spawn",
       "x": 25,
@@ -2399,6 +2436,7 @@
       "y": 225,
       "w": 28,
       "h": 14,
+      "UID": 23,
       "nextLevel": "lvl2"
     }
    ]

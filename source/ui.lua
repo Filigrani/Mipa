@@ -315,7 +315,7 @@ function UI:RemoveEquipment(ispassive)
 end
 
 function UI:ProcessDialog()
-    if self.currentdialogindex ~= 0 and #self.dialogdata > 0 then
+    if self.currentdialogindex ~= 0 and #self.dialogdata > 0 and self.dialogbg ~= nil then
         local ShowActor = true
         local ActorChanged = false
         local currentLineData = self.dialogdata[self.currdialoglineindex]
@@ -366,8 +366,9 @@ function UI:ProcessDialog()
             if not ShowActor then
                 drawingW = 388
             end
+            self.dialogtextimage:clear(gfx.kColorClear)
             gfx.setImageDrawMode(gfx.kDrawModeCopy)
-                gfx.pushContext(self.dialogtextimage)
+            gfx.pushContext(self.dialogtextimage)
                 gfx.drawTextInRect(self.currenttext, 0, 0, drawingW, darwingH, nil, "")
             gfx.popContext()
             gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
@@ -394,18 +395,15 @@ function UI:ProcessDialog()
                     self.currentdialogindex = 0
                     self.dialogdata = {}
                     self.dialogtextimage = gfx.image.new(388, 62)
+                    if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
+                        TrackableManager.ProcessCommandLine(self.ondialogfinish)
+                        self.ondialogfinish = nil
+                    end
+                    self.dialogbg:remove()
+                    self.dialogactor:remove()
+                    self.dialogtextsprite:remove()
                 end
             end
-        end
-    else
-        if self.dialogbg:isVisible() then
-            self.dialogbg:setVisible(false)
-        end
-        if self.dialogactor:isVisible() then
-            self.dialogactor:setVisible(false)
-        end
-        if self.dialogtextsprite:isVisible() then
-            self.dialogtextsprite:setVisible(false)
         end
     end
 end
@@ -416,34 +414,38 @@ function UI:LoadDialogUI()
     BG:setImage(BGimg)
     BG:setCenter(0, 0)
     BG:moveTo(0, 170)
-    BG:setZIndex(Z_Index.BG)
-    BG:add() -- Add to draw list
-    BG:setVisible(false)
+    BG:setZIndex(Z_Index.UI)
     local Actorimg = gfx.image.new("images/UI/DialogMipa")
     local Actor = gfx.sprite.new()
     Actor:setImage(Actorimg)
     Actor:setCenter(0, 0)
     Actor:moveTo(0, 170)
-    Actor:setZIndex(Z_Index.BG)
-    Actor:add() -- Add to draw list
-    Actor:setVisible(false)
+    Actor:setZIndex(Z_Index.UI)
     local DialogTextSprite = gfx.sprite.new()
     DialogTextSprite:setCenter(0, 0)
     DialogTextSprite:moveTo(91, 175)
-    DialogTextSprite:setZIndex(Z_Index.BG)
-    DialogTextSprite:add() -- Add to draw list
-    DialogTextSprite:setVisible(false)
+    DialogTextSprite:setZIndex(Z_Index.UI)
     self.dialogtextimage = gfx.image.new(388, 62)
     self.dialogbg = BG
     self.dialogactor = Actor
     self.dialogtextsprite = DialogTextSprite
 end
 
-function UI:StartDialog(data)
+function UI:StartDialog(data, onstart, onfinish)
     self.dialogtextimage = gfx.image.new(388, 62)
     self.currentdialogindex = 1
     self.currdialoglineindex = 1
     self.dialogdata = data
     self.currenttext = ""
     self.textwrapingindex = 0
+    self.dialogbg:add()
+    self.dialogactor:add()
+    self.dialogtextsprite:add()
+    if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then -- in case when we start new dialog when previous was still in process
+        TrackableManager.ProcessCommandLine(self.ondialogfinish)
+    end
+    self.ondialogfinish = onfinish
+    if onstart ~= nil and onstart ~= "" then
+        TrackableManager.ProcessCommandLine(onstart)
+    end
 end

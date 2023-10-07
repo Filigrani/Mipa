@@ -14,4 +14,5 @@ Z_Index =
 	Enemy = 2,
 	Object = 3,
 	BG = 4,
+	UI = 6,
 }

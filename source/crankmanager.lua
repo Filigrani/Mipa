@@ -11,6 +11,7 @@ CrankManager.Changed = function(num)
     for i = 1, #CrankManager.crankables, 1 do
         CrankManager.crankables[i]:Changed(num)
     end
+    print("change "..num)
 end
 
 CrankManager.NewPlatform = function (x, y, dis)

@@ -15,7 +15,7 @@ function Mipa:init(x, y)
     self.hp = 4
     self.hpmax = 4
     self.equipment = {1}
-    self.passiveitems = {1}
+    self.passiveitems = {}
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66

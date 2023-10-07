@@ -29,7 +29,7 @@ gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
 MipaInst = nil
 CurrentLevel = nil
-NextLevel = "lvl0"
+NextLevel = "lvl1"
 LoadNextLevel = false
 CanStartAgain = false
 local font = gfx.font.new('font/FiliFont')

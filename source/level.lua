@@ -21,6 +21,7 @@ function Level:init(levelPath)
     self.tilemap = pd.graphics.tilemap.new()
     self.tilemap:setImageTable(self.imagetable)
     self.tilemap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)  
+    self:ParceLogic()
     self:ParceTileMap() 
     self:RenderTilemap()
     self:ParceProps()
@@ -146,6 +147,8 @@ function Level:CreateProp(propData)
             end
         end
         TrackableManager.Add(door, propData.UID)
+    elseif type == "logic" then
+        local indi = Activatable(nil, nil, propData.group, 0, propData.activeType, propData.command)
     end
 end
 
@@ -179,8 +182,10 @@ function Level:CreateZone(zoneData)
             end
         end
         t.dialogdata = DialogData
+        t.ondialogstart = zoneData.dialogstart
+        t.ondialogfinish = zoneData.dialogfinish
         t.OnTrigger = function ()
-            UIIsnt:StartDialog(t.dialogdata)
+            UIIsnt:StartDialog(t.dialogdata, t.ondialogstart, t.ondialogfinish)
         end
         TrackableManager.Add(t, zoneData.UID)
     elseif type == "exit" then
@@ -192,28 +197,38 @@ function Level:CreateZone(zoneData)
             print("Going outbounds will load "..NextLevel)
         end
         TrackableManager.Add(t, zoneData.UID)
-    elseif type == "logic" then
-        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
-        t.nextlevel = zoneData.nextLevel
-        t.OnTrigger = function ()
-            NextLevel = t.nextlevel
-            LoadNextLevel = true
-            print("Going outbounds will load "..NextLevel)
-        end
-        TrackableManager.Add(t, zoneData.UID)
     end
+end
+
+function Level:RegisterLogic(LogicData)
+    TrackableManager.RegisterLogicBlock(LogicData.UID, LogicData.code)
 end
 
 function Level:ParceProps()
     print("[Level] Parcing props...")
+    if self.jsonTable.props == nil then
+        return
+    end
     for i=1, #self.jsonTable.props do
         self:CreateProp(self.jsonTable.props[i])
     end
 end
 function Level:ParceZones()
     print("[Level] Parcing zones...")
+    if self.jsonTable.zones == nil then
+        return
+    end
     for i=1, #self.jsonTable.zones do
         self:CreateZone(self.jsonTable.zones[i])
+    end
+end
+function Level:ParceLogic()
+    print("[Level] Parcing logic...")
+    if self.jsonTable.logic == nil then
+        return
+    end
+    for i=1, #self.jsonTable.logic do
+        self:RegisterLogic(self.jsonTable.logic[i])
     end
 end
 
