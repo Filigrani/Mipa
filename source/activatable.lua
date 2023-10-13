@@ -9,9 +9,9 @@ function Activatable:init(x, y, group, defaultactive, activetype, command)
         self:setImage(img)
         self:moveTo(x, y)
         self:setZIndex(Z_Index.BG)
-        self:setCenter(0, 0)
-        self:add() -- Add to draw list        
+        self:setCenter(0, 0)    
     end
+    self:add() -- Add to draw list 
     self.activegroup = {}
     self.activetype = activetype
     self.triggercommand = command
@@ -23,6 +23,7 @@ function Activatable:init(x, y, group, defaultactive, activetype, command)
     self.activated = self.defaultactive
     self.lastactive = self.defaultactive
     self.CustomUpdate = nil
+    self.CustomColision = nil
     if group and group ~= "" then
         if string.find(group, ",") then
             for g in string.gmatch(group, '([^,]+)') do
@@ -36,6 +37,13 @@ function Activatable:init(x, y, group, defaultactive, activetype, command)
     ActiveManager.AddActivatable(self)
 end
 
+function Activatable:collisionResponse(other)
+    if self.CustomColision ~= nil then
+        return self:CustomColision(other)
+    end
+    return nil
+end
+
 function Activatable:update()
     if self.CustomUpdate ~= nil then
         self.CustomUpdate()
@@ -44,6 +52,7 @@ function Activatable:update()
         self.lastactive = self.activated
         print("Activatable object now has status "..tostring(self.activated))
         if self.triggercommand ~= nil and self.triggercommand ~= "" then
+            print("Activatable object triggers command "..self.triggercommand)
             TrackableManager.ProcessCommandLine(self.triggercommand)
             self.triggercommand = nil
         end

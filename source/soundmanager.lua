@@ -29,12 +29,13 @@ AddSound("Peaw", 3)
 AddSound("Woop")
 AddSound("Pap")
 AddSound("Oop")
-
+AddSound("Bloop")
+AddSound("BeamLoop")
+AddSound("Glitch",6)
+AddSound("GlitchNew")
+AddSound("Gaw",4)
 
 function SoundManager:PlaySound(name, vol)
-    if name == "Land" then
-        return
-    end
     local volume = 1
     if vol ~= nil then
         volume = vol

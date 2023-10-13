@@ -11,6 +11,7 @@ import "jsonloader"
 import "level"
 import "physicalprop"
 import "ui"
+import "menu"
 import "soundmanager"
 import "crankmanager"
 import "crankdisk"
@@ -21,23 +22,33 @@ import "activator"
 import "activatable"
 import "trigger"
 import "spike"
+import "animeffect"
+import "raycasttrigger"
 
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
 gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
+MenuInst = nil
 MipaInst = nil
 CurrentLevel = nil
-NextLevel = "lvl1"
+NextLevel = "menu"
 LoadNextLevel = false
 CanStartAgain = false
+NewDeathScreen = true
 local font = gfx.font.new('font/FiliFont')
 
 StartGame = function ()
 	gfx.sprite.removeAll()
 	ActiveManager.Reset()
 	TrackableManager.Reset()
+
+	if NextLevel == "menu" then
+		MenuInst = Menu()
+		return
+	end
+	MenuInst = nil
 	--local clone = Mipa(165, 134)
 	if clone then
 		clone.IsClone = true
@@ -45,6 +56,7 @@ StartGame = function ()
 	end
 	CurrentLevel = Level("levels/"..NextLevel..".json")
 	UIIsnt = UI()
+	UIIsnt.glitchframes = 0
 	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
 end
 
@@ -68,28 +80,36 @@ DeathTrigger = function ()
 	end
 	again.anim.repeats = true
 	again.anim:start()
-
-	local overlay = gfx.sprite.new()
-	overlay:setCenter(0, 0)
-	overlay:setImage(deathimagetable:getImage(17))
-	overlay:add()
-	overlay:setZIndex(Z_Index.BG)
-	overlay.fadealpha = 1
-	overlay.fader = pd.frameTimer.new(3)
-	overlay.fader.timerEndedCallback = function(timer)  
-		local Ditherimg = deathimagetable:getImage(17)
-		if overlay.fadealpha <= 0 then
-			overlay.fadealpha = 0  
-			gfx.sprite.removeSprite(overlay)
-			return
-		else
-			overlay.fadealpha = overlay.fadealpha-0.1
+	if not NewDeathScreen then
+		local overlay = gfx.sprite.new()
+		overlay:setCenter(0, 0)
+		overlay:setImage(deathimagetable:getImage(17))
+		overlay:add()
+		overlay:setZIndex(Z_Index.BG)
+		overlay.fadealpha = 1
+		overlay.fader = pd.frameTimer.new(3)
+		overlay.fader.timerEndedCallback = function(timer)  
+			local Ditherimg = deathimagetable:getImage(17)
+			if overlay.fadealpha <= 0 then
+				overlay.fadealpha = 0  
+				gfx.sprite.removeSprite(overlay)
+				return
+			else
+				overlay.fadealpha = overlay.fadealpha-0.1
+			end
+			Ditherimg = Ditherimg:fadedImage(overlay.fadealpha, gfx.image.kDitherTypeBayer8x8)
+			overlay:setImage(Ditherimg)
 		end
-		Ditherimg = Ditherimg:fadedImage(overlay.fadealpha, gfx.image.kDitherTypeBayer8x8)
-		overlay:setImage(Ditherimg)
-	end
-	overlay.fader.repeats = true
-	overlay.fader:start()
+		overlay.fader.repeats = true
+		overlay.fader:start()
+	else
+		UIIsnt.glitchframes = 2
+		local fadetimer = pd.frameTimer.new(2)
+		fadetimer.timerEndedCallback = function(timer)
+			UIIsnt.glitchframes = 0
+		end
+		fadetimer:start()
+    end
 end
 local function loadGame()
 	gfx.setFont(font)
@@ -108,6 +128,9 @@ local function updateGame()
 	pd.timer.updateTimers()
 	if UIIsnt ~= nil then
 		UIIsnt:Update()
+	end
+	if MenuInst ~= nil then
+		MenuInst:Update()
 	end
 	if CanStartAgain then
 		if pd.buttonJustPressed(pd.kButtonA) then

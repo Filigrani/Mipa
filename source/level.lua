@@ -1,7 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 import "jsonloader"
-
+waterfallimagetable = gfx.imagetable.new("images/props/waterfall")
 class('Level').extends(playdate.graphics.sprite)
 
 function Level:init(levelPath)
@@ -21,7 +21,6 @@ function Level:init(levelPath)
     self.tilemap = pd.graphics.tilemap.new()
     self.tilemap:setImageTable(self.imagetable)
     self.tilemap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)  
-    self:ParceLogic()
     self:ParceTileMap() 
     self:RenderTilemap()
     self:ParceProps()
@@ -29,7 +28,10 @@ function Level:init(levelPath)
 end
 
 function Level:CreateTile(ID, X, Y, Solid)
-    self.tilemap:setTileAtPosition(X, Y, ID)
+    if ID ~= 4 then
+        self.tilemap:setTileAtPosition(X, Y, ID)
+    end
+    
     local WorldX = self.jsonTable.root_x+14*(X-1)
     local WorldY = self.jsonTable.root_y+14*(Y-1)
     if ID == 2 then
@@ -42,6 +44,17 @@ function Level:CreateTile(ID, X, Y, Solid)
         SlapColider:setBounds(WorldX, WorldY, TileW, TileH)
         SlapColider:setCollideRect(0, 0, TileW, TileH)
         SlapColider:addSprite()
+    end
+    if ID == 4 then
+        local SlapColider = gfx.sprite.new()
+        local TileW = 14
+        local TileH = 7
+        SlapColider:setCenter(0, 0)
+        SlapColider:setImage(self.imagetable:getImage(4))
+        SlapColider:setBounds(WorldX, WorldY, TileW, TileH)
+        SlapColider:setCollideRect(0, 0, TileW, TileH)
+        SlapColider:add()
+        SlapColider.Breaks = true
     end
     --[[
     if ID == 302 then
@@ -106,15 +119,39 @@ function Level:CreateProp(propData)
         end
         TrackableManager.Add(indi, propData.UID)
     elseif type == "door" then
-        local door = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
-        
+        local doorx = propData.x
+        local doory = propData.y
+        local vetical = true
+        if propData.a ~= nil and ( propData.a == 90 or propData.a == 269 ) then
+            vetical = false
+            if propData.a == 90 then
+                doorx = doorx-propData.h
+            elseif propData.a == 269 then
+                --doorx = doorx+propData.h
+            end
+        end
+        local door = Activatable(doorx, doory, propData.group, propData.active, propData.activeType)
         door.defaultH = propData.h
-        door.currentH = door.defaultH
+        if not door.defaultactive then
+            door.currentH = door.defaultH
+        else
+            door.currentH = 3
+        end  
         door.firstchange = true
         door.CustomUpdate = function()
-            local targetH = door.defaultH
-            if door.activated then
-                targetH = 3
+            local targetH = 0  
+            if door.defaultactive then
+                if not door.activated then
+                    targetH = 3
+                else
+                    targetH = door.defaultH
+                end
+            else
+                if not door.activated then
+                    targetH = door.defaultH
+                else
+                    targetH = 3
+                end                
             end
             local changed = false
             if targetH > door.currentH then
@@ -129,33 +166,192 @@ function Level:CreateProp(propData)
                     SoundManager:PlaySound("Door")
                 end
                 door.firstchange = false
-                door:setCollideRect(0,0,4,door.currentH)
-                local img = gfx.image.new(4, door.currentH)
-                local Skip = false
-                gfx.pushContext(img)
-                    gfx.setColor(gfx.kColorBlack)
-                    for i = 0, door.currentH-1, 1 do
-                        if not Skip then
-                            gfx.drawLine(0, i, 4, i)
-                            Skip =  true
-                        else
-                            Skip = false
+                
+                if vetical then
+                    door:setCollideRect(0,0,4,door.currentH)
+                    local img = gfx.image.new(4, door.currentH)
+                    local Skip = false
+                    gfx.pushContext(img)
+                        gfx.setColor(gfx.kColorBlack)
+                        for i = 0, door.currentH-1, 1 do
+                            if not Skip then
+                                gfx.drawLine(0, i, 4, i)
+                                Skip =  true
+                            else
+                                Skip = false
+                            end
                         end
+                    gfx.popContext()
+                    door:setImage(img)
+                else -- Horizontal
+                    local left = true
+                    local img = gfx.image.new(door.currentH, 4)
+                    local Skip = false                    
+                    if propData.a == 269 then -- if angle 270, then it opens to right.
+                        left = false
                     end
-                gfx.popContext()
-                door:setImage(img)
+                    if not left then
+                        door:setCollideRect(0,0,door.currentH,4)
+                        gfx.pushContext(img)
+                            gfx.setColor(gfx.kColorBlack)
+                            for i = 0, door.currentH-1, 1 do
+                                if not Skip then
+                                    gfx.drawLine(i, 0, i, 4)
+                                    Skip =  true
+                                else
+                                    Skip = false
+                                end
+                            end
+                        gfx.popContext()
+                        door:setImage(img)
+                    else
+                        door:setCollideRect(door.defaultH-door.currentH,0,door.currentH,4)
+                        gfx.pushContext(img)
+                            gfx.setColor(gfx.kColorBlack)
+                            for i = door.defaultH, door.currentH-1, -1 do
+                                if not Skip then
+                                    gfx.drawLine(i, 0, i, 4)
+                                    Skip =  true
+                                else
+                                    Skip = false
+                                end
+                            end
+                        gfx.popContext()     
+                        door:setImage(img)                                            
+                    end 
+                end
+            end
+        end
+        TrackableManager.Add(door, propData.UID)
+    elseif type == "laser" then
+        local laser = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
+        laser.fx = AnimEffect(propData.x, propData.y, "Effects/reflect", 1)
+        laser.eventick = false
+        laser.w = propData.w
+        laser.lastcoliderw = laser.w
+        laser.fx:moveTo(laser.lastcoliderw-14+propData.x, propData.y-8)
+        laser:setCollideRect(0,0,laser.w,2)
+        laser.CustomUpdate = function()
+            local _x, _y = laser:getPosition()
+            laser:setTag(TAG.ObstacleCastNoPlayer)
+            laser:setCollideRect(0,0,laser.w,2)
+            local _, _, collisions, length = laser:checkCollisions(laser.x, laser.y)
+            local closestX = 1000
+            for i=1,length do
+                local collision = collisions[i]
+                local collisionType = collision.type
+                local collisionObject = collision.other
+                local collisionTag = collisionObject:getTag()
+                if closestX > collision.otherRect.x then
+                    local newcolidew = math.floor(collision.otherRect.x-laser.x+0.5)
+                    if laser.lastcoliderw ~= newcolidew then
+                        laser.lastcoliderw = newcolidew
+                    end              
+                    print("i ", i)      
+                    print("closestX ", closestX)  
+                    print("rect ", collision.otherRect.x)   
+                    closestX = collision.otherRect.x               
+                end
+            end
+            if length == 0 and laser.lastcoliderw ~= laser.w then
+                laser.lastcoliderw = laser.w
+            end
+            if laser.lastcoliderw <= 3 then
+                laser:setCollideRect(0,0,3,2)
+            else
+                laser:setCollideRect(0,0,laser.lastcoliderw+3,2)
+            end
+            laser:setTag(TAG.HazardNoColide)
+            laser.fx:moveTo(laser.lastcoliderw-14+_x, _y-8)
+            if laser.lastcoliderw <= 4 or laser.activated then
+                if laser.fx:isVisible() then
+                    laser.fx:setVisible(false)
+                end
+            elseif not laser.fx:isVisible() and not laser.activated then
+                laser.fx:setVisible(true)
+            end
+            if not laser.activated and laser.lastcoliderw > 3 then
+                local img = gfx.image.new(laser.lastcoliderw, 2)
+                if not laser.eventick then
+                    gfx.pushContext(img)
+                        gfx.setColor(gfx.kColorBlack)
+                        gfx.drawLine(0, 0, laser.lastcoliderw, 0)
+                        gfx.drawLine(0, 1, laser.lastcoliderw, 1)
+                    gfx.popContext()
+                    laser.eventick = true
+                else
+                    gfx.pushContext(img)
+                        gfx.setColor(gfx.kColorBlack)
+                        local skip = false
+                        for i = 0, laser.lastcoliderw, 1 do
+                            if not skip then
+                                gfx.drawPixel(i, 0)
+                                skip = true
+                            else
+                                skip = false
+                            end
+                        end
+                        skip = true
+                        for i = 0, laser.lastcoliderw, 1 do
+                            if not skip then
+                                gfx.drawPixel(i, 1)
+                                skip = true
+                            else
+                                skip = false
+                            end
+                        end                  
+                    gfx.popContext()
+                    laser.eventick = false       
+                end
+                laser:setImage(img) 
+            elseif not laser.activated then
+                laser:setTag(TAG.Effect)  
             end
         end
         TrackableManager.Add(door, propData.UID)
     elseif type == "logic" then
-        local indi = Activatable(nil, nil, propData.group, 0, propData.activeType, propData.command)
+        Activatable(nil, nil, propData.group, 0, propData.activeType, propData.command)
+    elseif type == "poky" then
+        local pokey = gfx.sprite.new()
+        pokey:setCenter(0, 0)
+        pokey:moveTo(propData.x, propData.y)
+        pokey:setZIndex(Z_Index.Object)
+        pokey:setImage(gfx.image.new("images/Props/Poky"))
+        pokey:add()
+    elseif type == "waterfall" then
+        local waterfall = gfx.sprite.new()
+        waterfall:setCenter(0, 0)
+        waterfall:moveTo(propData.x, propData.y)
+        waterfall:setZIndex(Z_Index.TotalBumer)
+        waterfall:setImage(waterfallimagetable:getImage(1))
+        waterfall:add()
+        waterfall.curindex = 1
+        waterfall.animationtimer = pd.frameTimer.new(4)
+        waterfall.animationtimer.repeats = true       
+        waterfall.animationtimer.timerEndedCallback = function(timer)
+            if waterfall.curindex == 4 then
+                waterfall.curindex = 1
+            else
+                waterfall.curindex = waterfall.curindex+1
+            end
+            waterfall:setImage(waterfallimagetable:getImage(waterfall.curindex))
+        end
+        waterfall.animationtimer:start()
     end
 end
 
 function Level:CreateZone(zoneData)
     local type = zoneData.zoneType
     if type == "spawn" then
-        MipaInst = Mipa(zoneData.x, zoneData.y)
+        if self.foundmipas == 0 then
+            MipaInst = Mipa(zoneData.x, zoneData.y)
+            self.foundmipas = self.foundmipas+1
+        else
+            local clone = Mipa(zoneData.x, zoneData.y)
+            clone.IsClone = true
+            clone.hp = 1
+            self.foundmipas = self.foundmipas+1
+        end
     elseif type == "dialog" then
         local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
         local rawText = zoneData.text
@@ -200,10 +396,6 @@ function Level:CreateZone(zoneData)
     end
 end
 
-function Level:RegisterLogic(LogicData)
-    TrackableManager.RegisterLogicBlock(LogicData.UID, LogicData.code)
-end
-
 function Level:ParceProps()
     print("[Level] Parcing props...")
     if self.jsonTable.props == nil then
@@ -214,21 +406,13 @@ function Level:ParceProps()
     end
 end
 function Level:ParceZones()
+    self.foundmipas = 0
     print("[Level] Parcing zones...")
     if self.jsonTable.zones == nil then
         return
     end
     for i=1, #self.jsonTable.zones do
         self:CreateZone(self.jsonTable.zones[i])
-    end
-end
-function Level:ParceLogic()
-    print("[Level] Parcing logic...")
-    if self.jsonTable.logic == nil then
-        return
-    end
-    for i=1, #self.jsonTable.logic do
-        self:RegisterLogic(self.jsonTable.logic[i])
     end
 end
 
@@ -241,5 +425,5 @@ function Level:RenderTilemap()
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
     layerSprite:add()
-    gfx.sprite.addWallSprites(tilemap,  {2,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
+    gfx.sprite.addWallSprites(tilemap,  {2,4,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
 end

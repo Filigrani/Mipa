@@ -7,6 +7,8 @@ TAG =
 	Effect = 5,
 	Interactive = 6,
 	Hazard = 7,
+	HazardNoColide = 8,
+	ObstacleCastNoPlayer = 9,
 }
 Z_Index = 
 {
@@ -15,4 +17,10 @@ Z_Index =
 	Object = 3,
 	BG = 4,
 	UI = 6,
+	TotalBumer = -1,
+}
+
+DebugFlags = 
+{
+	NoDialogs = false,
 }

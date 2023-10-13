@@ -31,23 +31,23 @@
       "y": 5
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 1,
       "y": 6
-    },
-    {
-      "tileID": 0,
-      "x": 1,
-      "y": 7
-    },
-    {
-      "tileID": 0,
-      "x": 1,
-      "y": 8
     },
     {
       "tileID": 1,
       "x": 1,
+      "y": 7
+    },
+    {
+      "tileID": 1,
+      "x": 1,
+      "y": 8
+    },
+    {
+      "tileID": 1,
+      "x": 1,
       "y": 9
     },
     {
@@ -86,32 +86,32 @@
       "y": 16
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 1
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 5
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 2,
       "y": 6
     },
@@ -126,22 +126,22 @@
       "y": 8
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 9
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 2,
       "y": 12
     },
@@ -166,22 +166,22 @@
       "y": 16
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 1
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 4
     },
@@ -191,7 +191,7 @@
       "y": 5
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 3,
       "y": 6
     },
@@ -206,22 +206,22 @@
       "y": 8
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 9
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 3,
       "y": 12
     },
@@ -256,7 +256,7 @@
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 3
     },
@@ -286,32 +286,32 @@
       "y": 8
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 9
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 4,
       "y": 14
     },
@@ -366,7 +366,7 @@
       "y": 8
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 5,
       "y": 9
     },
@@ -376,22 +376,22 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 5,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 5,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 5,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 5,
       "y": 14
     },
@@ -426,27 +426,27 @@
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 6,
       "y": 5
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 6,
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 6,
       "y": 7
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 6,
       "y": 8
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 6,
       "y": 9
     },
@@ -461,17 +461,17 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 6,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 6,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 6,
       "y": 14
     },
@@ -506,27 +506,27 @@
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 7,
       "y": 5
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 7,
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 7,
       "y": 7
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 7,
       "y": 8
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 7,
       "y": 9
     },
@@ -551,7 +551,7 @@
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 7,
       "y": 14
     },
@@ -586,32 +586,32 @@
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 5
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 8
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 9
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 8,
       "y": 10
     },
@@ -626,12 +626,12 @@
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 14
     },
@@ -666,32 +666,32 @@
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 5
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 8
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 9
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 10
     },
@@ -706,12 +706,12 @@
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 14
     },
@@ -751,22 +751,22 @@
       "y": 5
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 8
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 9
     },
@@ -781,17 +781,17 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 14
     },
@@ -851,7 +851,7 @@
       "y": 9
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 11,
       "y": 10
     },
@@ -861,17 +861,17 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 11,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 11,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 11,
       "y": 14
     },
@@ -896,22 +896,22 @@
       "y": 2
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 3
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 4
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 5
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 6
     },
@@ -921,17 +921,17 @@
       "y": 7
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 8
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 9
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 12,
       "y": 10
     },
@@ -966,27 +966,27 @@
       "y": 16
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 1
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 5
     },
@@ -996,7 +996,7 @@
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 7
     },
@@ -1011,17 +1011,17 @@
       "y": 9
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 12
     },
@@ -1046,27 +1046,27 @@
       "y": 16
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 1
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 5
     },
@@ -1076,7 +1076,7 @@
       "y": 6
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 14,
       "y": 7
     },
@@ -1091,17 +1091,17 @@
       "y": 9
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 12
     },
@@ -1136,22 +1136,22 @@
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 5
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 15,
       "y": 6
     },
@@ -1171,7 +1171,7 @@
       "y": 9
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 15,
       "y": 10
     },
@@ -1181,17 +1181,17 @@
       "y": 11
     },
     {
-      "tileID": 302,
+      "tileID": 0,
       "x": 15,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 14
     },
@@ -1216,17 +1216,17 @@
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 4
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 16,
       "y": 5
     },
@@ -1261,17 +1261,17 @@
       "y": 11
     },
     {
-      "tileID": 302,
+      "tileID": 0,
       "x": 16,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 14
     },
@@ -1296,12 +1296,12 @@
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 17,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 17,
       "y": 4
     },
@@ -1321,7 +1321,7 @@
       "y": 7
     },
     {
-      "tileID": 2,
+      "tileID": 1,
       "x": 17,
       "y": 8
     },
@@ -1341,17 +1341,17 @@
       "y": 11
     },
     {
-      "tileID": 302,
+      "tileID": 0,
       "x": 17,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 17,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 17,
       "y": 14
     },
@@ -1376,12 +1376,12 @@
       "y": 2
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 18,
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 18,
       "y": 4
     },
@@ -1401,7 +1401,7 @@
       "y": 7
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 18,
       "y": 8
     },
@@ -1421,17 +1421,17 @@
       "y": 11
     },
     {
-      "tileID": 302,
+      "tileID": 0,
       "x": 18,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 18,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 18,
       "y": 14
     },
@@ -1461,7 +1461,7 @@
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 19,
       "y": 4
     },
@@ -1481,7 +1481,7 @@
       "y": 7
     },
     {
-      "tileID": 2,
+      "tileID": 0,
       "x": 19,
       "y": 8
     },
@@ -1501,17 +1501,17 @@
       "y": 11
     },
     {
-      "tileID": 302,
+      "tileID": 0,
       "x": 19,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 19,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 19,
       "y": 14
     },
@@ -1541,7 +1541,7 @@
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 20,
       "y": 4
     },
@@ -1561,7 +1561,7 @@
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 20,
       "y": 8
     },
@@ -1576,7 +1576,7 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 20,
       "y": 11
     },
@@ -1586,12 +1586,12 @@
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 20,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 20,
       "y": 14
     },
@@ -1621,12 +1621,12 @@
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 21,
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 21,
       "y": 5
     },
@@ -1641,7 +1641,7 @@
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 21,
       "y": 8
     },
@@ -1656,7 +1656,7 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 21,
       "y": 11
     },
@@ -1666,12 +1666,12 @@
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 21,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 21,
       "y": 14
     },
@@ -1701,12 +1701,12 @@
       "y": 3
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 5
     },
@@ -1721,7 +1721,7 @@
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 8
     },
@@ -1731,27 +1731,27 @@
       "y": 9
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 22,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 22,
       "y": 14
     },
@@ -1786,22 +1786,22 @@
       "y": 4
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 5
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 6
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 7
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 8
     },
@@ -1811,27 +1811,27 @@
       "y": 9
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 23,
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 23,
       "y": 14
     },
@@ -1881,42 +1881,42 @@
       "y": 7
     },
     {
-      "tileID": 402,
+      "tileID": 1,
       "x": 24,
       "y": 8
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 9
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 10
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 11
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 12
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 13
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 14
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 24,
       "y": 15
     },
@@ -1961,42 +1961,42 @@
       "y": 7
     },
     {
-      "tileID": 403,
+      "tileID": 1,
       "x": 25,
       "y": 8
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 9
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 10
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 11
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 12
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 13
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 14
     },
     {
-      "tileID": 0,
+      "tileID": 1,
       "x": 25,
       "y": 15
     },
@@ -2330,105 +2330,75 @@
    [
     {
       "propType": "box",
-      "x": 95,
-      "y": 135,
-      "UID": 33
+      "x": -22,
+      "y": 114,
+      "UID": 83
     },
     {
       "propType": "box",
-      "x": 109,
-      "y": 177,
-      "UID": 34
+      "x": -26,
+      "y": 187,
+      "UID": 84
     },
     {
       "propType": "box",
-      "x": 124,
-      "y": 176,
-      "UID": 35
+      "x": -27,
+      "y": 169,
+      "UID": 85
+    },
+    {
+      "propType": "box",
+      "x": 78,
+      "y": 300,
+      "UID": 90
     },
     {
       "propType": "button",
-      "x": 60,
-      "y": 153,
-      "UID": 36,
-      "group": "A"
-    },
-    {
-      "propType": "button",
-      "x": 297,
-      "y": 112,
-      "UID": 39,
+      "x": -35,
+      "y": 128,
+      "UID": 86,
       "group": "B"
     },
     {
+      "propType": "button",
+      "x": -55,
+      "y": 76,
+      "UID": 89,
+      "group": "A"
+    },
+    {
       "propType": "door",
-      "x": 270,
-      "y": 141,
-      "UID": 31,
+      "x": -25,
+      "y": 214,
+      "UID": 81,
       "h": 28,
       "a": 0,
-      "group": "B",
+      "group": "A,B",
       "active": 0,
-      "activeType": "Every"
-    },
-    {
-      "propType": "door",
-      "x": 172,
-      "y": 127,
-      "UID": 45,
-      "h": 28,
-      "a": 0,
-      "group": "A",
-      "active": 0,
-      "activeType": "Every"
-    },
-    {
-      "propType": "door",
-      "x": 4,
-      "y": 99,
-      "UID": 46,
-      "h": 41,
-      "a": 0,
-      "group": "D",
-      "active": 0,
-      "activeType": "Every"
-    },
-    {
-      "propType": "door",
-      "x": 200,
-      "y": 173,
-      "UID": 40,
-      "h": 69,
-      "a": 269,
-      "group": "B",
-      "active": 1,
       "activeType": "Every"
     },
     {
       "propType": "indicator",
-      "x": 166,
-      "y": 112,
-      "UID": 37,
+      "x": 129,
+      "y": 286,
+      "UID": 87,
       "group": "A",
       "active": 0,
       "activeType": "Every"
     },
     {
       "propType": "indicator",
-      "x": 268,
-      "y": 127,
-      "UID": 38,
+      "x": 180,
+      "y": 308,
+      "UID": 88,
       "group": "B",
       "active": 0,
       "activeType": "Every"
     },
     {
-      "propType": "indicator",
-      "x": 186,
-      "y": 164,
-      "UID": 43,
-      "group": "B",
-      "active": 0,
+      "propType": "logic",
+      "command": "Remove 29",
+      "group": "A,B",
       "activeType": "Every"
     }
    ],
@@ -2436,27 +2406,32 @@
    [
     {
       "zoneType": "dialog",
-      "x": 46,
-      "y": 85,
-      "w": 14,
-      "h": 55,
-      "UID": 42,
+      "x": 45,
+      "y": 99,
+      "w": 29,
+      "h": 42,
+      "UID": 6,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nThis box cound be helpful to get on this height.\nI can try to use my Manget Hand to pull that box.\n#None\nPress and hold B button to use Magnet hand."
+      "text": "#Mipa\nOh...Who are you?\nAnd why you looks like me?!\n#Wipa\nI am Wipa, and I am your holographic assistent!\n#Mipa\nOh that neat!\nI like new friends!"
     },
     {
       "zoneType": "spawn",
-      "x": 17,
-      "y": 133
+      "x": 25,
+      "y": 36
+    },
+    {
+      "zoneType": "spawn",
+      "x": 179,
+      "y": 36
     },
     {
       "zoneType": "exit",
-      "x": 326,
-      "y": 225,
+      "x": 93,
+      "y": 318,
       "w": 28,
       "h": 14,
-      "UID": 41,
+      "UID": 91,
       "nextLevel": "lvl2"
     }
    ]

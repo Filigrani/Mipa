@@ -20,6 +20,7 @@ function Mipa:init(x, y)
     -- Moving vars
     self.speed = 1.66
     self.pushingspeed = 1.1
+    self.pullingspeed = 1.33
     self.airspeed = 1.99
     self.velocityX = 0
     self.velocityY = 0
@@ -58,7 +59,7 @@ function Mipa:init(x, y)
     self.pulltimer = pd.frameTimer.new(3)
     self.pulltimer.repeats = true
     self.pulltimer.timerEndedCallback = function(timer)
-        self:ProcessPulling()    
+        self:ProcessPulling()
     end
 end
 
@@ -353,20 +354,29 @@ function Mipa:ProcessWalking()
     return Moved
 end
 
+function Mipa:GetSpeed()
+    if not self:IsDown() then
+        if not self:IsPushing() and not self:IsPulling() then
+            if self:IsOnFloor() then
+                return self.speed
+            else
+                return self.airspeed
+            end
+        elseif self:IsPushing() then
+            return self.pushingspeed
+        elseif self:IsPulling() then
+            return self.pullingspeed
+        end
+    end
+    return 0
+end
+
 function Mipa:TryMoveRight()
     if not self:IsDead() and (not self:IsPulling() and not self:IsPulling())then -- So when push her body she not facing to motion direction
         self.mirrored = gfx.kImageUnflipped
     end
     if not self:IsDown() then
-        if not self:IsPushing() then
-            if self:IsOnFloor() then
-                self.velocityX = self.speed
-            else
-                self.velocityX = self.airspeed
-            end
-        else
-            self.velocityX = self.pushingspeed
-        end
+        self.velocityX = self:GetSpeed()
         return true
     end
     return false
@@ -377,22 +387,14 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
         self.mirrored = gfx.kImageFlippedX
     end
     if not self:IsDown() then
-        if not self:IsPushing() then
-            if self:IsOnFloor() then
-                self.velocityX = -self.speed
-            else
-                self.velocityX = -self.airspeed
-            end
-        else
-            self.velocityX = -self.pushingspeed
-        end
+        self.velocityX = -self:GetSpeed()
     end
     return false
 end
 
 function Mipa:TryJump()  
     local canDoubleJump = self:HasPassiveItem(1) and self.candoublejump
-    if self:IsOnFloor() then
+    if (not self.midfalljump and self:IsOnFloor()) or self.midfalljump then
         if self.canjump then
             self.canjump = false
             self.velocityY = self.maxjumpvelocity
@@ -407,7 +409,7 @@ function Mipa:TryJump()
 end
 
 function Mipa:collisionResponse(other)
-    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard) then
+    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard or other:getTag() == TAG.ObstacleCastNoPlayer) or (other:getTag() == TAG.HazardNoColide and self:IsDead()) then
         return gfx.sprite.kCollisionTypeOverlap
     end
     return gfx.sprite.kCollisionTypeSlide
@@ -450,7 +452,7 @@ function Mipa:ApplyVelocity()
         local collisionType = collision.type
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
-        if collisionTag == TAG.Hazard and not self:IsDead() then
+        if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) and not self:IsDead() then
             self:Damage(self.hpmax)
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
@@ -477,7 +479,11 @@ function Mipa:ApplyVelocity()
                         elseif landvolume < 0.3 then
                             landvolume = 0.3
                         end
-                        SoundManager:PlaySound("Land", landvolume)
+                        AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
+                        SoundManager:PlaySound("Bloop", landvolume)
+                        if collisionObject ~= nil and collisionObject.Breaks ~= nil then
+                            gfx.sprite.removeSprite(collisionObject)
+                        end
                     end                
                 end
             elseif collision.normal.y == 1 then
@@ -511,7 +517,7 @@ function Mipa:ApplyVelocity()
             end
         elseif collisionType == gfx.sprite.kCollisionTypeOverlap then
             if collisionTag == TAG.Interactive then
-                if collisionObject.IsTrigger then
+                if collisionObject.IsTrigger and not self:IsDead() then
                     collisionObject:Trigger()
                 end
             end
@@ -535,7 +541,7 @@ function Mipa:ApplyVelocity()
             UIIsnt:Death()
         end
     end
-    if self:IsFalling() and not self.midfalljump then
+    if not self.midfalljump and self:IsFalling()  then
          self.canjump = false
     end
 end
@@ -550,6 +556,7 @@ function Mipa:ProcessPulling()
         else
             bullet.speed = -5
         end
+        --SoundManager:PlaySound("BeamLoop")
         bullet.lifedistance = 49
         bullet.lastpushonhit = true
         bullet.OnHit = function (collision)
@@ -614,6 +621,13 @@ function Mipa:update()
                 LoadNextLevel = false
                 StartGame()
             end 
+        end
+    end
+    if not self:IsDead() and self.hp == 1 and not self.IsClone then
+        if UIIsnt ~= nil then
+            if math.random(0,100) <= 0.002 then
+                UIIsnt.glitchframes = math.floor(math.random(2,7)+0.5)
+            end
         end
     end
 end

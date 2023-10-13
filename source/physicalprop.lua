@@ -62,7 +62,7 @@ function PhysicalProp:TryJump()
 end
 
 function PhysicalProp:collisionResponse(other)
-    if other and other:getTag() == TAG.Effect then
+    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide) then
         return gfx.sprite.kCollisionTypeOverlap
     end
     return gfx.sprite.kCollisionTypeSlide
@@ -91,8 +91,12 @@ function PhysicalProp:ApplyVelocity()
                         collisionObject:Damage(2)
                     else
                         collisionObject:Damage(1)
-                    end                   
-                end                   
+                    end
+                end 
+                if not lastground and self.onground and lastfreefall > 5 then
+                    AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
+                    SoundManager:PlaySound("Bloop", 0.3)
+                end         
             elseif collision.normal.y == 1 then       
                 self.velocityY = 0
             end

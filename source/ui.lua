@@ -1,6 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 deathimagetable = gfx.imagetable.new("images/ui/death")
+glitchtable = gfx.imagetable.new("images/ui/glitch")
 class('UI').extends(playdate.graphics.sprite)
 
 function UI:init()
@@ -22,6 +23,8 @@ function UI:init()
     self.textwrapinglimit = 99
     self.currentdialogactor = "Mipa"
     self.textwaittime = 0
+    self.lastglitch = 0
+    self.glitchframes = 0
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -173,6 +176,15 @@ function UI:Update()
         self.lasthearts = hearts
     end
     self:ProcessDialog()
+    if self.glitchframes > 0 then
+        self.glitchframes = self.glitchframes-1
+        self:DoGlitch()
+    else
+        if self.glitchoverlay ~= nil then
+            gfx.sprite.removeSprite(self.glitchoverlay)
+            self.glitchoverlay = nil
+        end
+    end
 end
 
 function UI:RemoveHeart()
@@ -358,6 +370,8 @@ function UI:ProcessDialog()
                 SoundManager:PlaySound("Pap")
             elseif self.currentdialogactor == "Mipa" then
                 SoundManager:PlaySound("Peaw")
+            elseif self.currentdialogactor == "Wipa" then
+                SoundManager:PlaySound("Sqeak")
             else
                 SoundManager:PlaySound("Pap")
             end
@@ -377,7 +391,13 @@ function UI:ProcessDialog()
             --print("Fulltext "..self.currenttext)
             if ActorChanged then
                 if ShowActor then
-                    self.dialogtextsprite:moveTo(91, 175)
+                    if self.currentdialogactor == "Mipa" then
+                        self.dialogtextsprite:moveTo(91, 175)
+                        self.dialogactor:moveTo(7, 170)
+                    else
+                        self.dialogtextsprite:moveTo(7, 175)
+                        self.dialogactor:moveTo(323, 170)
+                    end
                 else
                     self.dialogtextsprite:moveTo(7, 175)
                 end
@@ -432,6 +452,9 @@ function UI:LoadDialogUI()
 end
 
 function UI:StartDialog(data, onstart, onfinish)
+    if DebugFlags.NoDialogs then
+        return
+    end
     self.dialogtextimage = gfx.image.new(388, 62)
     self.currentdialogindex = 1
     self.currdialoglineindex = 1
@@ -448,4 +471,26 @@ function UI:StartDialog(data, onstart, onfinish)
     if onstart ~= nil and onstart ~= "" then
         TrackableManager.ProcessCommandLine(onstart)
     end
+end
+
+function UI:DoGlitch()
+    if self.glitchoverlay == nil then
+        local glitchSP = gfx.sprite.new()
+        glitchSP:setCenter(0, 0)
+        glitchSP:moveTo(0, 0)
+        glitchSP:setZIndex(Z_Index.UI)
+        glitchSP:add()
+        self.glitchoverlay = glitchSP
+    end
+    local glitchIndex = math.floor(math.random(1,6)+0.5)
+    if self.lastglitch == glitchIndex then
+        if glitchIndex == 6 then
+            glitchIndex = math.floor(math.random(1,5)+0.5)
+        else
+            glitchIndex = glitchIndex+1
+        end
+    end
+    self.lastglitch = glitchIndex
+    self.glitchoverlay:setImage(glitchtable:getImage(glitchIndex))
+    SoundManager:PlaySound("GlitchNew")
 end
