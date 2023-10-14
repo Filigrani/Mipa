@@ -41,6 +41,15 @@ local font = gfx.font.new('font/FiliFont')
 
 StartGame = function ()
 	gfx.sprite.removeAll()
+	local timers = playdate.frameTimer.allTimers()
+	for i = 1, #timers, 1 do
+		timers[i]:remove()
+	end
+	timers = playdate.timer.allTimers()
+	for i = 1, #timers, 1 do
+		timers[i]:remove()
+	end	
+
 	ActiveManager.Reset()
 	TrackableManager.Reset()
 

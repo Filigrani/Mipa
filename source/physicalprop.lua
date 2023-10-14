@@ -84,18 +84,18 @@ function PhysicalProp:ApplyVelocity()
                 self.onground = true
                 self.velocityY = 0
                 self.freefall = 0
-                if collisionTag == TAG.Player and not lastground then
-                    print("Damage "..lastfreefall)
-
-                    if lastfreefall > 10 then
-                        collisionObject:Damage(2)
-                    else
-                        collisionObject:Damage(1)
-                    end
-                end 
                 if not lastground and self.onground and lastfreefall > 5 then
                     AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
                     SoundManager:PlaySound("Bloop", 0.3)
+                    if collisionTag == TAG.Player and not lastground then
+                        print("Damage "..lastfreefall)
+    
+                        if lastfreefall > 10 then
+                            collisionObject:Damage(2)
+                        else
+                            collisionObject:Damage(1)
+                        end
+                    end                    
                 end         
             elseif collision.normal.y == 1 then       
                 self.velocityY = 0

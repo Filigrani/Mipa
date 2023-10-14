@@ -32,6 +32,13 @@ TrackableManager.RemoveByUID = function (uid)
         TrackableManager.trackables[tostring(uid)] = nil
     end
 end
+TrackableManager.GetByUID = function (uid)
+    local obj = TrackableManager.trackables[tostring(uid)]
+    if obj ~= nil then
+        return obj
+    end
+    return nil
+end
 
 TrackableManager.ExecuteCommand = function (commandWithParameters)
     print("[TrackableManager] ExecuteCommand: "..commandWithParameters)
@@ -47,6 +54,11 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
     if command == "Remove" then
         if parameters[2] ~= nil then
             TrackableManager.RemoveByUID(parameters[2])
+        end
+    elseif command == "Trigger" then
+        local obj = TrackableManager.GetByUID(parameters[2])
+        if obj and obj.Trigger then
+            obj:Trigger()
         end
     end
 end

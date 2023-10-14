@@ -226,6 +226,8 @@ function Level:CreateProp(propData)
     elseif type == "laser" then
         local laser = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
         laser.fx = AnimEffect(propData.x, propData.y, "Effects/reflect", 1)
+        laser.raycaster = RayCastTrigger(propData.x, propData.y, propData.w)
+        laser.raycaster.parent = laser
         laser.eventick = false
         laser.w = propData.w
         laser.lastcoliderw = laser.w
@@ -233,36 +235,24 @@ function Level:CreateProp(propData)
         laser:setCollideRect(0,0,laser.w,2)
         laser.CustomUpdate = function()
             local _x, _y = laser:getPosition()
-            laser:setTag(TAG.ObstacleCastNoPlayer)
-            laser:setCollideRect(0,0,laser.w,2)
-            local _, _, collisions, length = laser:checkCollisions(laser.x, laser.y)
-            local closestX = 1000
-            for i=1,length do
-                local collision = collisions[i]
-                local collisionType = collision.type
-                local collisionObject = collision.other
-                local collisionTag = collisionObject:getTag()
-                if closestX > collision.otherRect.x then
-                    local newcolidew = math.floor(collision.otherRect.x-laser.x+0.5)
-                    if laser.lastcoliderw ~= newcolidew then
-                        laser.lastcoliderw = newcolidew
-                    end              
-                    print("i ", i)      
-                    print("closestX ", closestX)  
-                    print("rect ", collision.otherRect.x)   
-                    closestX = collision.otherRect.x               
+            local RayCastChanged = false
+            if laser.raycaster ~= nil then
+                if laser.raycaster.lasthitdistance ~= laser.lastcoliderw then
+                    laser.lastcoliderw = laser.raycaster.lasthitdistance
+                    RayCastChanged = true
                 end
             end
-            if length == 0 and laser.lastcoliderw ~= laser.w then
-                laser.lastcoliderw = laser.w
+            
+            if RayCastChanged then
+                if laser.lastcoliderw < 0 then
+                    laser:setCollideRect(0,0,1,2)
+                else
+                    laser:setCollideRect(0,0,laser.lastcoliderw,2)
+                end
+                if laser.fx ~= nil then
+                    laser.fx:moveTo(laser.lastcoliderw-14+_x, _y-8)
+                end
             end
-            if laser.lastcoliderw <= 3 then
-                laser:setCollideRect(0,0,3,2)
-            else
-                laser:setCollideRect(0,0,laser.lastcoliderw+3,2)
-            end
-            laser:setTag(TAG.HazardNoColide)
-            laser.fx:moveTo(laser.lastcoliderw-14+_x, _y-8)
             if laser.lastcoliderw <= 4 or laser.activated then
                 if laser.fx:isVisible() then
                     laser.fx:setVisible(false)
@@ -270,7 +260,17 @@ function Level:CreateProp(propData)
             elseif not laser.fx:isVisible() and not laser.activated then
                 laser.fx:setVisible(true)
             end
-            if not laser.activated and laser.lastcoliderw > 3 then
+            if laser.activated then
+                if laser:isVisible() then
+                    laser:setVisible(false)
+                end
+            else
+                if not laser:isVisible() then
+                    laser:setVisible(true)
+                end
+            end
+            if not laser.activated and laser.lastcoliderw > 0 then
+                laser:setTag(TAG.HazardNoColide)
                 local img = gfx.image.new(laser.lastcoliderw, 2)
                 if not laser.eventick then
                     gfx.pushContext(img)
@@ -304,7 +304,7 @@ function Level:CreateProp(propData)
                     laser.eventick = false       
                 end
                 laser:setImage(img) 
-            elseif not laser.activated then
+            elseif laser.activated then
                 laser:setTag(TAG.Effect)  
             end
         end
@@ -352,8 +352,17 @@ function Level:CreateZone(zoneData)
             clone.hp = 1
             self.foundmipas = self.foundmipas+1
         end
-    elseif type == "dialog" then
-        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+    elseif type == "dialog" or type == "note" then
+        local w = 14
+        local h = 14
+        if type == "dialog" then
+            w = zoneData.w
+            h = zoneData.h
+        end
+        local t = Trigger(zoneData.x, zoneData.y, w, h)
+        if type == "note" then
+            t:setImage(gfx.image.new("images/Props/Note"))
+        end
         local rawText = zoneData.text
         local rawLines = {}
         if string.find(rawText, "\n") then
@@ -382,6 +391,13 @@ function Level:CreateZone(zoneData)
         t.ondialogfinish = zoneData.dialogfinish
         t.OnTrigger = function ()
             UIIsnt:StartDialog(t.dialogdata, t.ondialogstart, t.ondialogfinish)
+        end
+        TrackableManager.Add(t, zoneData.UID)
+    elseif type == "trigger" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        t.ontriggercommand = zoneData.ontrigger
+        t.OnTrigger = function ()
+            TrackableManager.ProcessCommandLine(t.ontriggercommand)
         end
         TrackableManager.Add(t, zoneData.UID)
     elseif type == "exit" then

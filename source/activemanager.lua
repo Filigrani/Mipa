@@ -73,6 +73,9 @@ ActiveManager.UpdateActivatables = function ()
                 end
                 act.activated = activeFlag             
             end
+            if DebugFlags.AllOpen then
+                act.activated = true
+            end
         end
     end   
 end

@@ -51,7 +51,9 @@ function Menu:Update()
         StartGame()
     end
     if pd.buttonJustPressed(pd.kButtonUp) then
-        self.selectedlevel = self.selectedlevel+1
+        if self.selectedlevel < 5 then
+            self.selectedlevel = self.selectedlevel+1
+        end
         self:UpdateNumbers()        
     end
     if pd.buttonJustPressed(pd.kButtonDown) then

@@ -366,14 +366,16 @@ function UI:ProcessDialog()
             --    self.textwrapingindex = 0
             --    self.currenttext = self.currenttext.."\n"
             --end
-            if self.currentdialogactor == "None" then
-                SoundManager:PlaySound("Pap")
-            elseif self.currentdialogactor == "Mipa" then
-                SoundManager:PlaySound("Peaw")
-            elseif self.currentdialogactor == "Wipa" then
-                SoundManager:PlaySound("Sqeak")
-            else
-                SoundManager:PlaySound("Pap")
+            if character ~= " " and character ~= "." then
+                if self.currentdialogactor == "None" then
+                    SoundManager:PlaySound("Pap")
+                elseif self.currentdialogactor == "Mipa" then
+                    SoundManager:PlaySound("Peaw")
+                elseif self.currentdialogactor == "Wipa" then
+                    SoundManager:PlaySound("Sqeak")
+                else
+                    SoundManager:PlaySound("Pap")
+                end
             end
             local drawingW = 300
             local darwingH = 62
@@ -415,6 +417,7 @@ function UI:ProcessDialog()
                     self.currentdialogindex = 0
                     self.dialogdata = {}
                     self.dialogtextimage = gfx.image.new(388, 62)
+                    self.dialogtextimage:clear(gfx.kColorClear)
                     if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
                         TrackableManager.ProcessCommandLine(self.ondialogfinish)
                         self.ondialogfinish = nil

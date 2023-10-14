@@ -8,7 +8,7 @@ function Mipa:init(x, y)
     self.mipaimagedithered = nil
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Player)
-    self:setCollideRect(3,1,8,13)
+    self:setCollideRect(3,3,8,11)
     self:add() -- Add to draw list
     self:setTag(TAG.Player)
     -- Stats
@@ -58,6 +58,7 @@ function Mipa:init(x, y)
     self.skipdeathscreen = false
     self.pulltimer = pd.frameTimer.new(3)
     self.pulltimer.repeats = true
+    self.pulltimer.id = math.random()
     self.pulltimer.timerEndedCallback = function(timer)
         self:ProcessPulling()
     end

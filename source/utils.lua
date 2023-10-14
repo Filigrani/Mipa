@@ -23,4 +23,5 @@ Z_Index =
 DebugFlags = 
 {
 	NoDialogs = false,
+	AllOpen = false,
 }
