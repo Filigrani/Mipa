@@ -12,7 +12,7 @@ function GetJSONData(path)
 		f:close()
 		
 		if levelData == nil then
-			print('ERROR LOADING DATA for ' .. path)
+			print('ERROR LOADING DATA for ', path)
 			return nil
 		end
 	end
@@ -20,7 +20,7 @@ function GetJSONData(path)
 	local jsonTable = json.decode(levelData)
 	
 	if jsonTable == nil then
-		print('ERROR PARSING JSON DATA for ' .. levelPath)
+		print('ERROR PARSING JSON DATA for ', levelPath)
 		return nil
 	end
 	

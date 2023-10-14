@@ -3,7 +3,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/frametimer"
-
+import "localizationmanager"
 import "utils"
 -- classes
 import "mipa"
@@ -37,7 +37,7 @@ NextLevel = "menu"
 LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
-local font = gfx.font.new('font/FiliFont')
+local font = gfx.font.new('font/Asheville Ayu')
 
 StartGame = function ()
 	gfx.sprite.removeAll()
@@ -121,6 +121,7 @@ DeathTrigger = function ()
     end
 end
 local function loadGame()
+	LocalizationManager.Load()
 	gfx.setFont(font)
 	pd.display.setInverted(true)
 	local menu = pd.getSystemMenu()

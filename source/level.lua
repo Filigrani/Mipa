@@ -363,7 +363,7 @@ function Level:CreateZone(zoneData)
         if type == "note" then
             t:setImage(gfx.image.new("images/Props/Note"))
         end
-        local rawText = zoneData.text
+        local rawText = LocalizationManager.GetLine(zoneData.text)
         local rawLines = {}
         if string.find(rawText, "\n") then
             for l in string.gmatch(rawText, '([^\n]+)') do

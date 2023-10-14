@@ -2535,7 +2535,7 @@
       "UID": 136,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nThe laser below looks very unfriendly.\nNeed to find way to disable it."
+      "text": "BadLasers"
     },
     {
       "zoneType": "dialog",
@@ -2546,14 +2546,14 @@
       "UID": 143,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nWooh...That was tricky."
+      "text": "LVL4Tricky"
     },
     {
       "zoneType": "note",
       "x": 18,
       "y": 43,
       "UID": 130,
-      "text": "#Note\nExpedition Log Number 0.\nThe rooms here are arranged in a strange way.\nAll traps and puzzles are simply reset to their default state once new visitor is come in.\nInteresting security system design.\n#Mipa\n... ... ... ..."
+      "text": "Note0"
     },
     {
       "zoneType": "trigger",

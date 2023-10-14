@@ -2418,12 +2418,21 @@
       "UID": 99,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa\nOH! Sorry, my visors seeing everything in monochrome... "
+      "text": "PokeyWaterFall"
     },
     {
       "zoneType": "spawn",
       "x": 12,
       "y": 133
+    },
+    {
+      "zoneType": "exit",
+      "x": 368,
+      "y": 99,
+      "w": 28,
+      "h": 41,
+      "UID": 114,
+      "nextLevel": "lvl8"
     }
    ]
   }

@@ -33,9 +33,11 @@ function Mipa:init(x, y)
     self.fallspeed = 7.2
     self.canjump = true
     self.candoublejump = true
-    self.midfalljump = false
+    self.midfalljump = true
     self.freefall = 0
     self.highestY = self.y
+    self.coyoteframes = 5
+    self.coyotetime = self.coyoteframes
     -- Animation
     self.animationtable = {}
     self:RegisterAnimations()
@@ -117,6 +119,14 @@ function Mipa:IsPulling()
         return pd.buttonIsPressed(pd.kButtonB) 
     end
     return false
+end
+
+function Mipa:IsCoyotTime()
+    if self.midfalljump then
+        return true
+    end
+
+    return self.coyotetime < self.coyoteframes
 end
 
 function Mipa:NextEquipment()
@@ -395,7 +405,7 @@ end
 
 function Mipa:TryJump()  
     local canDoubleJump = self:HasPassiveItem(1) and self.candoublejump
-    if (not self.midfalljump and self:IsOnFloor()) or self.midfalljump then
+    if self:IsOnFloor() or (self:IsCoyotTime() and not self:IsOnFloor()) then
         if self.canjump then
             self.canjump = false
             self.velocityY = self.maxjumpvelocity
@@ -460,6 +470,7 @@ function Mipa:ApplyVelocity()
             if collision.normal.y == -1 then
                 self.onground = true
                 self.canjump = true
+                self.coyotetime = 0
                 self.candoublejump = true
                 self.velocityY = 0
                 self.highestY = self.y
@@ -542,8 +553,12 @@ function Mipa:ApplyVelocity()
             UIIsnt:Death()
         end
     end
-    if not self.midfalljump and self:IsFalling()  then
-         self.canjump = false
+    if self:IsFalling()  then
+        if self:IsCoyotTime() then
+            self.coyotetime = self.coyotetime+1
+        else
+            self.canjump = false
+        end
     end
 end
 

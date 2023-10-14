@@ -2347,6 +2347,7 @@
       "y": 99,
       "UID": 1,
       "h": 42,
+      "a": 0,
       "group": "B",
       "active": 0,
       "activeType": "Every"
@@ -2357,6 +2358,7 @@
       "y": 99,
       "UID": 2,
       "h": 28,
+      "a": 0,
       "group": "A",
       "active": 0,
       "activeType": "Every"
@@ -2382,7 +2384,7 @@
       "UID": 6,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nOh! Pretty high wall!\nBut, I am can hop enough to get there!\n#None\nPress A button to jump."
+      "text": "HowToJumpGuide"
     },
     {
       "zoneType": "dialog",
@@ -2393,7 +2395,7 @@
       "UID": 7,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nThe passage is blocked. But I think I can try to move this box.\n#None\nKeep moving on a box to push it."
+      "text": "HowToPush"
     },
     {
       "zoneType": "dialog",
@@ -2404,7 +2406,7 @@
       "UID": 25,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nThis door is locked...\n#Mipa\nShould be the way to open it!"
+      "text": "LVL0DoorIsLocked"
     },
     {
       "zoneType": "dialog",
@@ -2415,7 +2417,7 @@
       "UID": 26,
       "dialogstart": "Remove 25",
       "dialogfinish": "",
-      "text": "#Mipa\nOH! Button!\nWhat does it do?\nThere only one way to check this out!\n#None\nPress Up to interact with buttons and switches."
+      "text": "HowToInteract"
     },
     {
       "zoneType": "spawn",

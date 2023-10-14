@@ -2443,7 +2443,7 @@
       "UID": 42,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nThis box cound be helpful to get on this height.\nI can try to use my Manget Hand to pull that box.\n#None\nPress and hold B button to use Magnet hand."
+      "text": "HowToPull"
     },
     {
       "zoneType": "spawn",

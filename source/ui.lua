@@ -389,8 +389,6 @@ function UI:ProcessDialog()
             gfx.popContext()
             gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
             self.dialogtextsprite:setImage(self.dialogtextimage)
-            --print("character "..character)
-            --print("Fulltext "..self.currenttext)
             if ActorChanged then
                 if ShowActor then
                     if self.currentdialogactor == "Mipa" then

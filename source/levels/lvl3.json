@@ -2424,7 +2424,7 @@
       "UID": 29,
       "dialogstart": "",
       "dialogfinish": "",
-      "text": "#Mipa\nThere is two indicators above this door...\n...\nLooks like more than one button need to be pressed to open the door."
+      "text": "TwoIndicators"
     },
     {
       "zoneType": "spawn",

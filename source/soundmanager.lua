@@ -34,6 +34,8 @@ AddSound("BeamLoop")
 AddSound("Glitch",6)
 AddSound("GlitchNew")
 AddSound("Gaw",4)
+AddSound("Wapa")
+AddSound("Pip")
 
 function SoundManager:PlaySound(name, vol)
     local volume = 1

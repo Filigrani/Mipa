@@ -1,0 +1,46 @@
+{
+  "language": "english",
+  "lines":
+  [
+    {
+      "key": "HowToJumpGuide",
+      "line": "#Mipa\nOh! Pretty high wall!\nBut, I am can hop enough to get there!\n#None\nPress A button to jump."
+    },
+    {
+      "key": "HowToPush",
+      "line": "#Mipa\nThe passage is blocked. But I think I can try to move this box.\n#None\nKeep moving on a box to push it."
+    },
+    {
+      "key": "HowToInteract",
+      "line": "#Mipa\nOH! Button!\nWhat does it do?\nThere only one way to check this out!\n#None\nPress Up to interact with buttons and switches."
+    },
+    {
+      "key": "LVL0DoorIsLocked",
+      "line": "#Mipa\nThis door is locked...\n#Mipa\nShould be the way to open it!"
+    },
+    {
+      "key": "HowToPull",
+      "line": "#Mipa\nThis box cound be helpful to get on this height.\nI can try to use my Manget Hand to pull that box.\n#None\nPress and hold B button to use Magnet hand."
+    },
+    {
+      "key": "TwoIndicators",
+      "line": "#Mipa\nThere is two indicators above this door...\n...\nLooks like more than one button need to be pressed to open the door."
+    },
+    {
+      "key": "BadLasers",
+      "line": "#Mipa\nThe laser below looks very unfriendly.\nNeed to find way to disable it."
+    },
+    {
+      "key": "LVL4Tricky",
+      "line": "#Mipa\nWooh...That was tricky."
+    },
+    {
+      "key": "Note0",
+      "line": "#Note\nExpedition Log Number 0.\nThe rooms here are arranged in a strange way.\nAll traps and puzzles are simply reset to their default state once new visitor is come in.\nInteresting security system design.\n#Mipa\n... ... ... ..."
+    },
+    {
+      "key": "PokeyWaterFall",
+      "line": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa\nOH! Sorry, my visors seeing everything in monochrome... "
+    }
+  ]
+}
