@@ -33,7 +33,7 @@ function Mipa:init(x, y)
     self.fallspeed = 7.2
     self.canjump = true
     self.candoublejump = true
-    self.midfalljump = true
+    self.midfalljump = false
     self.freefall = 0
     self.highestY = self.y
     self.coyoteframes = 5
@@ -437,18 +437,15 @@ function Mipa:Damage(damage)
         self.hp = self.hp-damage
     end
 
-    pd.display.setInverted(false)
-    local t = pd.frameTimer.new(4)
-    t.timerEndedCallback = function(timer)
-        pd.display.setInverted(true)
-    end
-    t:start()
-    --SoundManager:PlaySound("Hit")
-    SoundManager:PlaySound("Scream")
-
-    if self.hp == 0 then
+    if self:IsDead() then
+        if UIIsnt ~= nil then
+            UIIsnt:CancleDialog()
+        end
         self.speed = 1 -- so will be able to push her body without animation glitched, like a box
     end
+
+    InvertedColorsFrames = InvertedColorsFrames+4
+    SoundManager:PlaySound("Scream")
 end
 
 function Mipa:ApplyVelocity()

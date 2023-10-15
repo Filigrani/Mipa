@@ -2,27 +2,27 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 
 function GetJSONData(path)
-	
-	local levelData = nil
-	
+
+	local Data = nil
+
 	local f = pd.file.open(path)
 	if f then
 		local s = pd.file.getSize(path)
-		levelData = f:read(s)
+		Data = f:read(s)
 		f:close()
-		
-		if levelData == nil then
+
+		if Data == nil then
 			print('ERROR LOADING DATA for ', path)
 			return nil
 		end
 	end
 
-	local jsonTable = json.decode(levelData)
-	
+	local jsonTable = json.decode(Data)
+
 	if jsonTable == nil then
-		print('ERROR PARSING JSON DATA for ', levelPath)
+		print('ERROR PARSING JSON DATA for ', path)
 		return nil
 	end
-	
+
 	return jsonTable
 end

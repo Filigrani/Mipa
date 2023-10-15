@@ -37,9 +37,11 @@ NextLevel = "menu"
 LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
+InvertedColorsFrames = 0
 local font = gfx.font.new('font/Asheville Ayu')
 
 StartGame = function ()
+	InvertedColorsFrames = 0
 	gfx.sprite.removeAll()
 	local timers = playdate.frameTimer.allTimers()
 	for i = 1, #timers, 1 do
@@ -132,7 +134,16 @@ local function loadGame()
 end
 
 local function updateGame()
-    ActiveManager.Update()
+    if InvertedColorsFrames > 0 then
+		InvertedColorsFrames = InvertedColorsFrames-1
+		if pd.display.getInverted() then
+			pd.display.setInverted(false)
+		end
+	elseif not pd.display.getInverted() then
+		pd.display.setInverted(true)
+	end
+
+	ActiveManager.Update()
 	gfx.sprite.update()
 	pd.frameTimer.updateTimers()
 	pd.timer.updateTimers()

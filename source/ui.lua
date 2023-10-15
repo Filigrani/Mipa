@@ -411,18 +411,8 @@ function UI:ProcessDialog()
                     self.currentdialogindex = 1
                     self.currenttext = ""
                     self.dialogtextimage = gfx.image.new(388, 62)
-                else             
-                    self.currentdialogindex = 0
-                    self.dialogdata = {}
-                    self.dialogtextimage = gfx.image.new(388, 62)
-                    self.dialogtextimage:clear(gfx.kColorClear)
-                    if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
-                        TrackableManager.ProcessCommandLine(self.ondialogfinish)
-                        self.ondialogfinish = nil
-                    end
-                    self.dialogbg:remove()
-                    self.dialogactor:remove()
-                    self.dialogtextsprite:remove()
+                else
+                    self:CancleDialog()
                 end
             end
         end
@@ -450,6 +440,20 @@ function UI:LoadDialogUI()
     self.dialogbg = BG
     self.dialogactor = Actor
     self.dialogtextsprite = DialogTextSprite
+end
+
+function UI:CancleDialog()
+    self.currentdialogindex = 0
+    self.dialogdata = {}
+    self.dialogtextimage = gfx.image.new(388, 62)
+    self.dialogtextimage:clear(gfx.kColorClear)
+    if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
+        TrackableManager.ProcessCommandLine(self.ondialogfinish)
+        self.ondialogfinish = nil
+    end
+    self.dialogbg:remove()
+    self.dialogactor:remove()
+    self.dialogtextsprite:remove()
 end
 
 function UI:StartDialog(data, onstart, onfinish)
