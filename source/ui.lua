@@ -25,6 +25,7 @@ function UI:init()
     self.textwaittime = 0
     self.lastglitch = 0
     self.glitchframes = 0
+    self.dialogYroot = 175
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -326,6 +327,21 @@ function UI:RemoveEquipment(ispassive)
     end
 end
 
+function UI:DialogPosUpdate()
+    if self.currentdialogactor ~= "None" then
+        if self.currentdialogactor == "Mipa" then
+            self.dialogtextsprite:moveTo(91, self.dialogYroot)
+            self.dialogactor:moveTo(7, self.dialogYroot-5)
+        else
+            self.dialogtextsprite:moveTo(7, self.dialogYroot)
+            self.dialogactor:moveTo(323, self.dialogYroot-5)
+        end
+    else
+        self.dialogtextsprite:moveTo(7, self.dialogYroot)
+    end
+    self.dialogbg:moveTo(0, self.dialogYroot-5)
+end
+
 function UI:ProcessDialog()
     if self.currentdialogindex ~= 0 and #self.dialogdata > 0 and self.dialogbg ~= nil then
         local ShowActor = true
@@ -390,17 +406,7 @@ function UI:ProcessDialog()
             gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
             self.dialogtextsprite:setImage(self.dialogtextimage)
             if ActorChanged then
-                if ShowActor then
-                    if self.currentdialogactor == "Mipa" then
-                        self.dialogtextsprite:moveTo(91, 175)
-                        self.dialogactor:moveTo(7, 170)
-                    else
-                        self.dialogtextsprite:moveTo(7, 175)
-                        self.dialogactor:moveTo(323, 170)
-                    end
-                else
-                    self.dialogtextsprite:moveTo(7, 175)
-                end
+                self:DialogPosUpdate()
             end
         else
             if self.textwaittime > 0 then
@@ -415,6 +421,24 @@ function UI:ProcessDialog()
                     self:CancleDialog()
                 end
             end
+        end
+        local disiredYRoot = self.dialogYroot
+        if MipaInst ~= nil then         
+            if MipaInst.x > 0 and MipaInst.x < 400 then -- if out of bounds, dont make any changes
+                if MipaInst.y > 170 then
+                    disiredYRoot = 2
+                else
+                    if MipaInst.y < 150 then
+                        disiredYRoot = 175
+                    end
+                end                
+            end
+        else
+            disiredYRoot = 175
+        end
+        if disiredYRoot ~= self.dialogYroot then
+            self.dialogYroot = disiredYRoot
+            self:DialogPosUpdate()
         end
     end
 end
@@ -440,6 +464,7 @@ function UI:LoadDialogUI()
     self.dialogbg = BG
     self.dialogactor = Actor
     self.dialogtextsprite = DialogTextSprite
+    self:DialogPosUpdate()
 end
 
 function UI:CancleDialog()
@@ -476,6 +501,7 @@ function UI:StartDialog(data, onstart, onfinish)
     if onstart ~= nil and onstart ~= "" then
         TrackableManager.ProcessCommandLine(onstart)
     end
+    self:DialogPosUpdate()
 end
 
 function UI:DoGlitch()

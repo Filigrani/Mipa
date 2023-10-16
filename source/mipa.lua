@@ -450,9 +450,15 @@ end
 
 function Mipa:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
-    local _, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
+    local _x, _y = self:getPosition()
+    local disiredX = _x + self.velocityX
+    local disiredY = _y + self.velocityY
+    local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
     local lastground = self.onground
     local lasthighestY = self.highestY
+    --if actualX ~= disiredX then
+    --    print("Mipa can't move")
+    --end
     self.onground = false
     self.pusing = false
     for i=1,length do
@@ -498,6 +504,7 @@ function Mipa:ApplyVelocity()
             elseif collision.normal.y == 1 then
                 self.velocityY = 0
             end
+            --print("collision.other ", collision.other.y)    
             if collisionTag == TAG.PropPushable and lastground then
                 if collision.normal.x > 0 then
                     collisionObject:TryMoveLeft()
@@ -549,6 +556,10 @@ function Mipa:ApplyVelocity()
         if not self.IsClone then
             UIIsnt:Death()
         end
+    end
+    if self.y < 35 then
+        self.velocityY = 0
+        self.y = 35
     end
     if self:IsFalling()  then
         if self:IsCoyotTime() then

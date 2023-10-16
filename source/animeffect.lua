@@ -3,9 +3,12 @@ local gfx <const> = pd.graphics
 
 class("AnimEffect").extends(gfx.sprite)
 
-function AnimEffect:init(x, y, tablename, speed, oneshot)
+function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset)
     self.imagetable = gfx.imagetable.new("images/"..tablename)
     self.currentindex = 1
+    if randomstartoffset then
+        self.currentindex = math.floor(math.random(1,self.imagetable:getLength())+0.5)
+    end
     self:setCenter(0, 0)
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Player)

@@ -2405,6 +2405,11 @@
       "group": "A",
       "active": 0,
       "activeType": "Every"
+    },
+    {
+      "propType": "blob",
+      "x": 109,
+      "y": 133
     }
    ],
   "zones":

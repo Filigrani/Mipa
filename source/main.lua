@@ -24,6 +24,8 @@ import "trigger"
 import "spike"
 import "animeffect"
 import "raycasttrigger"
+import "creature"
+import "cheatsmanager"
 
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
@@ -38,6 +40,7 @@ LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
+LevelsLimit = 5
 local font = gfx.font.new('font/Asheville Ayu')
 
 StartGame = function ()
@@ -123,6 +126,7 @@ DeathTrigger = function ()
     end
 end
 local function loadGame()
+	CheatsManager.RegisterCheats()
 	LocalizationManager.Load()
 	gfx.setFont(font)
 	pd.display.setInverted(true)
@@ -134,7 +138,7 @@ local function loadGame()
 end
 
 local function updateGame()
-    if InvertedColorsFrames > 0 then
+	if InvertedColorsFrames > 0 then
 		InvertedColorsFrames = InvertedColorsFrames-1
 		if pd.display.getInverted() then
 			pd.display.setInverted(false)
@@ -143,6 +147,8 @@ local function updateGame()
 		pd.display.setInverted(true)
 	end
 
+	CheatsManager.HandleInputs()
+	
 	ActiveManager.Update()
 	gfx.sprite.update()
 	pd.frameTimer.updateTimers()

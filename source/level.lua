@@ -225,7 +225,7 @@ function Level:CreateProp(propData)
         TrackableManager.Add(door, propData.UID)
     elseif type == "laser" then
         local laser = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
-        laser.fx = AnimEffect(propData.x, propData.y, "Effects/reflect", 1)
+        laser.fx = AnimEffect(propData.x, propData.y, "Effects/reflect", 1, false, true)
         laser.raycaster = RayCastTrigger(propData.x, propData.y, propData.w)
         laser.raycaster.parent = laser
         laser.eventick = false
@@ -337,6 +337,8 @@ function Level:CreateProp(propData)
             waterfall:setImage(waterfallimagetable:getImage(waterfall.curindex))
         end
         waterfall.animationtimer:start()
+    elseif type == "blob" then
+        local c = Creature(propData.x, propData.y)
     end
 end
 
