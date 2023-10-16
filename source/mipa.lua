@@ -441,7 +441,7 @@ function Mipa:Damage(damage)
         if UIIsnt ~= nil then
             UIIsnt:CancleDialog()
         end
-        self.speed = 1 -- so will be able to push her body without animation glitched, like a box
+        self.speed = 1.01 -- so will be able to push her body without animation glitched, like a box
     end
 
     InvertedColorsFrames = InvertedColorsFrames+4

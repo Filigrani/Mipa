@@ -13,7 +13,7 @@ function PhysicalProp:init(x, y)
     self:add() -- Add to draw list
     self:setTag(TAG.PropPushable)
     -- Moving vars
-    self.speed = 1
+    self.speed = 1.01
     self.velocityX = 0
     self.velocityY = 0
     -- Physic

@@ -40,7 +40,7 @@ LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 5
+LevelsLimit = 8
 local font = gfx.font.new('font/Asheville Ayu')
 
 StartGame = function ()

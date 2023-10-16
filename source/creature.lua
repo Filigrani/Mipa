@@ -7,11 +7,11 @@ function Creature:init(x, y)
     self.imagetable = gfx.imagetable.new("images/blob")
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
-    self:setCollideRect(0,7,14,7)
+    self:setCollideRect(2,7,10,7)
     self:add() -- Add to draw list
     self:setTag(TAG.Enemy)
     -- Moving vars
-    self.speed = 1
+    self.speed = 1.01
     self.velocityX = 0
     self.velocityY = 0
     -- Physic
@@ -41,6 +41,7 @@ function Creature:init(x, y)
     -- AI
     self.movingdirection = 0
     self.thinkticks = 1
+    self.bumpwall = false
     print("Creature Created")
 end
 
@@ -100,7 +101,9 @@ function Creature:ApplyVelocity()
     local lastground = self.onground
     local lastfreefall = self.freefall
     if actualX ~= disiredX then
-        print("Blob can't move")
+        self.bumpwall = true
+    else
+        self.bumpwall = false
     end
     self.onground = false
     for i=1,length do
@@ -164,9 +167,17 @@ function Creature:AIUpdate()
             if math.random(0,100) <= 50 then
                 self.movingdirection = 1
             else
-                self.movingdirection = 1
+                self.movingdirection = -1
             end
         end
+    end
+    if self.bumpwall then
+        if self.movingdirection == 1 then
+            self.movingdirection = -1
+        else
+            self.movingdirection = 1
+        end
+        self.bumpwall = false
     end
     if self.movingdirection == 1 then
         self:TryMoveRight()
