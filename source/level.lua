@@ -339,6 +339,7 @@ function Level:CreateProp(propData)
         waterfall.animationtimer:start()
     elseif type == "blob" then
         local c = Creature(propData.x, propData.y)
+        c.enemyname = "blob"
     end
 end
 
@@ -365,30 +366,7 @@ function Level:CreateZone(zoneData)
         if type == "note" then
             t:setImage(gfx.image.new("images/Props/Note"))
         end
-        local rawText = LocalizationManager.GetLine(zoneData.text)
-        local rawLines = {}
-        if string.find(rawText, "\n") then
-            for l in string.gmatch(rawText, '([^\n]+)') do
-                table.insert(rawLines, l)
-            end
-        else
-            table.insert(rawLines, rawText)
-        end
-        local DialogData = {}
-        local Prefix = "#"
-        local LastActor = "Mipa"
-        for i = 1, #rawLines, 1 do
-            local rawLine = rawLines[i]
-            if string.sub(rawLine,1,string.len(Prefix)) == Prefix then
-                LastActor = rawLine
-            else
-                local lineData = {}
-                lineData.actor = LastActor:sub(2)
-                lineData.text = rawLine
-                table.insert(DialogData, lineData)
-            end
-        end
-        t.dialogdata = DialogData
+        t.dialogdata = GetDialogDataFromString(zoneData.text)
         t.ondialogstart = zoneData.dialogstart
         t.ondialogfinish = zoneData.dialogfinish
         t.OnTrigger = function ()

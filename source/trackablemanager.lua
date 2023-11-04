@@ -60,6 +60,11 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         if obj and obj.Trigger then
             obj:Trigger()
         end
+    elseif command == "Spawn" then
+        local type = parameters[2]
+        if type and type == "box" then
+            PhysicalProp(tonumber(parameters[3]), tonumber(parameters[4]))
+        end
     end
 end
 

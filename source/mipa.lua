@@ -420,14 +420,14 @@ function Mipa:TryJump()
 end
 
 function Mipa:collisionResponse(other)
-    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard or other:getTag() == TAG.ObstacleCastNoPlayer) or (other:getTag() == TAG.HazardNoColide and self:IsDead()) then
+    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard or other:getTag() == TAG.ObstacleCastNoPlayer) or (other:getTag() == TAG.HazardNoColide) then
         return gfx.sprite.kCollisionTypeOverlap
     end
     return gfx.sprite.kCollisionTypeSlide
 end
 
 function Mipa:Damage(damage)
-    if self:IsDead() then
+    if self:IsDead() or DebugFlags.NoDamage then
         return
     end
 
@@ -442,12 +442,31 @@ function Mipa:Damage(damage)
             UIIsnt:CancleDialog()
         end
         self.speed = 1.01 -- so will be able to push her body without animation glitched, like a box
+        SoundManager:PlaySound("MipaGameOver")
     end
 
     InvertedColorsFrames = InvertedColorsFrames+4
     SoundManager:PlaySound("Scream")
 end
 
+function Mipa:TryClimb()
+    print("Try climb")
+    local _x, _y = self:getPosition()
+    local feetsY = _y-12
+    local disiredX = _x + self.velocityX
+    local disiredY = _y - 19
+    local actualX, actualY, collisions, length = self:checkCollisions(disiredX, disiredY)
+    local futureFeetsY = actualY-12
+    print("[Try climb] disiredX ", disiredX)
+    print("[Try climb] disiredY ", disiredY)
+    print("[Try climb] actualX ", actualX)
+    print("[Try climb] actualY ", actualY)
+    if feetsY > futureFeetsY and actualX == disiredX then
+        
+        self:moveTo(actualX, actualY)
+    end
+    return false
+end
 function Mipa:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
     local _x, _y = self:getPosition()
@@ -456,11 +475,9 @@ function Mipa:ApplyVelocity()
     local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
     local lastground = self.onground
     local lasthighestY = self.highestY
-    --if actualX ~= disiredX then
-    --    print("Mipa can't move")
-    --end
     self.onground = false
     self.pusing = false
+    local maytryclimb = false
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
@@ -470,6 +487,9 @@ function Mipa:ApplyVelocity()
             self:Damage(self.hpmax)
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
+            if actualX ~= disiredX and self:IsOnFloor() then
+                maytryclimb = true
+            end
             if collision.normal.y == -1 then
                 self.onground = true
                 self.canjump = true
@@ -500,6 +520,12 @@ function Mipa:ApplyVelocity()
                             gfx.sprite.removeSprite(collisionObject)
                         end
                     end                
+                end
+                if collisionObject.enemyname ~= nil and collisionObject.enemyname == "blob" then
+                    if not collisionObject.squshed then
+                        collisionObject.squshed = true
+                        collisionObject.thinkticks = 0
+                    end
                 end
             elseif collision.normal.y == 1 then
                 self.velocityY = 0
@@ -567,6 +593,9 @@ function Mipa:ApplyVelocity()
         else
             self.canjump = false
         end
+    end
+    if maytryclimb then
+        --self:TryClimb()
     end
 end
 

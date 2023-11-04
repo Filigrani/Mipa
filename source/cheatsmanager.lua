@@ -9,12 +9,14 @@ end
 
 CheatsManager.HandleInput = function (str)
     if #CheatsManager.currentcombination == 10 then
-        CheatsManager.currentcombination = ""
+        CheatsManager.currentcombination = CheatsManager.currentcombination:sub(2)
     end
     CheatsManager.currentcombination = CheatsManager.currentcombination..str
-    print("Cheat: ", CheatsManager.currentcombination)
     if  CheatsManager.cheats[CheatsManager.currentcombination] ~= nil then
         CheatsManager.cheats[CheatsManager.currentcombination]()
+        if UIIsnt ~= nil then
+            UIIsnt:StartDialog(GetDialogDataFromString("#Mipa\nCheater!"))
+        end
     end
 end
 
@@ -38,10 +40,20 @@ CheatsManager.HandleInputs = function ()
 end
 
 CheatsManager.RegisterCheats = function ()
+    -- Cheats should be 10 buttons long combination
+    --                      1234567890
     CheatsManager.AddCheat("UUDDLRLRBA", function ()
         if MipaInst then
             MipaInst.hpmax = 10
             MipaInst.hp = 10
+        end
+    end)
+    --                      1234567890
+    CheatsManager.AddCheat("UUUDDDBBBB", function ()
+        if DebugFlags.FPSCounter then
+            DebugFlags.FPSCounter = false
+        else
+            DebugFlags.FPSCounter = true
         end
     end)
 end

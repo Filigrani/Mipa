@@ -119,18 +119,14 @@ function Creature:ApplyVelocity()
                 if not lastground and self.onground and lastfreefall > 5 then
                     AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
                     SoundManager:PlaySound("Bloop", 0.3)
-                    if collisionTag == TAG.Player and not lastground then
-                        print("Damage "..lastfreefall)
-    
-                        if lastfreefall > 10 then
-                            collisionObject:Damage(2)
-                        else
-                            collisionObject:Damage(1)
-                        end
-                    end
                 end         
-            elseif collision.normal.y == 1 then    
+            elseif collision.normal.y == 1 then
                 self.velocityY = 0
+            end
+            if collision.normal.x ~= 0 then
+                if collisionTag == TAG.Player then
+                    collisionObject:Damage(1)
+                end
             end
         end
     end
@@ -163,7 +159,7 @@ function Creature:AIUpdate()
     self.thinkticks = self.thinkticks+1
 
     if self.thinkticks >= 100 then
-        if self.movingdirection == 0 then
+        if self.movingdirection == 0 and not self.squshed then
             if math.random(0,100) <= 50 then
                 self.movingdirection = 1
             else
@@ -179,10 +175,23 @@ function Creature:AIUpdate()
         end
         self.bumpwall = false
     end
-    if self.movingdirection == 1 then
-        self:TryMoveRight()
-    elseif self.movingdirection == -1 then
-        self:TryMoveLeft()
+    if self.squshed then
+        self:setCollideRect(2,10,10,4)
+        if self.thinkticks >= 30 then
+            if MipaInst ~= nil then
+                MipaInst.velocityY = -12
+                MipaInst:ApplyVelocity()
+                self.thinkticks = 0
+                self.squshed = false
+                self:setCollideRect(2,7,10,7)
+            end
+        end
+    else
+        if self.movingdirection == 1 then
+            self:TryMoveRight()
+        elseif self.movingdirection == -1 then
+            self:TryMoveLeft()
+        end
     end
 end
 

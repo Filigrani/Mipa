@@ -10,13 +10,14 @@ function Menu:init()
     self.currentmenu = "start"
     self.currentselectedindex = 1
     Menu.super.init(self)
+    self:add()
+
     self.bg = gfx.sprite.new()
-    self.bg:setImage(gfx.image.new("images/UI/menu"))
     self.bg:setCenter(0, 0)
-    self.bg:moveTo(0, 0)
+    self.bg:moveTo(220, 0)
     self.bg:setZIndex(Z_Index.UI)
     self.bg:add()
-    self:add()
+    self:AddToggleRender(self.bg, "MipaBG")
 
     self.title = gfx.sprite.new()
     self.title:setCenter(0, 0)
@@ -78,8 +79,16 @@ function Menu:init()
     self.num2:setZIndex(Z_Index.UI)
     self.num2:add()
     self.num2:setVisible(false)
- 
-    self:UpdateNumbers()   
+
+    self:UpdateNumbers()
+
+    self.menu_controls = gfx.sprite.new()
+    self.menu_controls:setCenter(0, 0)
+    self.menu_controls:moveTo(0, 211)
+    self.menu_controls:setZIndex(Z_Index.UI)
+    self.menu_controls:add()
+    self.menu_controls:setVisible(false)
+    self:AddToggleRender(self.menu_controls, "menu-controls", true)
 
     local leveloptions = {}
 
@@ -88,7 +97,7 @@ function Menu:init()
         StartGame()
     end})
 
-    self:AddMenu("level", leveloptions, {self.levelmenu, self.num1, self.num2}, function ()
+    self:AddMenu("level", leveloptions, {self.levelmenu, self.num1, self.num2, self.menu_controls}, function ()
         if pd.buttonJustPressed(pd.kButtonUp) then
             if self.selectedlevel < LevelsLimit then
                 self.selectedlevel = self.selectedlevel+1
@@ -121,7 +130,24 @@ function Menu:init()
     self.currentlang:setZIndex(Z_Index.UI)
     self.currentlang:add()
     self.currentlang:setVisible(false)
-    self:AddToggleRender(self.currentlang, "menu-lang-english")
+    self:AddToggleRender(self.currentlang, "menu-lang", true)
+
+    self.options_controls = gfx.sprite.new()
+    self.options_controls:setCenter(0, 0)
+    self.options_controls:moveTo(0, 211)
+    self.options_controls:setZIndex(Z_Index.UI)
+    self.options_controls:add()
+    self.options_controls:setVisible(false)
+    self:AddToggleRender(self.options_controls, "menu-options-controls", true)
+
+    self.options_selection = gfx.sprite.new()
+    self.options_selection:setCenter(0, 0)
+    self.options_selection:moveTo(92, 75)
+    self.options_selection:setZIndex(Z_Index.UI)
+    self.options_selection:add()
+    self.options_selection:setVisible(false)
+    self:AddToggleRender(self.options_selection, "menu-options-selection", true)
+
 
     local optionsoptions = {}
     
@@ -129,17 +155,72 @@ function Menu:init()
 
     end})
 
-    self:AddMenu("options", optionsoptions, {self.optionsmenu, self.currentlang}, function ()
-        if pd.buttonJustPressed(pd.kButtonDown) or pd.buttonJustPressed(pd.kButtonUp) or pd.buttonJustPressed(pd.kButtonLeft) or pd.buttonJustPressed(pd.kButtonRight) then
+    self:AddMenu("options", optionsoptions, {self.optionsmenu, self.currentlang, self.options_controls, self.options_selection}, function ()
+        if pd.buttonJustPressed(pd.kButtonDown) or pd.buttonJustPressed(pd.kButtonUp) then
             if LocalizationManager.defaultlanguage == "english" then
                 LocalizationManager.defaultlanguage = "russian"
             else
                 LocalizationManager.defaultlanguage = "english"
             end
             LocalizationManager.Load()
-            self.currentlang.imagetable = gfx.imagetable.new("images/Ui/menu-lang-"..LocalizationManager.defaultlanguage)
-            self.currentlang:setImage(self.currentlang.imagetable:getImage(self.currentlang.animindex))
             self:ChangeLanguage()
+        end
+        if pd.buttonJustPressed(pd.kButtonB) then
+            self:SetMenu("start")
+        end
+        if pd.buttonJustPressed(pd.kButtonRight) then
+            self:SetMenu("options2")
+        end
+    end)
+
+    -- Options2 menu
+
+    
+    -- TO-DO:
+    -- Add russian variant for menu-dialogbox, and option select for static/dyanmic dialog
+
+
+    self.dialogbox = gfx.sprite.new()
+    self.dialogbox:setCenter(0, 0)
+    self.dialogbox:moveTo(65, 98)
+    self.dialogbox:setZIndex(Z_Index.UI)
+    self.dialogbox:add()
+    self.dialogbox:setVisible(false)
+    self:AddToggleRender(self.dialogbox, "menu-dialogbox", true)
+
+    self.dialogboxmode = gfx.sprite.new()
+    self.dialogboxmode:setCenter(0, 0)
+    self.dialogboxmode:moveTo(62, 145)
+    self.dialogboxmode:setZIndex(Z_Index.UI)
+    self.dialogboxmode:add()
+    self.dialogboxmode:setVisible(false)
+    self:AddToggleRender(self.dialogboxmode, "menu-dialogbox-"..DialogboxMode, true)
+
+    self:AddMenu("options2", optionsoptions, {self.dialogbox, self.options_controls, self.options_selection, self.dialogboxmode}, function ()
+        if pd.buttonJustPressed(pd.kButtonDown) then
+            if DialogboxMode == "dyn" then
+                DialogboxMode = "fixeddown"
+            elseif DialogboxMode == "fixeddown" then
+                DialogboxMode = "fixedup"
+            else
+                DialogboxMode = "dyn"
+            end
+            self.dialogboxmode.originalname = "menu-dialogbox-"..DialogboxMode
+            self:ApplyChangeOnElement(self.dialogboxmode)
+        end
+        if pd.buttonJustPressed(pd.kButtonUp) then
+            if DialogboxMode == "fixeddown" then
+                DialogboxMode = "dyn"
+            elseif DialogboxMode == "fixedup" then
+                DialogboxMode = "fixeddown"
+            else
+                DialogboxMode = "fixedup"
+            end
+            self.dialogboxmode.originalname = "menu-dialogbox-"..DialogboxMode
+            self:ApplyChangeOnElement(self.dialogboxmode)
+        end
+        if pd.buttonJustPressed(pd.kButtonLeft) then
+            self:SetMenu("options")
         end
         if pd.buttonJustPressed(pd.kButtonB) then
             self:SetMenu("start")
@@ -154,6 +235,7 @@ function Menu:init()
 	self.animtimer:start()
     self:SetMenu(self.currentmenu)
     self:SelectorPos()
+    self:ChangeLanguage()
     return self
 end
 
@@ -193,18 +275,22 @@ function Menu:ToggleSprites()
     end
 end
 
+function Menu:ApplyChangeOnElement(obj)
+    if obj.originalname then
+        if LocalizationManager.defaultlanguage == "english" then
+            obj.imagetable = gfx.imagetable.new("images/Ui/"..obj.originalname)
+        else
+            obj.imagetable = gfx.imagetable.new("images/Ui/"..obj.originalname.."-"..LocalizationManager.defaultlanguage)
+        end
+    end
+    obj:setImage(obj.imagetable:getImage(obj.animindex))    
+end
+
 function Menu:ChangeLanguage()
     for i = 1, #self.toggles, 1 do
         local obj = self.toggles[i]
         if obj ~= nil then
-            if obj.originalname then
-                if LocalizationManager.defaultlanguage == "english" then
-                    obj.imagetable = gfx.imagetable.new("images/Ui/"..obj.originalname)
-                else
-                    obj.imagetable = gfx.imagetable.new("images/Ui/"..obj.originalname.."-"..LocalizationManager.defaultlanguage)
-                end
-            end
-            obj:setImage(obj.imagetable:getImage(obj.animindex))
+            self:ApplyChangeOnElement(obj)
         end
     end
 end

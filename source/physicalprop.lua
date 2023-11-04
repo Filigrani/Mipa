@@ -62,10 +62,15 @@ function PhysicalProp:TryJump()
 end
 
 function PhysicalProp:collisionResponse(other)
-    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide) then
+    if other then
+        if (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide) then
+            return gfx.sprite.kCollisionTypeOverlap
+        else
+            return gfx.sprite.kCollisionTypeSlide
+        end
+    else
         return gfx.sprite.kCollisionTypeOverlap
     end
-    return gfx.sprite.kCollisionTypeSlide
 end
 
 function PhysicalProp:ApplyVelocity()
@@ -144,7 +149,7 @@ function PhysicalProp:ApplyVelocity()
     else
         self.movingflag = false
     end
-    if self.y > 400 then
+    if self.y > 240 then
         gfx.sprite.removeSprite(self)
     end
 end

@@ -40,7 +40,8 @@ LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 8
+LevelsLimit = 5
+DialogboxMode = "dyn"
 local font = gfx.font.new('font/Asheville Ayu')
 
 StartGame = function ()
@@ -180,5 +181,7 @@ loadGame()
 function pd.update()
 	updateGame()
 	drawGame()
-	--pd.drawFPS(385,0) -- FPS widget
+	if DebugFlags.FPSCounter then
+		pd.drawFPS(385,0) -- FPS widget
+	end
 end

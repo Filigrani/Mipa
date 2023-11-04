@@ -536,7 +536,7 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 7,
       "y": 11
     },
@@ -616,22 +616,22 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 2,
       "x": 8,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 8,
       "y": 14
     },
@@ -696,22 +696,22 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 9,
       "y": 14
     },
@@ -776,22 +776,22 @@
       "y": 10
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 10,
       "y": 14
     },
@@ -848,110 +848,110 @@
     {
       "tileID": 0,
       "x": 11,
-      "y": 9
-    },
-    {
-      "tileID": 1,
-      "x": 11,
-      "y": 10
-    },
-    {
-      "tileID": 1,
-      "x": 11,
-      "y": 11
-    },
-    {
-      "tileID": 1,
-      "x": 11,
-      "y": 12
-    },
-    {
-      "tileID": 1,
-      "x": 11,
-      "y": 13
-    },
-    {
-      "tileID": 1,
-      "x": 11,
-      "y": 14
-    },
-    {
-      "tileID": 1,
-      "x": 11,
-      "y": 15
-    },
-    {
-      "tileID": 0,
-      "x": 11,
-      "y": 16
-    },
-    {
-      "tileID": 1,
-      "x": 12,
-      "y": 1
-    },
-    {
-      "tileID": 1,
-      "x": 12,
-      "y": 2
-    },
-    {
-      "tileID": 1,
-      "x": 12,
-      "y": 3
-    },
-    {
-      "tileID": 0,
-      "x": 12,
-      "y": 4
-    },
-    {
-      "tileID": 0,
-      "x": 12,
-      "y": 5
-    },
-    {
-      "tileID": 0,
-      "x": 12,
-      "y": 6
-    },
-    {
-      "tileID": 1,
-      "x": 12,
-      "y": 7
-    },
-    {
-      "tileID": 2,
-      "x": 12,
-      "y": 8
-    },
-    {
-      "tileID": 0,
-      "x": 12,
       "y": 9
     },
     {
       "tileID": 101,
-      "x": 12,
+      "x": 11,
       "y": 10
     },
     {
       "tileID": 101,
+      "x": 11,
+      "y": 11
+    },
+    {
+      "tileID": 2,
+      "x": 11,
+      "y": 12
+    },
+    {
+      "tileID": 0,
+      "x": 11,
+      "y": 13
+    },
+    {
+      "tileID": 0,
+      "x": 11,
+      "y": 14
+    },
+    {
+      "tileID": 1,
+      "x": 11,
+      "y": 15
+    },
+    {
+      "tileID": 0,
+      "x": 11,
+      "y": 16
+    },
+    {
+      "tileID": 1,
+      "x": 12,
+      "y": 1
+    },
+    {
+      "tileID": 1,
+      "x": 12,
+      "y": 2
+    },
+    {
+      "tileID": 1,
+      "x": 12,
+      "y": 3
+    },
+    {
+      "tileID": 0,
+      "x": 12,
+      "y": 4
+    },
+    {
+      "tileID": 0,
+      "x": 12,
+      "y": 5
+    },
+    {
+      "tileID": 0,
+      "x": 12,
+      "y": 6
+    },
+    {
+      "tileID": 1,
+      "x": 12,
+      "y": 7
+    },
+    {
+      "tileID": 0,
+      "x": 12,
+      "y": 8
+    },
+    {
+      "tileID": 0,
+      "x": 12,
+      "y": 9
+    },
+    {
+      "tileID": 0,
+      "x": 12,
+      "y": 10
+    },
+    {
+      "tileID": 0,
       "x": 12,
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 12,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 12,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 12,
       "y": 14
     },
@@ -1021,17 +1021,17 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 13,
       "y": 14
     },
@@ -1101,17 +1101,17 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 2,
       "x": 14,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 14,
       "y": 14
     },
@@ -1186,12 +1186,12 @@
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 15,
       "y": 14
     },
@@ -1261,17 +1261,17 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 13
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 16,
       "y": 14
     },
@@ -1341,12 +1341,12 @@
       "y": 11
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 17,
       "y": 12
     },
     {
-      "tileID": 1,
+      "tileID": 0,
       "x": 17,
       "y": 13
     },
@@ -2349,7 +2349,7 @@
     },
     {
       "propType": "button",
-      "x": 179,
+      "x": 186,
       "y": 168,
       "UID": 67,
       "group": "A"
@@ -2367,6 +2367,20 @@
       "y": 154,
       "UID": 80,
       "group": "D"
+    },
+    {
+      "propType": "button",
+      "x": 312,
+      "y": 154,
+      "UID": 151,
+      "group": "F"
+    },
+    {
+      "propType": "button",
+      "x": 227,
+      "y": 196,
+      "UID": 152,
+      "group": "L"
     },
     {
       "propType": "door",
@@ -2402,22 +2416,44 @@
       "activeType": "Every"
     },
     {
+      "propType": "door",
+      "x": 155,
+      "y": 183,
+      "UID": 148,
+      "h": 31,
+      "a": 269,
+      "group": "F",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 149,
+      "y": 189,
+      "UID": 150,
+      "h": 36,
+      "a": 0,
+      "group": "L",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
       "propType": "laser",
       "x": 88,
       "y": 146,
       "UID": 76,
       "w": 111,
       "a": 0,
-      "group": "H",
+      "group": "F",
       "active": 0,
       "activeType": "Every"
     },
     {
       "propType": "laser",
-      "x": 228,
-      "y": 148,
+      "x": 214,
+      "y": 135,
       "UID": 47,
-      "w": 112,
+      "w": 168,
       "a": 0,
       "group": "B",
       "active": 0,
@@ -2426,7 +2462,7 @@
     {
       "propType": "laser",
       "x": 228,
-      "y": 155,
+      "y": 150,
       "UID": 77,
       "w": 112,
       "a": 0,
@@ -2446,6 +2482,17 @@
       "activeType": "Every"
     },
     {
+      "propType": "laser",
+      "x": 102,
+      "y": 217,
+      "UID": 149,
+      "w": 127,
+      "a": 0,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
       "propType": "indicator",
       "x": 241,
       "y": 36,
@@ -2457,7 +2504,7 @@
     {
       "propType": "indicator",
       "x": 214,
-      "y": 152,
+      "y": 141,
       "UID": 66,
       "group": "C",
       "active": 0,
@@ -2465,8 +2512,8 @@
     },
     {
       "propType": "indicator",
-      "x": 214,
-      "y": 141,
+      "x": 200,
+      "y": 127,
       "UID": 71,
       "group": "B",
       "active": 0,
@@ -2484,6 +2531,13 @@
    ],
   "zones":
    [
+    {
+      "zoneType": "note",
+      "x": 88,
+      "y": 169,
+      "UID": 153,
+      "text": "Note1"
+    },
     {
       "zoneType": "spawn",
       "x": 22,

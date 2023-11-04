@@ -372,7 +372,7 @@ function UI:ProcessDialog()
             print("Actor changed "..self.currentdialogactor)
         end
         local LineText = currentLineData.text
-        if self.currenttext ~= LineText then
+        if self.currentdialogindex ~= #LineText+1 then
             local character = string.sub(LineText, self.currentdialogindex, self.currentdialogindex)
             self.currenttext = self.currenttext..character
             self.currentdialogindex = self.currentdialogindex+1
@@ -423,22 +423,28 @@ function UI:ProcessDialog()
             end
         end
         local disiredYRoot = self.dialogYroot
-        if MipaInst ~= nil then         
-            if MipaInst.x > 0 and MipaInst.x < 400 then -- if out of bounds, dont make any changes
-                if MipaInst.y > 170 then
-                    disiredYRoot = 2
-                else
-                    if MipaInst.y < 150 then
-                        disiredYRoot = 175
-                    end
-                end                
+        if DialogboxMode == "dyn" then      
+            if MipaInst ~= nil then         
+                if MipaInst.x > 0 and MipaInst.x < 400 then -- if out of bounds, dont make any changes
+                    if MipaInst.y > 170 then
+                        disiredYRoot = 2
+                    else
+                        if MipaInst.y < 150 then
+                            disiredYRoot = 175
+                        end
+                    end                
+                end
+            else
+                disiredYRoot = 175
             end
-        else
-            disiredYRoot = 175
-        end
-        if disiredYRoot ~= self.dialogYroot then
-            self.dialogYroot = disiredYRoot
-            self:DialogPosUpdate()
+            if disiredYRoot ~= self.dialogYroot then
+                self.dialogYroot = disiredYRoot
+                self:DialogPosUpdate()
+            end
+        elseif DialogboxMode == "fixedup" then
+            self.dialogYroot = 2
+        elseif DialogboxMode == "fixeddown" then
+            self.dialogYroot = 175
         end
     end
 end
