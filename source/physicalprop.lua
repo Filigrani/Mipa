@@ -14,6 +14,7 @@ function PhysicalProp:init(x, y)
     self:setTag(TAG.PropPushable)
     -- Moving vars
     self.speed = 1.01
+    self.momentumX = 0
     self.velocityX = 0
     self.velocityY = 0
     -- Physic
@@ -54,13 +55,6 @@ function PhysicalProp:TryMoveLeft(s)
     self.velocityX = -speed
 end
 
-function PhysicalProp:TryJump()  
-    if self.canjump then
-        self.canjump = false
-        self.velocityY = self.maxjumpvelocity
-    end
-end
-
 function PhysicalProp:collisionResponse(other)
     if other then
         if (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide) then
@@ -75,7 +69,21 @@ end
 
 function PhysicalProp:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
-    local _, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
+    if self.momentumX > 0 then
+        self.momentumX = self.momentumX-self.gravity
+        if self.momentumX <= 0 then
+            self.momentumX = 0
+        end
+    elseif self.momentumX < 0 then
+        self.momentumX = self.momentumX+self.gravity
+        if self.momentumX >= 0 then
+            self.momentumX = 0
+        end
+    end
+    if self.momentumX ~= 0 then
+        self.velocityX = self.velocityX+self.momentumX
+    end
+    local actualX, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
     local lastground = self.onground
     local lastfreefall = self.freefall
     self.onground = false
@@ -103,6 +111,11 @@ function PhysicalProp:ApplyVelocity()
                     end                    
                 end         
             elseif collision.normal.y == 1 then       
+                self.velocityY = 0
+                self.momentumX = 0
+            end
+            if collision.normal.x ~= 0 and self.momentumX ~= 0 then
+                self.momentumX = 0
                 self.velocityY = 0
             end
             if collisionTag == TAG.PropPushable and lastground then

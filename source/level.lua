@@ -318,6 +318,13 @@ function Level:CreateProp(propData)
         pokey:setZIndex(Z_Index.Object)
         pokey:setImage(gfx.image.new("images/Props/Poky"))
         pokey:add()
+    elseif type == "jobee" then
+        local jobee = gfx.sprite.new()
+        jobee:setCenter(0, 0)
+        jobee:moveTo(propData.x, propData.y)
+        jobee:setZIndex(Z_Index.Object)
+        jobee:setImage(gfx.image.new("images/Props/Jobee"))
+        jobee:add()
     elseif type == "waterfall" then
         local waterfall = gfx.sprite.new()
         waterfall:setCenter(0, 0)

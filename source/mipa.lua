@@ -14,8 +14,8 @@ function Mipa:init(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
-    self.equipment = {1}
-    self.passiveitems = {}
+    self.equipment = {1, 2}
+    self.passiveitems = {2}
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
@@ -64,6 +64,8 @@ function Mipa:init(x, y)
     self.pulltimer.timerEndedCallback = function(timer)
         self:ProcessPulling()
     end
+    self.holdingbox = nil
+    self.lastframonwall = false
 end
 
 function Mipa:HasPassiveItem(item)
@@ -114,8 +116,12 @@ function Mipa:IsPushing()
     return self.pusing
 end
 
+function Mipa:CurrentEquipment()
+    return self.equipment[self.selectedequipment]
+end
+
 function Mipa:IsPulling()
-    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self.equipment[self.selectedequipment] == 1 then
+    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self:CurrentEquipment() == 1 then
         return pd.buttonIsPressed(pd.kButtonB) 
     end
     return false
@@ -172,6 +178,10 @@ function Mipa:RegisterAnimations()
     self:AddAnimation("deathstart", {16, 17, 18, 19, 20, 21}, 3, false)
     self:AddAnimation("death", {22, 23, 24, 25, 26, 27}, 7, false)
     self:AddAnimation("walkpull", {30, 31, 32})
+    self:AddAnimation("idlebox", {33, 34})
+    self:AddAnimation("walkbox", {35, 36, 37})
+    self:AddAnimation("downbox", {38})
+    self:AddAnimation("sliping", {39, 40, 41}, 6)
 end
 
 function Mipa:SetAnimation(anim)
@@ -269,17 +279,21 @@ function Mipa:IsEvenFrame()
 end
 
 function Mipa:PickAnimation()
+    local affix = ""
+    if self.holdingbox ~= nil then
+        affix = "box"
+    end
     if not self:IsDead() then
         if self:IsOnFloor() then
             if self:IsDown() then
-                self:SetAnimation("down")
+                self:SetAnimation("down"..affix)
             else
                 if self:IsMoving() then             
                     if self:IsPushing() then
                         self:SetAnimation("push")
                     else
                         if not self:IsPulling() then
-                            self:SetAnimation("walk")
+                            self:SetAnimation("walk"..affix)
                         else
                             self:SetAnimation("walkpull")
                         end
@@ -288,10 +302,12 @@ function Mipa:PickAnimation()
                     if self:IsPulling() then
                         self:SetAnimation("pull")
                     else
-                        self:SetAnimation("idle")
+                        self:SetAnimation("idle"..affix)
                     end
                 end
             end
+        elseif self.lastframonwall then
+            self:SetAnimation("sliping")
         elseif self:IsFlying() then
             self:SetAnimation("flying")
         elseif self:IsFalling() then
@@ -469,6 +485,9 @@ function Mipa:TryClimb()
 end
 function Mipa:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
+    if self.lastframonwall and self:HasPassiveItem(2) then
+        self.velocityY = 0.4
+    end
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
     local disiredY = _y + self.velocityY
@@ -477,6 +496,7 @@ function Mipa:ApplyVelocity()
     local lasthighestY = self.highestY
     self.onground = false
     self.pusing = false
+    self.lastframonwall = false
     local maytryclimb = false
     for i=1,length do
         local collision = collisions[i]
@@ -487,8 +507,10 @@ function Mipa:ApplyVelocity()
             self:Damage(self.hpmax)
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
-            if actualX ~= disiredX and self:IsOnFloor() then
-                maytryclimb = true
+            if actualX ~= disiredX then
+                if self:IsOnFloor() then
+                    maytryclimb = true
+                end
             end
             if collision.normal.y == -1 then
                 self.onground = true
@@ -530,32 +552,36 @@ function Mipa:ApplyVelocity()
             elseif collision.normal.y == 1 then
                 self.velocityY = 0
             end
-            --print("collision.other ", collision.other.y)    
-            if collisionTag == TAG.PropPushable and lastground then
-                if collision.normal.x > 0 then
-                    collisionObject:TryMoveLeft()
-                    collisionObject:ApplyVelocity()
-                    SoundManager:PlaySound("Push")
-                elseif collision.normal.x < 0 then
-                    collisionObject:TryMoveRight()
-                    collisionObject:ApplyVelocity()    
-                    SoundManager:PlaySound("Push")                     
-                end
-            end
-            if collisionTag == TAG.Player and collisionObject:IsDead() and lastground then
-                if collision.normal.x > 0 then
-                    collisionObject:TryMoveLeft()
-                    collisionObject:ApplyVelocity()
-                    SoundManager:PlaySound("MetalPush")
-                elseif collision.normal.x < 0 then
-                    collisionObject:TryMoveRight()
-                    collisionObject:ApplyVelocity()    
-                    SoundManager:PlaySound("MetalPush")                     
-                end
-            end     
 
-            if collision.normal.x ~= 0 then
-                self.pusing = true
+            if self.holdingbox == nil then
+                if collisionTag == TAG.PropPushable and lastground then
+                    if collision.normal.x > 0 then
+                        collisionObject:TryMoveLeft()
+                        collisionObject:ApplyVelocity()
+                        SoundManager:PlaySound("Push")
+                    elseif collision.normal.x < 0 then
+                        collisionObject:TryMoveRight()
+                        collisionObject:ApplyVelocity()    
+                        SoundManager:PlaySound("Push")                     
+                    end
+                end
+                if collisionTag == TAG.Player and collisionObject:IsDead() and lastground then
+                    if collision.normal.x > 0 then
+                        collisionObject:TryMoveLeft()
+                        collisionObject:ApplyVelocity()
+                        SoundManager:PlaySound("MetalPush")
+                    elseif collision.normal.x < 0 then
+                        collisionObject:TryMoveRight()
+                        collisionObject:ApplyVelocity()    
+                        SoundManager:PlaySound("MetalPush")                     
+                    end
+                end
+                if collision.normal.x ~= 0 then
+                    self.pusing = true
+                    if not self:IsOnFloor() then
+                        self.lastframonwall = true
+                    end
+                end                
             end
         elseif collisionType == gfx.sprite.kCollisionTypeOverlap then
             if collisionTag == TAG.Interactive then
@@ -648,6 +674,117 @@ function Mipa:Interact()
         end
     end
 end
+function Mipa:ApplyHoldingBox()
+    if self.holdingbox ~= nil then
+        local _x, _y = self:getPosition()
+        local offset = 0
+        if (self.currentanimation == "idlebox" or self.currentanimation == "walkbox") and self.animationindex == 2 then
+            offset = 1
+        elseif self.currentanimation == "downbox" then
+            offset = 2
+        end
+        self.holdingbox:moveTo(_x, _y-12+offset)
+    end
+end
+function Mipa:CheckSpaceForMipaWithBox(box)
+    local _x, _y = self:getPosition()
+    local offsetX = -7
+    local offsetY = -7
+    local collider = gfx.sprite.addEmptyCollisionSprite(_x+offsetX, _y+offsetY,1,1)
+    collider:setTag(TAG.Effect)
+    collider:setCollideRect(1,-9,12,23)
+    local _, _, collisions, length = collider:checkCollisions(_x+offsetX, _y+offsetY)
+    --gfx.sprite.removeSprite(collider)
+    for i=1,length do
+        local collision = collisions[i]
+        local collisionType = collision.type
+        local collisionObject = collision.other
+        local collisionTag = collisionObject:getTag()
+        print("colide ", i)
+        if collisionObject ~= self and collisionObject ~= box and collisionTag ~= TAG.Effect then
+            print("colide x ", collisionObject.x)
+            print("colide y ", collisionObject.y)
+            --gfx.sprite.removeSprite(collisionObject)
+            return false
+        end
+    end
+    return true
+end
+function Mipa:CheckSpaceForBox(futureX, futureY)
+    local collider = gfx.sprite.addEmptyCollisionSprite(0,0,12,12)
+    collider:moveTo(futureX, futureY)
+    collider:setCollideRect(0,0,12,12)
+    local _, _, collisions, length = collider:checkCollisions(futureX, futureY)
+    for i=1,length do
+        local collision = collisions[i]
+        local collisionType = collision.type
+        local collisionObject = collision.other
+        local collisionTag = collisionObject:getTag()
+        if collisionType ~= gfx.sprite.kCollisionTypeOverlap and collisionObject ~= self then
+            gfx.sprite.removeSprite(collider)
+            return false
+        end
+    end
+    gfx.sprite.removeSprite(collider)
+    return true
+end
+
+function Mipa:RingAction()
+    if self.holdingbox == nil then
+        local facingoffset = 0
+        if self.mirrored == gfx.kImageUnflipped then
+            facingoffset = 5
+        else
+            facingoffset = -5
+        end
+        local _x, _y = self:getPosition()
+        local _, _, collisions, length = self:checkCollisions(self.x+facingoffset, self.y)
+        for i=1,length do
+            local collision = collisions[i]
+            local collisionType = collision.type
+            local collisionObject = collision.other
+            local collisionTag = collisionObject:getTag()
+            if collisionTag == TAG.PropPushable then
+                --if self:CheckSpaceForMipaWithBox(collisionObject) then
+                if self:CheckSpaceForBox(_x, _y-12) then
+                    self:setCollideRect(1,-9,12,23)
+                    self.holdingbox = collisionObject
+                    collisionObject:setTag(TAG.Effect)
+                    collisionObject.velocityX = 0
+                    collisionObject.velocityY = 0
+                    collisionObject.momentumX = 0
+                    SoundManager:PlaySound("Tuboa")
+                else
+                    SoundManager:PlaySound("No")
+                end
+            end
+        end
+    else
+        local _x, _y = self:getPosition()
+        local momentumvalue = 3
+        local momentumImpulseX = 0
+        local pushoff = 0
+        if self.mirrored == gfx.kImageUnflipped then
+            momentumImpulseX = momentumvalue
+            pushoff = 12
+        else
+            momentumImpulseX = -momentumvalue
+            pushoff = -12
+        end
+        local box_x, box_y = self.holdingbox:getPosition()
+        if self:CheckSpaceForBox(box_x+pushoff, box_y) then
+            self:setCollideRect(3,3,8,11)
+            self.holdingbox:moveBy(pushoff, 0)
+            self.holdingbox.momentumX = momentumImpulseX
+            self.holdingbox.velocityY = momentumvalue
+            self.holdingbox:setTag(TAG.PropPushable)
+            self.holdingbox = nil
+            SoundManager:PlaySound("Weep")
+        else
+            SoundManager:PlaySound("No")  
+        end
+    end
+end
 
 function Mipa:update()
     self.velocityX = 0
@@ -659,8 +796,14 @@ function Mipa:update()
                 SoundManager:PlaySound("Oop")
             end
         end
-        if pd.buttonJustPressed(pd.kButtonB) and self:IsDown() then
-            self:NextEquipment()
+        if pd.buttonJustPressed(pd.kButtonB) then
+            if self:IsDown() then
+                self:NextEquipment()
+            else
+                if self:CurrentEquipment() == 2 then
+                    self:RingAction()
+                end
+            end 
         end
         if pd.buttonJustPressed(pd.kButtonUp) then
             self:Interact()
@@ -683,4 +826,5 @@ function Mipa:update()
             end
         end
     end
+    self:ApplyHoldingBox()
 end

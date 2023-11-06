@@ -389,6 +389,8 @@ function UI:ProcessDialog()
                     SoundManager:PlaySound("Peaw")
                 elseif self.currentdialogactor == "Wipa" then
                     SoundManager:PlaySound("Sqeak")
+                elseif self.currentdialogactor == "Jobee" then
+                    SoundManager:PlaySound("Bzz")
                 else
                     SoundManager:PlaySound("Pap")
                 end

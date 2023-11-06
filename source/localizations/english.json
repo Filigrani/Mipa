@@ -45,6 +45,10 @@
     {
       "key": "PokeyWaterFall",
       "line": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa\nOH! Sorry, my visors seeing everything in monochrome... "
+    },
+    {
+      "key": "JobeeTest",
+      "line": "#Mipa\nAre you sure your sprites are final?\n#Jobee\nNo idea..!\nDo I look good?\n#Mipa\nWell....\n... ... ...\n...\n. . . . .\n#Jobee\nI see..."
     }
   ]
 }
