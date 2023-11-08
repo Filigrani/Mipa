@@ -5,8 +5,7 @@ class("Activatable").extends(gfx.sprite)
 
 function Activatable:init(x, y, group, defaultactive, activetype, command)
     if x ~= nil and y ~= nil then
-        local img = gfx.image.new("images/Props/Box")
-        self:setImage(img)
+        self:setImage(AssetsLoader.LoadImage("images/Props/Box"))
         self:moveTo(x, y)
         self:setZIndex(Z_Index.BG)
         self:setCenter(0, 0)    
@@ -50,9 +49,9 @@ function Activatable:update()
     end    
     if self.lastactive ~= self.activated then
         self.lastactive = self.activated
-        print("Activatable object now has status "..tostring(self.activated))
+        print("[Activablable] Activatable object now has status "..tostring(self.activated))
         if self.triggercommand ~= nil and self.triggercommand ~= "" then
-            print("Activatable object triggers command "..self.triggercommand)
+            print("[Activablable] Activatable object triggers command "..self.triggercommand)
             TrackableManager.ProcessCommandLine(self.triggercommand)
             self.triggercommand = nil
         end

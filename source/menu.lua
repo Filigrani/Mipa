@@ -1,7 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 class('Menu').extends(playdate.graphics.sprite)
-local poornumbers = gfx.imagetable.new("images/Ui/poornumbers")
+local poornumbers = AssetsLoader.LoadImageTable("images/Ui/poornumbers")
 function Menu:init()
     print("[Menu] Init...")
     self.selectedlevel = 0
@@ -252,7 +252,7 @@ function Menu:UpdateNumbers()
 end
 
 function Menu:AddToggleRender(obj, imagename, translatable)
-    obj.imagetable = gfx.imagetable.new("images/Ui/"..imagename)
+    obj.imagetable = AssetsLoader.LoadImageTable("images/Ui/"..imagename)
     obj.animindex = 1
     obj:setImage(obj.imagetable:getImage(obj.animindex))
     if translatable then
@@ -278,9 +278,9 @@ end
 function Menu:ApplyChangeOnElement(obj)
     if obj.originalname then
         if LocalizationManager.defaultlanguage == "english" then
-            obj.imagetable = gfx.imagetable.new("images/Ui/"..obj.originalname)
+            obj.imagetable = AssetsLoader.LoadImageTable("images/Ui/"..obj.originalname)
         else
-            obj.imagetable = gfx.imagetable.new("images/Ui/"..obj.originalname.."-"..LocalizationManager.defaultlanguage)
+            obj.imagetable = AssetsLoader.LoadImageTable("images/Ui/"..obj.originalname.."-"..LocalizationManager.defaultlanguage)
         end
     end
     obj:setImage(obj.imagetable:getImage(obj.animindex))    

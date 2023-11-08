@@ -4,6 +4,7 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/frametimer"
 import "localizationmanager"
+import "assetsloader"
 import "utils"
 -- classes
 import "mipa"
@@ -133,6 +134,10 @@ local function loadGame()
 	pd.display.setInverted(true)
 	local menu = pd.getSystemMenu()
 	local menuItem, error = menu:addMenuItem("Restart level", function()
+		StartGame()
+	end)
+	local menuItem, error = menu:addMenuItem("main menu", function()
+		NextLevel = "menu"
 		StartGame()
 	end)
 	StartGame()

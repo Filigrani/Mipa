@@ -4,7 +4,7 @@ local gfx <const> = pd.graphics
 class("CrankDisk").extends(gfx.sprite)
 
 function CrankDisk:init(x, y, platforms)
-    local img = gfx.image.new("images/Props/Box")
+    local img = AssetsLoader.LoadImage("images/Props/Box")
     self:setImage(img)
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
@@ -28,7 +28,7 @@ function CrankDisk:Changed(num)
 end
 
 function CrankDisk:AddPlatform(platform)
-    local img = gfx.image.new("images/Props/Box")
+    local img = AssetsLoader.LoadImage("images/Props/Box")
     self:setImage(img)
     self:moveTo(platform.x, platform.y)
     self:setZIndex(Z_Index.Object)

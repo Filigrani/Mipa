@@ -4,7 +4,7 @@ local gfx <const> = pd.graphics
 class("Creature").extends(gfx.sprite)
 
 function Creature:init(x, y)
-    self.imagetable = gfx.imagetable.new("images/blob")
+    self.imagetable = AssetsLoader.LoadImageTable("images/blob")
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
     self:setCollideRect(2,7,10,7)

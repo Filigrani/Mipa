@@ -4,7 +4,7 @@ local gfx <const> = pd.graphics
 class("AnimEffect").extends(gfx.sprite)
 
 function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset)
-    self.imagetable = gfx.imagetable.new("images/"..tablename)
+    self.imagetable = AssetsLoader.LoadImageTable("images/"..tablename)
     self.currentindex = 1
     if randomstartoffset then
         self.currentindex = math.floor(math.random(1,self.imagetable:getLength())+0.5)

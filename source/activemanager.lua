@@ -13,7 +13,7 @@ end
 
 ActiveManager.AddActivatable = function (obj)
     table.insert(ActiveManager.activatables, obj)
-    print("Added activatable that requires "..obj.activetype.." of this groups to be active:")
+    print("[ActiveManager] Added activatable that requires "..obj.activetype.." of this groups to be active:")
     for i = 1, #obj.activegroup, 1 do
         print(obj.activegroup[i])
     end
@@ -21,7 +21,7 @@ end
 
 ActiveManager.AddActivator = function (obj)
     table.insert(ActiveManager.activators, obj)
-    print("Added activator that triggers groups:")
+    print("[ActiveManager] Added activator that triggers groups:")
     for i = 1, #obj.activegroup, 1 do
         print(obj.activegroup[i])
     end

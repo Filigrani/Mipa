@@ -4,7 +4,7 @@ local gfx <const> = pd.graphics
 class("Activator").extends(gfx.sprite)
 
 function Activator:init(x, y, group)
-    local img = gfx.image.new("images/Props/Box")
+    local img = AssetsLoader.LoadImage("images/Props/Box")
     self:setImage(img)
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
@@ -37,7 +37,7 @@ function Activator:PressButton()
     if not self.activated then
         self.activated = true
         SoundManager:PlaySound("Button")
-        print("Activator triggered groups:")
+        print("[Activator] Activator triggered groups:")
         for i = 1, #self.activegroup, 1 do
             print(self.activegroup[i])
         end

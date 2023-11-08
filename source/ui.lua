@@ -1,12 +1,12 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
-deathimagetable = gfx.imagetable.new("images/ui/death")
-glitchtable = gfx.imagetable.new("images/ui/glitch")
+deathimagetable = AssetsLoader.LoadImageTable("images/ui/death")
+glitchtable = AssetsLoader.LoadImageTable("images/ui/glitch")
 class('UI').extends(playdate.graphics.sprite)
 
 function UI:init()
     UI.super.init(self)
-    self.heartsimagetable = gfx.imagetable.new("images/ui/hp")
+    self.heartsimagetable = AssetsLoader.LoadImageTable("images/ui/hp")
     self:add() -- Add to draw list
     self.hearts = {}
     self.equipment = {}
@@ -102,7 +102,7 @@ function UI:UpdateHP(hearts, containers)
                 heart:setVisible(true)
             end
             if heart.style ~= style then
-                print("Heart "..i.." updated to style "..style)
+                print("[UI] Heart "..i.." updated to style "..style)
                 heart.style  = style
                 if heart.myIndex == 1 and style == 3 then
                     style = 1
@@ -123,26 +123,26 @@ function UI:UpdateEquipment(equipment, selectedIndex, passiveitems)
         end
         if style ~= eq.style then
             if style == "" then
-                print("Equipment slot frame "..i.." updated to style none active")
+                print("[UI] Equipment slot frame "..i.." updated to style none active")
             else
-                print("Equipment slot frame "..i.." updated to style active")
+                print("[UI] Equipment slot frame "..i.." updated to style active")
             end
             eq.style = style
-            eq:setImage(gfx.image.new("images/UI/equip_slot"..style))
+            eq:setImage(AssetsLoader.LoadImage("images/UI/equip_slot"..style))
         end       
         if eq.icon.style ~= item then
-            print("Equipment slot icon "..i.." updated with item "..item)
+            print("[UI] Equipment slot icon "..i.." updated with item "..item)
             eq.icon.style = item
-            eq.icon:setImage(gfx.image.new("images/UI/equip"..item))
+            eq.icon:setImage(AssetsLoader.LoadImage("images/UI/equip"..item))
         end
     end
     for i=1, #self.passiveitems do
         local eq = self.passiveitems[i]
         local item = passiveitems[i]
         if eq.icon.style ~= item then
-            print("Passive item slot icon "..i.." updated with item "..item)
+            print("[UI] Passive item slot icon "..i.." updated with item "..item)
             eq.icon.style = item
-            eq.icon:setImage(gfx.image.new("images/UI/passive"..item))
+            eq.icon:setImage(AssetsLoader.LoadImage("images/UI/passive"..item))
         end
     end
 end
@@ -280,10 +280,10 @@ function UI:AddEquipment(style, ispassive)
     local eq = gfx.sprite.new()
     eq:setCenter(0, 0)
     if not ispassive then
-        eq:setImage(gfx.image.new("images/UI/equip_slot"))
+        eq:setImage(AssetsLoader.LoadImage("images/UI/equip_slot"))
         eq:moveTo(371-30*#self.equipment, 2)
     else
-        eq:setImage(gfx.image.new("images/UI/passive_slot"))
+        eq:setImage(AssetsLoader.LoadImage("images/UI/passive_slot"))
         local lastEQPosition = 378-30*#self.equipment
         eq:moveTo(lastEQPosition-27*#self.passiveitems, 9)
     end
@@ -296,7 +296,7 @@ function UI:AddEquipment(style, ispassive)
     end
     eq.icon = gfx.sprite.new()
     eq.icon.style = 0
-    local imgSlice = gfx.image.new("images/UI/equip0")
+    local imgSlice = AssetsLoader.LoadImage("images/UI/equip0")
     eq.icon:setImage(imgSlice)
     eq.icon:setCenter(0, 0)
     eq.icon:moveTo(eq.x, eq.y)
@@ -367,9 +367,9 @@ function UI:ProcessDialog()
         end
         if ActorChanged then
             if ShowActor then
-                self.dialogactor:setImage(gfx.image.new("images/UI/Dialog"..self.currentdialogactor))
+                self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
             end
-            print("Actor changed "..self.currentdialogactor)
+            print("[UI] Actor changed "..self.currentdialogactor)
         end
         local LineText = currentLineData.text
         if self.currentdialogindex ~= #LineText+1 then
@@ -452,13 +452,13 @@ function UI:ProcessDialog()
 end
 
 function UI:LoadDialogUI()
-    local BGimg = gfx.image.new("images/UI/dialog")
+    local BGimg = AssetsLoader.LoadImage("images/UI/dialog")
     local BG = gfx.sprite.new()
     BG:setImage(BGimg)
     BG:setCenter(0, 0)
     BG:moveTo(0, 170)
     BG:setZIndex(Z_Index.UI)
-    local Actorimg = gfx.image.new("images/UI/DialogMipa")
+    local Actorimg = AssetsLoader.LoadImage("images/UI/DialogMipa")
     local Actor = gfx.sprite.new()
     Actor:setImage(Actorimg)
     Actor:setCenter(0, 0)

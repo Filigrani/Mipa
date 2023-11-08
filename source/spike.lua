@@ -10,7 +10,6 @@ function Spike:init(x, y)
     self:setCollideRect(0,3,14,11)
     self:setTag(TAG.Hazard)
     self.IsSpike = true
-    print("Spike spawned")
     self:setUpdatesEnabled(false) 
     self:setVisible(false)
     self:addSprite()

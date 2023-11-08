@@ -3,8 +3,24 @@ local gfx <const> = pd.graphics
 
 class("Mipa").extends(gfx.sprite)
 
+local PASSIVEITEMS <const> = 
+{
+    None = 0,
+    KoaKola = 1,
+    Honey = 2,
+    AdjustableJump = 3,
+    MidFallJump = 4,
+}
+
+local EQUIPMENT <const> = 
+{
+    None = 0,
+    MagnetHand = 1,
+    PowerRing = 2,
+}
+
 function Mipa:init(x, y)
-    self.mipaimages = gfx.imagetable.new("images/mipa")
+    self.mipaimages = AssetsLoader.LoadImageTable("images/mipa")
     self.mipaimagedithered = nil
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Player)
@@ -15,7 +31,7 @@ function Mipa:init(x, y)
     self.hp = 4
     self.hpmax = 4
     self.equipment = {1, 2}
-    self.passiveitems = {2}
+    self.passiveitems = {PASSIVEITEMS.AdjustableJump}
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
@@ -33,7 +49,6 @@ function Mipa:init(x, y)
     self.fallspeed = 7.2
     self.canjump = true
     self.candoublejump = true
-    self.midfalljump = false
     self.freefall = 0
     self.highestY = self.y
     self.coyoteframes = 5
@@ -120,15 +135,19 @@ function Mipa:CurrentEquipment()
     return self.equipment[self.selectedequipment]
 end
 
+function Mipa:IsEquipped(device)
+    return self:CurrentEquipment() == device
+end
+
 function Mipa:IsPulling()
-    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self:CurrentEquipment() == 1 then
+    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self:IsEquipped(EQUIPMENT.MagnetHand) then
         return pd.buttonIsPressed(pd.kButtonB) 
     end
     return false
 end
 
 function Mipa:IsCoyotTime()
-    if self.midfalljump then
+    if self:HasPassiveItem(PASSIVEITEMS.MidFallJump) then
         return true
     end
 
@@ -332,11 +351,18 @@ function Mipa:PickAnimation()
 end
 
 function Mipa:SetDitherImageTable()
-    self.mipaimagedithered = gfx.imagetable.new("images/mipa")
+    local ditheredtable = AssetsLoader.GetAsset("images/mipadithred")
+    if ditheredtable ~= nil then
+        self.mipaimagedithered = ditheredtable
+        return
+    end
+    ditheredtable = AssetsLoader.LoadImageTable("images/mipa")
     for i = 1, #self.mipaimages, 1 do
         local img = self.mipaimages:getImage(i)
-        self.mipaimagedithered:setImage(i, img:fadedImage(0.5, gfx.image.kDitherTypeBayer2x2))
+        ditheredtable:setImage(i, img:fadedImage(0.5, gfx.image.kDitherTypeBayer2x2))
     end
+    self.mipaimagedithered = ditheredtable
+    AssetsLoader.SetAsset("images/mipadithred", ditheredtable)
 end
 
 function Mipa:UpdateAnimation()
@@ -420,7 +446,7 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
 end
 
 function Mipa:TryJump()  
-    local canDoubleJump = self:HasPassiveItem(1) and self.candoublejump
+    local canDoubleJump = self:HasPassiveItem(PASSIVEITEMS.KoaKola) and self.candoublejump
     if self:IsOnFloor() or (self:IsCoyotTime() and not self:IsOnFloor()) then
         if self.canjump then
             self.canjump = false
@@ -485,8 +511,13 @@ function Mipa:TryClimb()
 end
 function Mipa:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
-    if self.lastframonwall and self:HasPassiveItem(2) then
+    if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
         self.velocityY = 0.4
+    end
+    if self:IsFlying() and self:HasPassiveItem(PASSIVEITEMS.AdjustableJump) then
+        if not pd.buttonIsPressed(pd.kButtonA) then
+            self.velocityY = 0
+        end
     end
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
@@ -628,7 +659,7 @@ end
 function Mipa:ProcessPulling()
     if self:IsPulling() then
         local bullet = Bullet(self.x, self.y-2)
-        bullet:setImage(gfx.image.new("images/Effects/pull"), self.mirrored)
+        bullet:setImage(AssetsLoader.LoadImage("images/Effects/pull"), self.mirrored)
         bullet:setCollideRect(0, 0, 10, 10)
         if self.mirrored == gfx.kImageUnflipped then
             bullet.speed = 5
@@ -800,7 +831,7 @@ function Mipa:update()
             if self:IsDown() then
                 self:NextEquipment()
             else
-                if self:CurrentEquipment() == 2 then
+                if self:IsEquipped(EQUIPMENT.PowerRing) then
                     self:RingAction()
                 end
             end 

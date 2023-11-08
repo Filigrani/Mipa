@@ -1,7 +1,7 @@
 local pd <const> = playdate
 local gfx <const> = pd.graphics
 import "jsonloader"
-waterfallimagetable = gfx.imagetable.new("images/props/waterfall")
+waterfallimagetable = nil
 class('Level').extends(playdate.graphics.sprite)
 
 function Level:init(levelPath)
@@ -12,7 +12,7 @@ function Level:init(levelPath)
         return
 	end
     print("[Level] Creating tilemap...")
-    self.imagetable = pd.graphics.imagetable.new("images/tileset")
+    self.imagetable = AssetsLoader.LoadImageTable("images/tileset")
 
     if self.imagetable == nil then
         print("[Level] Imagetable is null")
@@ -88,14 +88,14 @@ function Level:CreateProp(propData)
         TrackableManager.Add(PhysicalProp(propData.x, propData.y), propData.UID)
     elseif type == "button" then
         local butt = Activator(propData.x, propData.y, propData.group)
-        local img = gfx.image.new("images/Props/Button0")
+        local img = AssetsLoader.LoadImage("images/Props/Button0")
         butt:setImage(img)
         butt.CustomUpdate = function()
             if butt.activated ~= butt.lastactive then
                 if butt.activated then
-                    img = gfx.image.new("images/Props/Button1")
+                    img = AssetsLoader.LoadImage("images/Props/Button1")
                 else
-                    img = gfx.image.new("images/Props/Button0")
+                    img = AssetsLoader.LoadImage("images/Props/Button0")
                 end
                 butt.lastactive = butt.activated
                 butt:setImage(img)
@@ -105,14 +105,14 @@ function Level:CreateProp(propData)
         TrackableManager.Add(butt, propData.UID)
     elseif type == "indicator" then
         local indi = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
-        local img = gfx.image.new("images/Props/Indicator0")
+        local img = AssetsLoader.LoadImage("images/Props/Indicator0")
         indi:setImage(img)
         indi.CustomUpdate = function()
             if indi.activated ~= indi.lastactive then
                 if indi.activated then
-                    img = gfx.image.new("images/Props/Indicator1")
+                    img = AssetsLoader.LoadImage("images/Props/Indicator1")
                 else
-                    img = gfx.image.new("images/Props/Indicator0")
+                    img = AssetsLoader.LoadImage("images/Props/Indicator0")
                 end
                 indi:setImage(img)
             end
@@ -316,17 +316,20 @@ function Level:CreateProp(propData)
         pokey:setCenter(0, 0)
         pokey:moveTo(propData.x, propData.y)
         pokey:setZIndex(Z_Index.Object)
-        pokey:setImage(gfx.image.new("images/Props/Poky"))
+        pokey:setImage(AssetsLoader.LoadImage("images/Props/Poky"))
         pokey:add()
     elseif type == "jobee" then
         local jobee = gfx.sprite.new()
         jobee:setCenter(0, 0)
         jobee:moveTo(propData.x, propData.y)
         jobee:setZIndex(Z_Index.Object)
-        jobee:setImage(gfx.image.new("images/Props/Jobee"))
+        jobee:setImage(AssetsLoader.LoadImage("images/Props/Jobee"))
         jobee:add()
     elseif type == "waterfall" then
         local waterfall = gfx.sprite.new()
+        if waterfallimagetable == nil then
+            waterfallimagetable = AssetsLoader.LoadImageTable("images/props/waterfall")
+        end
         waterfall:setCenter(0, 0)
         waterfall:moveTo(propData.x, propData.y)
         waterfall:setZIndex(Z_Index.TotalBumer)
@@ -371,7 +374,7 @@ function Level:CreateZone(zoneData)
         end
         local t = Trigger(zoneData.x, zoneData.y, w, h)
         if type == "note" then
-            t:setImage(gfx.image.new("images/Props/Note"))
+            t:setImage(AssetsLoader.LoadImage("images/Props/Note"))
         end
         t.dialogdata = GetDialogDataFromString(zoneData.text)
         t.ondialogstart = zoneData.dialogstart

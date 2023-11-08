@@ -28,6 +28,8 @@ DebugFlags =
 	FPSCounter = false,
 }
 
+null = nil
+
 GetDialogDataFromString = function (str)
 	local rawText = LocalizationManager.GetLine(str)
 	local rawLines = {}
