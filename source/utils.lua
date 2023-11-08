@@ -12,12 +12,13 @@ TAG =
 }
 Z_Index = 
 {
-	Player = 5,
+	TotalBumer = -1,
 	Enemy = 2,
 	Object = 3,
 	BG = 4,
+	Player = 5,
 	UI = 6,
-	TotalBumer = -1,
+	AllAtop = 7,
 }
 
 DebugFlags = 

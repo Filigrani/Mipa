@@ -380,6 +380,10 @@ function Level:CreateZone(zoneData)
         t.ondialogstart = zoneData.dialogstart
         t.ondialogfinish = zoneData.dialogfinish
         t.OnTrigger = function ()
+            if type == "note" then
+                InvertedColorsFrames = 2
+                SoundManager:PlaySound("Note")
+            end
             UIIsnt:StartDialog(t.dialogdata, t.ondialogstart, t.ondialogfinish)
         end
         TrackableManager.Add(t, zoneData.UID)

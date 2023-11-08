@@ -37,8 +37,11 @@ AddSound("Weep")
 AddSound("BeamLoop")
 AddSound("Glitch",6)
 AddSound("Bzz",1)
+AddSound("Splash",2)
+AddSound("Slip")
 AddSound("GlitchNew")
 AddSound("MipaGameOver")
+AddSound("Note")
 
 function SoundManager:PlaySound(name, vol)
     local volume = 1

@@ -27,7 +27,7 @@ import "animeffect"
 import "raycasttrigger"
 import "creature"
 import "cheatsmanager"
-
+import "credits"
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
@@ -35,13 +35,14 @@ gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
 MenuInst = nil
 MipaInst = nil
+CreditsInst = nil
 CurrentLevel = nil
 NextLevel = "menu"
 LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 9
+LevelsLimit = 5
 DialogboxMode = "dyn"
 local font = gfx.font.new('font/Asheville Ayu')
 
@@ -59,12 +60,21 @@ StartGame = function ()
 
 	ActiveManager.Reset()
 	TrackableManager.Reset()
-
+	MenuInst = nil
+	CreditsInst = nil
 	if NextLevel == "menu" then
 		MenuInst = Menu()
 		return
 	end
-	MenuInst = nil
+	if NextLevel == "credits" then
+		UIIsnt = UI()
+		local creditsDialog = GetDialogDataFromString("#None\nWell, you wanted to see a credits?\nSadly, you have to fight me first!")
+		UIIsnt:StartDialog(creditsDialog, nil,"Glitch 20")
+		UIIsnt.oneglitchover = function ()
+			CreditsInst = Credits()
+		end
+		return
+	end
 	--local clone = Mipa(165, 134)
 	if clone then
 		clone.IsClone = true
@@ -72,7 +82,6 @@ StartGame = function ()
 	end
 	CurrentLevel = Level("levels/"..NextLevel..".json")
 	UIIsnt = UI()
-	UIIsnt.glitchframes = 0
 	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
 end
 
@@ -82,7 +91,7 @@ DeathTrigger = function ()
 	again:setCenter(0, 0)
 	again:setImage(deathimagetable:getImage(18))
 	again:add()
-	again:setZIndex(Z_Index.BG)
+	again:setZIndex(Z_Index.AllAtop)
 	again.fadealpha = 1
 	again.anim = pd.frameTimer.new(7)
 	again.frame = 18
@@ -101,7 +110,7 @@ DeathTrigger = function ()
 		overlay:setCenter(0, 0)
 		overlay:setImage(deathimagetable:getImage(17))
 		overlay:add()
-		overlay:setZIndex(Z_Index.BG)
+		overlay:setZIndex(Z_Index.AllAtop)
 		overlay.fadealpha = 1
 		overlay.fader = pd.frameTimer.new(3)
 		overlay.fader.timerEndedCallback = function(timer)  
@@ -174,6 +183,9 @@ local function updateGame()
 	local change = playdate.getCrankChange()
 	if change ~= 0 then
 		CrankManager.Changed(change)
+	end
+	if CreditsInst ~= nil then
+		CreditsInst:Update()
 	end
 end
 

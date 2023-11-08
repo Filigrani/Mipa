@@ -3,7 +3,10 @@ local gfx <const> = pd.graphics
 
 class("AnimEffect").extends(gfx.sprite)
 
-function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset)
+function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset, mirrored)
+    if mirrored == nil then
+        mirrored = gfx.kImageUnflipped
+    end
     self.imagetable = AssetsLoader.LoadImageTable("images/"..tablename)
     self.currentindex = 1
     if randomstartoffset then
@@ -31,7 +34,7 @@ function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset)
                 return
             end
         end
-        self:setImage(self.imagetable:getImage(self.currentindex))
+        self:setImage(self.imagetable:getImage(self.currentindex), mirrored)
     end
     self.animtimer:start()
 end

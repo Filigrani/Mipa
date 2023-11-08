@@ -53,3 +53,15 @@ AssetsLoader.LoadImageTable = function (path)
         return asset
     end
 end
+
+AssetsLoader.LoadImageTableAsNew = function (path, newname)
+    local asset = gfx.imagetable.new(path)
+    if asset == nil then
+        print("[AssetsLoader] Can't load Image Table: ", path)
+        return nil
+    else
+        AssetsLoader.assets[newname] = asset
+        print("[AssetsLoader] Image Table Loaded: ", newname)
+        return asset
+    end
+end

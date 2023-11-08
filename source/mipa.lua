@@ -30,14 +30,15 @@ function Mipa:init(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
-    self.equipment = {1, 2}
-    self.passiveitems = {PASSIVEITEMS.AdjustableJump}
+    self.equipment = {EQUIPMENT.MagnetHand}
+    self.passiveitems = {}
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
     self.pushingspeed = 1.1
     self.pullingspeed = 1.33
     self.airspeed = 1.99
+    self.momentumX = 0
     self.velocityX = 0
     self.velocityY = 0
     self.movingflag = false
@@ -79,8 +80,17 @@ function Mipa:init(x, y)
     self.pulltimer.timerEndedCallback = function(timer)
         self:ProcessPulling()
     end
+    self.slidesoundtimer = pd.frameTimer.new(5)
+    self.slidesoundtimer.repeats = true
+    self.slidesoundtimer.id = math.random()
+    self.slidesoundtimer.timerEndedCallback = function(timer)
+        if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
+            SoundManager:PlaySound("Slip", 0.08)
+        end
+    end
     self.holdingbox = nil
     self.lastframonwall = false
+    self.jumpoffwallmomentum = 10
 end
 
 function Mipa:HasPassiveItem(item)
@@ -356,45 +366,34 @@ function Mipa:SetDitherImageTable()
         self.mipaimagedithered = ditheredtable
         return
     end
-    ditheredtable = AssetsLoader.LoadImageTable("images/mipa")
+    ditheredtable = AssetsLoader.LoadImageTableAsNew("images/mipa", "images/mipadithred")
     for i = 1, #self.mipaimages, 1 do
         local img = self.mipaimages:getImage(i)
         ditheredtable:setImage(i, img:fadedImage(0.5, gfx.image.kDitherTypeBayer2x2))
     end
     self.mipaimagedithered = ditheredtable
-    AssetsLoader.SetAsset("images/mipadithred", ditheredtable)
 end
 
 function Mipa:UpdateAnimation()
     self:PickAnimation()
     local spritePath = self.currentanimation.."/"..self.animationframe
-    if self.lastimage ~= spritePath then
-        local imagetable = self.mipaimages
-        if self.IsClone and self:IsEvenFrame() then
-            if self.mipaimagedithered == nil then
-                self:SetDitherImageTable()
-            end
-            imagetable = self.mipaimagedithered
-        end
-        local img = imagetable:getImage(self.animationframe)
-        self:setImage(img, self.mirrored) 
-        self.lastimage = spritePath 
-    else
-        if self.IsClone then
-            local imagetable = self.mipaimages
-            if self:IsEvenFrame()  then
-                if self.mipaimagedithered == nil then
-                    self:SetDitherImageTable()
-                end
-                imagetable = self.mipaimagedithered
-            end
-            local img = imagetable:getImage(self.animationframe)
-            self:setImage(img, self.mirrored)
-        end
-    end
+    local framechanged = self.lastimage ~= spritePath
+    local imagetable = self.mipaimages
     if self.IsClone then
-        self:ToggleEvenFrame()
+        if self.mipaimagedithered == nil then
+            self:SetDitherImageTable()
+        end
+        if self:IsEvenFrame() then
+            imagetable = self.mipaimagedithered
+        else
+            imagetable = self.mipaimages
+        end
+    end   
+    if framechanged or self.IsClone then
+        self:setImage(imagetable:getImage(self.animationframe), self.mirrored) 
+        self.lastimage = spritePath
     end
+    self:ToggleEvenFrame()
 end
 
 function Mipa:ProcessWalking()
@@ -425,6 +424,9 @@ function Mipa:GetSpeed()
 end
 
 function Mipa:TryMoveRight()
+    if self.momentumX ~= 0 then
+        return false
+    end
     if not self:IsDead() and (not self:IsPulling() and not self:IsPulling())then -- So when push her body she not facing to motion direction
         self.mirrored = gfx.kImageUnflipped
     end
@@ -436,6 +438,9 @@ function Mipa:TryMoveRight()
 end
 
 function Mipa:TryMoveLeft() -- So when push her body she not facing to motion direction
+    if self.momentumX ~= 0 then
+        return false
+    end
     if not self:IsDead() and (not self:IsPulling() and not self:IsPulling()) then
         self.mirrored = gfx.kImageFlippedX
     end
@@ -446,6 +451,16 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
 end
 
 function Mipa:TryJump()  
+    if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
+        if self.mirrored == gfx.kImageFlippedX then
+            self.momentumX = self.jumpoffwallmomentum
+        else
+            self.momentumX = -self.jumpoffwallmomentum
+        end
+        AnimEffect(self.x-12, self.y, "Effects/reflect", 1, true, false, self.mirrored)
+        SoundManager:PlaySound("Splash", 0.2)
+        return true
+    end
     local canDoubleJump = self:HasPassiveItem(PASSIVEITEMS.KoaKola) and self.candoublejump
     if self:IsOnFloor() or (self:IsCoyotTime() and not self:IsOnFloor()) then
         if self.canjump then
@@ -512,12 +527,32 @@ end
 function Mipa:ApplyVelocity()
     self.velocityY = self.velocityY+self.gravity
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
-        self.velocityY = 0.4
+        if not pd.buttonIsPressed(pd.kButtonDown) then
+            self.velocityY = 0.4
+            self.slidesoundtimer.duration = 7
+        else
+            self.velocityY = 0.9
+            self.slidesoundtimer.duration = 4
+        end
     end
     if self:IsFlying() and self:HasPassiveItem(PASSIVEITEMS.AdjustableJump) then
         if not pd.buttonIsPressed(pd.kButtonA) then
             self.velocityY = 0
         end
+    end
+    if self.momentumX > 0 then
+        self.momentumX = self.momentumX-self.gravity
+        if self.momentumX <= 0 then
+            self.momentumX = 0
+        end
+    elseif self.momentumX < 0 then
+        self.momentumX = self.momentumX+self.gravity
+        if self.momentumX >= 0 then
+            self.momentumX = 0
+        end
+    end
+    if self.momentumX ~= 0 then
+        self.velocityX = self.velocityX+self.momentumX
     end
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
@@ -525,6 +560,7 @@ function Mipa:ApplyVelocity()
     local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
     local lastground = self.onground
     local lasthighestY = self.highestY
+    local lastonwall = self.lastframonwall
     self.onground = false
     self.pusing = false
     self.lastframonwall = false
@@ -611,8 +647,16 @@ function Mipa:ApplyVelocity()
                     self.pusing = true
                     if not self:IsOnFloor() then
                         self.lastframonwall = true
+                        if lastonwall == false and self:HasPassiveItem(PASSIVEITEMS.Honey) then
+                            SoundManager:PlaySound("Splash", 0.1)
+                        end
+                        if collision.normal.x > 0 then
+                            self.mirrored = gfx.kImageFlippedX
+                        else
+                            self.mirrored = gfx.kImageUnflipped
+                        end
                     end
-                end                
+                end
             end
         elseif collisionType == gfx.sprite.kCollisionTypeOverlap then
             if collisionTag == TAG.Interactive then

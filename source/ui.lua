@@ -180,6 +180,11 @@ function UI:Update()
     if self.glitchframes > 0 then
         self.glitchframes = self.glitchframes-1
         self:DoGlitch()
+        if self.glitchframes == 0 then
+            if self.oneglitchover ~= nil then
+                self.oneglitchover()
+            end
+        end
     else
         if self.glitchoverlay ~= nil then
             gfx.sprite.removeSprite(self.glitchoverlay)
@@ -259,7 +264,7 @@ function UI:Death()
     local overlay = gfx.sprite.new()
     overlay:setCenter(0, 0)
     overlay:add()
-    overlay:setZIndex(Z_Index.BG)
+    overlay:setZIndex(Z_Index.AllAtop)
     overlay.frame = 1
     overlay.animationtimer = pd.frameTimer.new(1)
     overlay.animationtimer.timerEndedCallback = function(timer)             

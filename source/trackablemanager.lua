@@ -65,6 +65,8 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         if type and type == "box" then
             PhysicalProp(tonumber(parameters[3]), tonumber(parameters[4]))
         end
+    elseif command == "Glitch" then
+        UIIsnt.glitchframes = tonumber(parameters[2])
     end
 end
 

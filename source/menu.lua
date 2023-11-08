@@ -36,7 +36,7 @@ function Menu:init()
     -- Start menu
     self.startmenu = gfx.sprite.new()
     self.startmenu:setCenter(0, 0)
-    self.startmenu:moveTo(76, 112)
+    self.startmenu:moveTo(76, 92)
     self.startmenu:setZIndex(Z_Index.UI)
     self.startmenu:add()
     self.startmenu:setVisible(false)
@@ -44,14 +44,19 @@ function Menu:init()
 
     local startoptions = {}
     
-    table.insert(startoptions, {posX = 13, posY = 100, fn = function()
+    table.insert(startoptions, {posX = 13, posY = 80, fn = function()
         self:SetMenu("level")
     end})
 
-    table.insert(startoptions, {posX = 13, posY = 145, fn = function()
+    table.insert(startoptions, {posX = 13, posY = 125, fn = function()
         self:SetMenu("options")
     end})
 
+    table.insert(startoptions, {posX = 13, posY = 165, fn = function()
+        NextLevel = "credits"
+        StartGame()
+    end})
+    
     self:AddMenu("start", startoptions, {self.startmenu})
 
     -- Level Menu
