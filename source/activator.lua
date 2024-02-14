@@ -3,9 +3,13 @@ local gfx <const> = pd.graphics
 
 class("Activator").extends(gfx.sprite)
 
-function Activator:init(x, y, group)
-    local img = AssetsLoader.LoadImage("images/Props/Box")
-    self:setImage(img)
+function Activator:init(x, y, group, timer, indicatorUID)
+    if timer == nil then
+        timer = 0
+    end
+    if indicatorUID == nil then
+        indicatorUID = 0
+    end
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
     self:setCenter(0, 0)
@@ -15,6 +19,27 @@ function Activator:init(x, y, group)
     self.activated = false
     self.IsButton = true
     self.CustomUpdate = nil
+    self.timertime = timer
+    self.timertimems = timer*1000
+    self.timertimeleft = 0
+    self.indicatorUID = indicatorUID
+    self.indicator = nil
+    self.lastindicatorframe = 21
+    if self.timertime ~= 0 then
+        self.timer = pd.timer.new(1000, function ()
+            if self.timertimeleft > 0 then
+                self.timertimeleft = self.timertimeleft-1
+                if self.timertimeleft == 0 then
+                    self.activated = false
+                    SoundManager:PlaySound("Stop")
+                else
+                    self:TimerTick()
+                end
+            end
+        end)
+        self.timer.repeats = true
+        self.timer:start()
+    end
 
     if group and group ~= "" then
         if string.find(group, ",") then
@@ -33,22 +58,68 @@ function Activator:collisionResponse(other)
     return gfx.sprite.kCollisionTypeOverlap
 end
 
+function Activator:TimerTick()
+    SoundManager:PlaySound("Tick")
+end
+
 function Activator:PressButton()
-    if not self.activated then
-        self.activated = true
+    if self.timertime == 0 then
+        if not self.activated then
+            self.activated = true
+            SoundManager:PlaySound("Button")
+            print("[Activator] Activator triggered groups:")
+            for i = 1, #self.activegroup, 1 do
+                print(self.activegroup[i])
+            end
+        else
+            SoundManager:PlaySound("No")
+        end
+    else
         SoundManager:PlaySound("Button")
+        self.timertimeleft = self.timertime
+        self.activated = true
+        if self.timer ~= nil then
+            self.timer:reset()
+            if self.timerprogress ~= nil then
+                self.timerprogress:remove()
+            end
+            self.timerprogress = pd.timer.new(self.timertimems)
+            self.timerprogress:start()
+        end
         print("[Activator] Activator triggered groups:")
         for i = 1, #self.activegroup, 1 do
             print(self.activegroup[i])
         end
-    else
-        SoundManager:PlaySound("No")
     end
 end
 
+function Activator:UpdateIndicator(indicatorframe)
+    if self.indicator == nil then
+        if self.indicatorUID ~= 0 then
+            self.indicator = TrackableManager.GetByUID(self.indicatorUID)
+            if self.indicator == nil then
+                self.indicatorUID = 0
+                return
+            end
+        else
+            return
+        end
+    end
+    if indicatorframe == 0 then
+        indicatorframe = 21
+    end
+    self.indicator:setImage(self.indicator.imagetable:getImage(indicatorframe))
+end
 
 function Activator:update()
     if self.CustomUpdate ~= nil then
         self.CustomUpdate()
+    end
+    if self.timerprogress ~= nil then
+        local indicatorframe = math.floor((self.timerprogress.timeLeft / self.timerprogress.duration * 21 )+0.5)
+        if self.lastindicatorframe ~= indicatorframe then
+            self.lastindicatorframe = indicatorframe
+            self:UpdateIndicator(indicatorframe)
+        end
     end
 end

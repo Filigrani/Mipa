@@ -3,7 +3,7 @@ local gfx <const> = pd.graphics
 
 class("Mipa").extends(gfx.sprite)
 
-local PASSIVEITEMS <const> = 
+PASSIVEITEMS = 
 {
     None = 0,
     KoaKola = 1,
@@ -12,7 +12,7 @@ local PASSIVEITEMS <const> =
     MidFallJump = 4,
 }
 
-local EQUIPMENT <const> = 
+EQUIPMENT = 
 {
     None = 0,
     MagnetHand = 1,
@@ -35,7 +35,7 @@ function Mipa:init(x, y)
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
-    self.pushingspeed = 1.1
+    self.pushingspeed = 1.12
     self.pullingspeed = 1.33
     self.airspeed = 1.99
     self.momentumX = 0
@@ -84,13 +84,24 @@ function Mipa:init(x, y)
     self.slidesoundtimer.repeats = true
     self.slidesoundtimer.id = math.random()
     self.slidesoundtimer.timerEndedCallback = function(timer)
-        if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
+        if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) and not self:IsOnFloor() then
             SoundManager:PlaySound("Slip", 0.08)
         end
     end
     self.holdingbox = nil
     self.lastframonwall = false
     self.jumpoffwallmomentum = 10
+end
+
+function Mipa:Konami()
+    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing}
+    self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Honey, PASSIVEITEMS.AdjustableJump, PASSIVEITEMS.MidFallJump}
+end
+
+function Mipa:AddPassiveItem(item)
+    if not self:HasPassiveItem(item) then
+        table.insert(self.passiveitems, item)
+    end
 end
 
 function Mipa:HasPassiveItem(item)
@@ -390,7 +401,7 @@ function Mipa:UpdateAnimation()
         end
     end   
     if framechanged or self.IsClone then
-        self:setImage(imagetable:getImage(self.animationframe), self.mirrored) 
+        self:setImage(imagetable:getImage(self.animationframe), self.mirrored)
         self.lastimage = spritePath
     end
     self:ToggleEvenFrame()
@@ -506,6 +517,14 @@ function Mipa:Damage(damage)
     SoundManager:PlaySound("Scream")
 end
 
+function Mipa:FatalDamage()
+    if self:IsDead() or DebugFlags.NoDamage then
+        return
+    end
+
+    self:Damage(self.hp)
+end
+
 function Mipa:TryClimb()
     print("Try climb")
     local _x, _y = self:getPosition()
@@ -571,7 +590,7 @@ function Mipa:ApplyVelocity()
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
         if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) and not self:IsDead() then
-            self:Damage(self.hpmax)
+            self:FatalDamage()
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
             if actualX ~= disiredX then
@@ -600,6 +619,9 @@ function Mipa:ApplyVelocity()
                         if landvolume >= 0.77 then
                             landvolume = 1
                             self:Damage(1)
+                            --if UIIsnt ~= nil then
+                            --    UIIsnt:StartDialog(GetDialogDataFromString(""))
+                            --end
                         elseif landvolume < 0.3 then
                             landvolume = 0.3
                         end
@@ -645,7 +667,7 @@ function Mipa:ApplyVelocity()
                 end
                 if collision.normal.x ~= 0 then
                     self.pusing = true
-                    if not self:IsOnFloor() then
+                    if not lastground then
                         self.lastframonwall = true
                         if lastonwall == false and self:HasPassiveItem(PASSIVEITEMS.Honey) then
                             SoundManager:PlaySound("Splash", 0.1)
@@ -828,7 +850,7 @@ function Mipa:RingAction()
                     collisionObject.velocityX = 0
                     collisionObject.velocityY = 0
                     collisionObject.momentumX = 0
-                    SoundManager:PlaySound("Tuboa")
+                    SoundManager:PlaySound("Woop")
                 else
                     SoundManager:PlaySound("No")
                 end
@@ -863,7 +885,7 @@ end
 
 function Mipa:update()
     self.velocityX = 0
-    if not self:IsDead() then
+    if not self:IsDead() and (UIIsnt == nil or not UIIsnt:IsCutscene()) then
         self:ProcessWalking()
         if pd.buttonJustPressed(pd.kButtonA) then
             local jumped = self:TryJump()

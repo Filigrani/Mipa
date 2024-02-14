@@ -67,6 +67,10 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         end
     elseif command == "Glitch" then
         UIIsnt.glitchframes = tonumber(parameters[2])
+    elseif command == "Dialog" then
+        if UIIsnt ~= nil then
+            UIIsnt:StartDialog(GetDialogDataFromString(parameters[2]))
+        end
     end
 end
 

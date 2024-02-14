@@ -3,10 +3,12 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/frametimer"
+import "savemanager"
 import "localizationmanager"
 import "assetsloader"
 import "utils"
 -- classes
+import "dummy"
 import "mipa"
 import "jsonloader"
 import "level"
@@ -42,8 +44,8 @@ LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 5
-DialogboxMode = "dyn"
+LevelsLimit = 9
+DialogboxMode = SaveManager.Load("dialogboxmode") or "dyn"
 local font = gfx.font.new('font/Asheville Ayu')
 
 StartGame = function ()

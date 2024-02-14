@@ -13,7 +13,7 @@ function PhysicalProp:init(x, y)
     self:add() -- Add to draw list
     self:setTag(TAG.PropPushable)
     -- Moving vars
-    self.speed = 1.01
+    self.speed = 1.012
     self.momentumX = 0
     self.velocityX = 0
     self.velocityY = 0
@@ -83,7 +83,21 @@ function PhysicalProp:ApplyVelocity()
     if self.momentumX ~= 0 then
         self.velocityX = self.velocityX+self.momentumX
     end
-    local actualX, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
+
+    local logIt = false
+
+    if logIt then
+        --print("[PhysicalProp:ApplyVelocity()] PreMove -> self.velocityX ", self.velocityX)
+        print("[PhysicalProp:ApplyVelocity()] PreMove -> self.x ", self.x)
+    end
+    local _x, _y = self:getPosition()
+    local disiredX = _x + self.velocityX
+    local disiredY = _y + self.velocityY
+    local actualX, _, collisions, length = self:moveWithCollisions(disiredX, disiredY)
+    if logIt then
+        --print("[PhysicalProp:ApplyVelocity()] PostMove -> self.velocityX ", self.velocityX)
+        print("[PhysicalProp:ApplyVelocity()] PostMove -> self.x ", self.x)
+    end
     local lastground = self.onground
     local lastfreefall = self.freefall
     self.onground = false
@@ -152,7 +166,10 @@ function PhysicalProp:ApplyVelocity()
             end                     
         end
     end
-
+    if logIt then
+        --print("[PhysicalProp:ApplyVelocity()] PostForLoop -> self.velocityX ", self.velocityX)
+        print("[PhysicalProp:ApplyVelocity()] PostForLoop -> self.x ", self.x)
+    end
     if not self.onground then
         self.freefall = self.freefall + self.gravity
     end 

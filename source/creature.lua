@@ -125,7 +125,7 @@ function Creature:ApplyVelocity()
             end
             if collision.normal.x ~= 0 then
                 if collisionTag == TAG.Player then
-                    collisionObject:Damage(1)
+                    --collisionObject:Damage(1)
                 end
             end
         end
@@ -165,6 +165,11 @@ function Creature:AIUpdate()
             else
                 self.movingdirection = -1
             end
+        end
+    end
+    if self.thinkticks >= 200 then
+        if self.movingdirection ~= 0 and not self.squshed then
+            self.movingdirection = -1
         end
     end
     if self.bumpwall then
@@ -237,6 +242,7 @@ end
 function Creature:RegisterAnimations()
     self:AddAnimation("idle", {1})
     self:AddAnimation("walk", {1, 3, 2, 4})
+    self:AddAnimation("reset", {5})
 end
 
 function Creature:SetAnimation(anim)
@@ -326,6 +332,10 @@ function Creature:PickAnimation()
     if self:IsMoving() then
         self:SetAnimation("walk")
     else
-        self:SetAnimation("idle")
+        if self.movingdirection == -1 then
+            self:SetAnimation("reset")
+        else
+            self:SetAnimation("idle")
+        end
     end
 end

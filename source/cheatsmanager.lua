@@ -15,9 +15,10 @@ CheatsManager.HandleInput = function (str)
     if  CheatsManager.cheats[CheatsManager.currentcombination] ~= nil then
         CheatsManager.cheats[CheatsManager.currentcombination]()
         if UIIsnt ~= nil then
-            UIIsnt:StartDialog(GetDialogDataFromString("#Mipa\nCheater!"))
+            UIIsnt:StartDialog(GetDialogDataFromString("Cheater"))
         end
     end
+    --print(CheatsManager.currentcombination)
 end
 
 CheatsManager.HandleInputs = function ()
@@ -46,6 +47,7 @@ CheatsManager.RegisterCheats = function ()
         if MipaInst then
             MipaInst.hpmax = 10
             MipaInst.hp = 10
+            MipaInst:Konami()
         end
     end)
     --                      1234567890
@@ -55,5 +57,13 @@ CheatsManager.RegisterCheats = function ()
         else
             DebugFlags.FPSCounter = true
         end
+    end)
+    --                      1234567890
+    CheatsManager.AddCheat("BABAUBABAU", function ()
+        DebugFlags.AllOpen = true
+    end)
+    --                      1234567890
+    CheatsManager.AddCheat("DURALDURAL", function ()
+        DebugFlags.NoDamage = true
     end)
 end

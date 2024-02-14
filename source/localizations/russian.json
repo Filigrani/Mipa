@@ -45,6 +45,18 @@
     {
       "key": "PokeyWaterFall",
       "line": "#Mipa\nПривет?\n..........\n#Poky\nШшшшшшш!\n..........\nДай мне насладиться звуками лазурного водопада.\n#Mipa\nОн и вправду лазурный?\n#Poky\nКонечно же!\nКак же ты, не уж то, сама этого не видишь?\n#Mipa\nОй! Простите, мои визоры видят всё монохромно... "
+    },
+    {
+      "key": "JobeeTest",
+      "line": "#Mipa\nAre you sure your sprites are final?\n#Jobee\nNo idea..!\nDo I look good?\n#Mipa\nWell....\n... ... ...\n...\n. . . . .\n#Jobee\nI see..."
+    },
+    {
+      "key": "Cheater",
+      "line": "#Mipa\nЧитер!"
+    },
+    {
+      "key": "BoxButton",
+      "line": "#Mipa\nХм...Когда эта кнопка нажата, дверь открыта.\nНужно найти что нибуть, чем можно зажать кнопку нажатой."
     }
   ]
 }

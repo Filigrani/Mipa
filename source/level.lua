@@ -27,58 +27,70 @@ function Level:init(levelPath)
     self:ParceZones()
 end
 
-function Level:CreateTile(ID, X, Y, Solid)
+function Level:CreateTile(ID, X, Y)
     if ID ~= 4 then
         self.tilemap:setTileAtPosition(X, Y, ID)
     end
-    
     local WorldX = self.jsonTable.root_x+14*(X-1)
     local WorldY = self.jsonTable.root_y+14*(Y-1)
-    if ID == 2 then
+    if ID == 2 or ID == 3 then
         local SlapColider = gfx.sprite.new()
         local TileW = 14
         local TileH = 7
+        local YOffset = 0
+        if ID == 3 then
+            YOffset = -7
+        end
         SlapColider:setUpdatesEnabled(false) 
         SlapColider:setVisible(false)
         SlapColider:setCenter(0, 0)
-        SlapColider:setBounds(WorldX, WorldY, TileW, TileH)
+        SlapColider:setBounds(WorldX, WorldY-YOffset, TileW, TileH)
         SlapColider:setCollideRect(0, 0, TileW, TileH)
         SlapColider:addSprite()
     end
-    if ID == 4 then
+    if ID == 4 or ID == 5 then
         local SlapColider = gfx.sprite.new()
         local TileW = 14
         local TileH = 7
+        local YOffset = 0
+        if ID == 5 then
+            YOffset = -7
+        end
         SlapColider:setCenter(0, 0)
         SlapColider:setImage(self.imagetable:getImage(4))
-        SlapColider:setBounds(WorldX, WorldY, TileW, TileH)
+        SlapColider:setBounds(WorldX, WorldY-YOffset, TileW, TileH)
         SlapColider:setCollideRect(0, 0, TileW, TileH)
         SlapColider:add()
         SlapColider.Breaks = true
     end
-    --[[
-    if ID == 302 then
-        local Colider = gfx.sprite.new()
-        local TileW = 14
-        local TileH = 14
-        Colider:setUpdatesEnabled(false) 
-        Colider:setVisible(false)
-        Colider:setCenter(0, 0)
-        Colider:setBounds(WorldX, WorldY, TileW, TileH)
-        Colider:setCollideRect(0, 0, TileW, TileH)
-        Colider:addSprite()
-    end    
-    --]]
     if ID == 302 then
         Spike(WorldX, WorldY)
     end
 end
 
-function Level:ParceTileMap()
+function Level:ParceTileMapOld()
     print("[Level] Parcing tilemap...")
     for i=1, #self.jsonTable.tiles do
         local tile = self.jsonTable.tiles[i]
         self:CreateTile(tile.tileID, tile.x, tile.y, tile.solid)
+    end
+end
+
+function Level:ParceTileMap()
+    print("[Level] Parcing tilemap...")
+    local rawtiles = self.jsonTable.tiles
+    local w = self.jsonTable.width_in_tile+1
+    local h = self.jsonTable.height_in_tiles+1
+    local tiles = {}
+    for tile in string.gmatch(rawtiles, "%S+") do
+        table.insert(tiles, tile)
+    end
+    local TileIndex = 1
+    for x=1, w do
+        for y=1, h do
+            self:CreateTile(tonumber(tiles[TileIndex]), x, y)
+            TileIndex = TileIndex+1
+        end
     end
 end
 
@@ -87,7 +99,7 @@ function Level:CreateProp(propData)
     if type == "box" then
         TrackableManager.Add(PhysicalProp(propData.x, propData.y), propData.UID)
     elseif type == "button" then
-        local butt = Activator(propData.x, propData.y, propData.group)
+        local butt = Activator(propData.x, propData.y, propData.group, propData.timer, propData.indicatorUID)
         local img = AssetsLoader.LoadImage("images/Props/Button0")
         butt:setImage(img)
         butt.CustomUpdate = function()
@@ -102,6 +114,39 @@ function Level:CreateProp(propData)
             end
         end
         butt:setCollideRect(4,5,6,5)
+        TrackableManager.Add(butt, propData.UID)
+    elseif type == "boxbutton" then
+        local butt = Activator(propData.x, propData.y, propData.group)
+        butt.IsButton = false
+        local img = AssetsLoader.LoadImage("images/Props/boxbutton")
+        butt:setImage(img)
+        butt:setCollideRect(0,3,14,2)
+        butt.CustomUpdate = function()
+            local _, _, collisions, length = butt:checkCollisions(butt.x, butt.y)
+            local supposedBeActive = false
+            for i=1,length do
+                local collision = collisions[i]
+                local collisionType = collision.type
+                local collisionObject = collision.other
+                local collisionTag = collisionObject:getTag()
+                if collisionType == gfx.sprite.kCollisionTypeOverlap then
+                    if collisionTag == TAG.PropPushable or collisionTag == TAG.Player then
+                        supposedBeActive = true
+                        break
+                    end
+                end
+            end
+            butt.activated = supposedBeActive
+            if butt.activated ~= butt.lastactive then
+                if butt.activated then
+                    img = AssetsLoader.LoadImage("images/Props/boxbuttonheld")
+                else
+                    img = AssetsLoader.LoadImage("images/Props/boxbutton")
+                end
+                butt.lastactive = butt.activated
+                butt:setImage(img)
+            end
+        end
         TrackableManager.Add(butt, propData.UID)
     elseif type == "indicator" then
         local indi = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
@@ -118,6 +163,11 @@ function Level:CreateProp(propData)
             end
         end
         TrackableManager.Add(indi, propData.UID)
+    elseif type == "clockindicator" then
+        local indi = Dummy(propData.x, propData.y)
+        indi.imagetable = AssetsLoader.LoadImageTable("images/Props/clock")
+        indi:setImage(indi.imagetable:getImage(21))
+        TrackableManager.Add(indi, propData.UID)
     elseif type == "door" then
         local doorx = propData.x
         local doory = propData.y
@@ -132,17 +182,27 @@ function Level:CreateProp(propData)
         end
         local door = Activatable(doorx, doory, propData.group, propData.active, propData.activeType)
         door.defaultH = propData.h
+        if propData.openPixels ~= nil then
+            door.openpixels = propData.openPixels
+        else
+            door.openpixels = 3
+        end
+        if propData.closeSpeed ~= nil then
+            door.closespeed = propData.closeSpeed
+        else
+            door.closespeed = 1
+        end
         if not door.defaultactive then
             door.currentH = door.defaultH
         else
-            door.currentH = 3
-        end  
+            door.currentH = door.openpixels
+        end
         door.firstchange = true
         door.CustomUpdate = function()
             local targetH = 0  
             if door.defaultactive then
                 if not door.activated then
-                    targetH = 3
+                    targetH = door.openpixels
                 else
                     targetH = door.defaultH
                 end
@@ -150,15 +210,21 @@ function Level:CreateProp(propData)
                 if not door.activated then
                     targetH = door.defaultH
                 else
-                    targetH = 3
+                    targetH = door.openpixels
                 end                
             end
             local changed = false
             if targetH > door.currentH then
-                door.currentH = door.currentH+1
+                door.currentH = door.currentH+door.closespeed
+                if door.currentH > targetH then
+                    door.currentH = targetH
+                end
                 changed = true
             elseif targetH < door.currentH then
-                door.currentH = door.currentH-1
+                door.currentH = door.currentH-door.closespeed
+                if door.currentH < targetH then
+                    door.currentH = targetH
+                end
                 changed = true
             end
             if changed or door.firstchange then
@@ -166,37 +232,19 @@ function Level:CreateProp(propData)
                     SoundManager:PlaySound("Door")
                 end
                 door.firstchange = false
-                
-                if vetical then
-                    door:setCollideRect(0,0,4,door.currentH)
-                    local img = gfx.image.new(4, door.currentH)
-                    local Skip = false
-                    gfx.pushContext(img)
-                        gfx.setColor(gfx.kColorBlack)
-                        for i = 0, door.currentH-1, 1 do
-                            if not Skip then
-                                gfx.drawLine(0, i, 4, i)
-                                Skip =  true
-                            else
-                                Skip = false
-                            end
-                        end
-                    gfx.popContext()
-                    door:setImage(img)
-                else -- Horizontal
-                    local left = true
-                    local img = gfx.image.new(door.currentH, 4)
-                    local Skip = false                    
-                    if propData.a == 269 then -- if angle 270, then it opens to right.
-                        left = false
-                    end
-                    if not left then
-                        door:setCollideRect(0,0,door.currentH,4)
+
+                if door.currentH > 0 then
+                    door:setTag(0)
+                    door:collisionsEnabled(true)
+                    if vetical then
+                        door:setCollideRect(0,0,4,door.currentH)
+                        local img = gfx.image.new(4, door.currentH)
+                        local Skip = false
                         gfx.pushContext(img)
                             gfx.setColor(gfx.kColorBlack)
                             for i = 0, door.currentH-1, 1 do
                                 if not Skip then
-                                    gfx.drawLine(i, 0, i, 4)
+                                    gfx.drawLine(0, i, 4, i)
                                     Skip =  true
                                 else
                                     Skip = false
@@ -204,21 +252,58 @@ function Level:CreateProp(propData)
                             end
                         gfx.popContext()
                         door:setImage(img)
-                    else
-                        door:setCollideRect(door.defaultH-door.currentH,0,door.currentH,4)
-                        gfx.pushContext(img)
-                            gfx.setColor(gfx.kColorBlack)
-                            for i = door.defaultH, door.currentH-1, -1 do
-                                if not Skip then
-                                    gfx.drawLine(i, 0, i, 4)
-                                    Skip =  true
-                                else
-                                    Skip = false
-                                end
+                        local _, _, collisions, length = door:checkCollisions(door.x, door.y+1)
+                        --print("Check Door collision", length)
+                        for i=1,length do
+                            local collision = collisions[i]
+                            local collisionType = collision.type
+                            local collisionObject = collision.other
+                            local collisionTag = collisionObject:getTag()
+                            if collisionTag == TAG.Player then
+                                collisionObject:FatalDamage()
                             end
-                        gfx.popContext()     
-                        door:setImage(img)                                            
-                    end 
+                        end
+                    else -- Horizontal
+                        local left = true
+                        local img = gfx.image.new(door.currentH, 4)
+                        local Skip = false                    
+                        if propData.a == 269 then -- if angle 270, then it opens to right.
+                            left = false
+                        end
+                        if not left then
+                            door:setCollideRect(0,0,door.currentH,4)
+                            gfx.pushContext(img)
+                                gfx.setColor(gfx.kColorBlack)
+                                for i = 0, door.currentH-1, 1 do
+                                    if not Skip then
+                                        gfx.drawLine(i, 0, i, 4)
+                                        Skip =  true
+                                    else
+                                        Skip = false
+                                    end
+                                end
+                            gfx.popContext()
+                            door:setImage(img)
+                        else
+                            door:setCollideRect(door.defaultH-door.currentH,0,door.currentH,4)
+                            gfx.pushContext(img)
+                                gfx.setColor(gfx.kColorBlack)
+                                for i = door.defaultH, door.currentH-1, -1 do
+                                    if not Skip then
+                                        gfx.drawLine(i, 0, i, 4)
+                                        Skip =  true
+                                    else
+                                        Skip = false
+                                    end
+                                end
+                            gfx.popContext()     
+                            door:setImage(img)                                            
+                        end 
+                    end
+                else
+                    door:setImage(nil)
+                    door:setCollideRect(0,0,0,0)
+                    door:setTag(TAG.Effect)
                 end
             end
         end
@@ -308,7 +393,7 @@ function Level:CreateProp(propData)
                 laser:setTag(TAG.Effect)  
             end
         end
-        TrackableManager.Add(door, propData.UID)
+        TrackableManager.Add(laser, propData.UID)
     elseif type == "logic" then
         Activatable(nil, nil, propData.group, 0, propData.activeType, propData.command)
     elseif type == "poky" then
@@ -403,6 +488,24 @@ function Level:CreateZone(zoneData)
             print("Going outbounds will load "..NextLevel)
         end
         TrackableManager.Add(t, zoneData.UID)
+    elseif type == "koasoda" then
+        local w = 14
+        local h = 14
+        local t = Trigger(zoneData.x, zoneData.y, w, h)
+        if type == "koasoda" then
+            t:setImage(AssetsLoader.LoadImage("images/Props/KoaSoda"))
+        end
+        t.OnTrigger = function ()
+            if type == "koasoda" then
+                if zoneData.cutscene == nil then
+                    InvertedColorsFrames = 2
+                    SoundManager:PlaySound("Warning")
+                else
+                    UIIsnt:StartCutscene(zoneData.cutscene)
+                end
+                MipaInst:AddPassiveItem(PASSIVEITEMS.KoaKola)
+            end
+        end
     end
 end
 
@@ -435,5 +538,5 @@ function Level:RenderTilemap()
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
     layerSprite:add()
-    gfx.sprite.addWallSprites(tilemap,  {2,4,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
+    gfx.sprite.addWallSprites(tilemap,  {2,3,4,5,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
 end

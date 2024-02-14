@@ -42,8 +42,16 @@ AddSound("Slip")
 AddSound("GlitchNew")
 AddSound("MipaGameOver")
 AddSound("Note")
+AddSound("Tick")
+AddSound("Stop")
+AddSound("Warning")
 
-function SoundManager:PlaySound(name, vol)
+function SoundManager:PlaySound(name, vol, ignorecutscene)
+    if UIIsnt and UIIsnt:IsCutscene() then
+        if ignorecutscene == nil then
+            return
+        end
+    end
     local volume = 1
     if vol ~= nil then
         volume = vol

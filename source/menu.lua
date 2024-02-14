@@ -162,16 +162,17 @@ function Menu:init()
 
     self:AddMenu("options", optionsoptions, {self.optionsmenu, self.currentlang, self.options_controls, self.options_selection}, function ()
         if pd.buttonJustPressed(pd.kButtonDown) or pd.buttonJustPressed(pd.kButtonUp) then
-            if LocalizationManager.defaultlanguage == "english" then
-                LocalizationManager.defaultlanguage = "russian"
+            if LocalizationManager.currentlanguage == "english" then
+                LocalizationManager.currentlanguage = "russian"
             else
-                LocalizationManager.defaultlanguage = "english"
+                LocalizationManager.currentlanguage = "english"
             end
             LocalizationManager.Load()
             self:ChangeLanguage()
         end
         if pd.buttonJustPressed(pd.kButtonB) then
             self:SetMenu("start")
+            SaveManager.Save("lang", LocalizationManager.currentlanguage)
         end
         if pd.buttonJustPressed(pd.kButtonRight) then
             self:SetMenu("options2")
@@ -229,6 +230,7 @@ function Menu:init()
         end
         if pd.buttonJustPressed(pd.kButtonB) then
             self:SetMenu("start")
+            SaveManager.Save("dialogboxmode", DialogboxMode)
         end
     end)
 
@@ -282,10 +284,10 @@ end
 
 function Menu:ApplyChangeOnElement(obj)
     if obj.originalname then
-        if LocalizationManager.defaultlanguage == "english" then
+        if LocalizationManager.currentlanguage == "english" then
             obj.imagetable = AssetsLoader.LoadImageTable("images/Ui/"..obj.originalname)
         else
-            obj.imagetable = AssetsLoader.LoadImageTable("images/Ui/"..obj.originalname.."-"..LocalizationManager.defaultlanguage)
+            obj.imagetable = AssetsLoader.LoadImageTable("images/Ui/"..obj.originalname.."-"..LocalizationManager.currentlanguage)
         end
     end
     obj:setImage(obj.imagetable:getImage(obj.animindex))    

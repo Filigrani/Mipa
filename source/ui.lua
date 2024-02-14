@@ -3,6 +3,7 @@ local gfx <const> = pd.graphics
 deathimagetable = AssetsLoader.LoadImageTable("images/ui/death")
 glitchtable = AssetsLoader.LoadImageTable("images/ui/glitch")
 class('UI').extends(playdate.graphics.sprite)
+import "jsonloader"
 
 function UI:init()
     UI.super.init(self)
@@ -290,7 +291,7 @@ function UI:AddEquipment(style, ispassive)
     else
         eq:setImage(AssetsLoader.LoadImage("images/UI/passive_slot"))
         local lastEQPosition = 378-30*#self.equipment
-        eq:moveTo(lastEQPosition-27*#self.passiveitems, 9)
+        eq:moveTo(lastEQPosition-23*#self.passiveitems, 9)
     end
     eq:add()
     eq.style = ""
@@ -515,6 +516,7 @@ function UI:StartDialog(data, onstart, onfinish)
         TrackableManager.ProcessCommandLine(onstart)
     end
     self:DialogPosUpdate()
+    self:ProcessDialog()
 end
 
 function UI:DoGlitch()
@@ -537,4 +539,52 @@ function UI:DoGlitch()
     self.lastglitch = glitchIndex
     self.glitchoverlay:setImage(glitchtable:getImage(glitchIndex))
     SoundManager:PlaySound("GlitchNew")
+end
+
+function UI:NextCutsceneFrame()
+    self.currentsceneimage = self.currentsceneimage+1
+    if self.currentsceneimage > self.sceneimages then
+        self.currentsceneimage = 0
+        gfx.sprite.removeSprite(self.sceneoverlay)
+        if self.scenejsonTable.onfinished then
+            TrackableManager.ProcessCommandLine(self.scenejsonTable.onfinished)
+        end
+        self.scenejsonTable = nil
+        return
+    end
+    local frame = self.scenejsonTable.frames[self.currentsceneimage]
+    print("[UI] Cutscene frame "..self.currentsceneimage.." image index "..frame.image.." duration "..frame.duration)
+    self.sceneoverlay:setImage(self.sceneimagetable:getImage(frame.image))
+    self.scenetimer = pd.frameTimer.new(frame.duration)
+    self.scenetimer.repeats = false
+    self.scenetimer.timerEndedCallback = function(timer)
+        self:NextCutsceneFrame()
+    end
+    self.scenetimer:start()
+end
+
+function UI:IsCutscene()
+    if self.currentsceneimage == nil or self.currentsceneimage == 0 then
+        return false
+    end
+    return true
+end
+
+function UI:StartCutscene(name)
+    print("[UI] Trying to load cutscene "..name)
+    self.scenejsonTable = GetJSONData("images/UI/cutscenes/"..name..".json")
+	if self.scenejsonTable == nil then
+		print("[UI] Cutscene loading failed!")
+        return
+	end
+    print("[UI] Creating cutscene...")
+    self.sceneoverlay = gfx.sprite.new()
+    self.sceneoverlay:setCenter(0, 0)
+    self.sceneoverlay:moveTo(0, 0)
+    self.sceneoverlay:setZIndex(Z_Index.UI)
+    self.sceneoverlay:add()
+    self.currentsceneimage = 0
+    self.sceneimages = #self.scenejsonTable.frames
+    self.sceneimagetable = AssetsLoader.LoadImageTable("images/UI/cutscenes/"..self.scenejsonTable.sheet)
+    self:NextCutsceneFrame()
 end

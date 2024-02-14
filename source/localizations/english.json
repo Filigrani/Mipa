@@ -48,7 +48,19 @@
     },
     {
       "key": "JobeeTest",
-      "line": "#Mipa\nAre you sure your sprites are final?\n#Jobee\nNo idea..!\nDo I look good?\n#Mipa\nWell....\n... ... ...\n...\n. . . . .\n#Jobee\nI see..."
+      "line": "#Mipa\nAre you sure your sprites are final?\n#Jobee\nNo idea!\nDo I look good?\n#Mipa\nWell....\nBetter than previous version, I did say!\n#Jobee\nThanks!\n#Mipa\n... ...\n...\n. . . . .\nDate you later!\n#Jobee\nWhat?"
+    },
+    {
+      "key": "Cheater",
+      "line": "#Mipa\nCheater!"
+    },
+    {
+      "key": "BoxButton",
+      "line": "#Mipa\nHm...When this button down, door is open.\nI need to find something to keep this button pressed."
+    },
+    {
+      "key": "KoaKola",
+      "line": "#Mipa\nHow weird!\nVery carbonated liquid in bottle!\nIt pulls so much....\nI guess, I can even use it...\n#None\nPress ① button in air to do second jump."
     }
   ]
 }

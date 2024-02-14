@@ -1,0 +1,272 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 101 101 101 0 0 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 1 1 101 101 1 1 1 1 1 1 0 0 0 0 0 0 0 1 0 0 101 1 1 1 1 1 0 301 0 0 0 0 0 1 0 0 0 1 0 1 1 1 0 1 301 301 0 0 0 1 0 0 0 0 0 1 1 1 0 1 1 1 0 0 0 1 0 0 0 0 0 1 1 1 0 1 1 1 0 0 0 1 0 0 0 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 1 1 1 1 1 1 0 1 1 1 0 0 1 1 0 0 1 1 1 1 1 1 0 1 1 0 0 0 2 0 0 0 2 0 0 0 302 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 302 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 302 1 0 1 1 0 0 0 2 0 0 0 0 0 0 0 302 1 0 1 1 1 0 0 1 1 1 0 0 0 1 1 1 1 0 1 1 1 0 0 1 1 1 0 0 0 1 1 1 1 0 1 0 0 0 0 0 1 1 0 0 0 0 0 1 1 0 1 0 0 0 0 0 0 1 0 0 0 1 0 1 1 0 1 0 0 0 0 0 0 1 0 0 0 1 0 1 1 0 1 0 0 0 2 0 0 0 0 0 1 1 0 1 1 0 1 0 0 1 1 0 0 1 0 0 1 0 0 1 1 0 1 0 0 0 1 0 0 0 0 0 1 1 0 1 1 0 1 0 0 0 1 0 0 0 0 0 0 1 0 1 1 0 1 0 0 0 1 0 0 0 0 0 0 1 1 1 1 0 1 0 0 0 1 0 0 0 0 0 0 1 1 1 1 0 1 0 0 0 1 0 0 0 0 0 0 1 1 1 1 0 1 0 2 0 0 0 0 2 0 0 0 402 1 1 1 0 1 1 1 1 1 1 1 1 0 0 0 405 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "box",
+      "x": 24,
+      "y": 93,
+      "UID": 163
+    },
+    {
+      "propType": "box",
+      "x": 375,
+      "y": 121,
+      "UID": 179
+    },
+    {
+      "propType": "box",
+      "x": 305,
+      "y": 79,
+      "UID": 173
+    },
+    {
+      "propType": "button",
+      "x": 46,
+      "y": 141,
+      "UID": 176,
+      "timer": 5,
+      "indicatorUID": 175,
+      "group": "D"
+    },
+    {
+      "propType": "button",
+      "x": 312,
+      "y": 197,
+      "UID": 183,
+      "timer": 5,
+      "indicatorUID": 182,
+      "group": "F"
+    },
+    {
+      "propType": "button",
+      "x": 60,
+      "y": 183,
+      "UID": 186,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "E"
+    },
+    {
+      "propType": "button",
+      "x": 368,
+      "y": 43,
+      "UID": 187,
+      "timer": 10,
+      "indicatorUID": 178,
+      "group": "L"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 75,
+      "y": 108,
+      "UID": 162,
+      "group": "A"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 313,
+      "y": 178,
+      "UID": 180,
+      "group": "B"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 355,
+      "y": 178,
+      "UID": 189,
+      "group": "C"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 214,
+      "y": 178,
+      "UID": 190,
+      "group": "G"
+    },
+    {
+      "propType": "door",
+      "x": 133,
+      "y": 72,
+      "UID": 160,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 7,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 200,
+      "y": 141,
+      "UID": 168,
+      "h": 41,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 207,
+      "y": 71,
+      "UID": 170,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "B,C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 298,
+      "y": 131,
+      "UID": 181,
+      "h": 39,
+      "a": 269,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "F",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 388,
+      "y": 141,
+      "UID": 184,
+      "h": 41,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "E",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 368,
+      "y": 85,
+      "UID": 188,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "G",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 74,
+      "y": 174,
+      "UID": 177,
+      "w": 28,
+      "a": 0,
+      "group": "L",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 130,
+      "y": 58,
+      "UID": 161,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 200,
+      "y": 57,
+      "UID": 171,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 214,
+      "y": 57,
+      "UID": 172,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 382,
+      "y": 127,
+      "UID": 185,
+      "group": "E",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 354,
+      "y": 85,
+      "UID": 191,
+      "group": "G",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "clockindicator",
+      "x": 200,
+      "y": 128,
+      "UID": 175
+    },
+    {
+      "propType": "clockindicator",
+      "x": 285,
+      "y": 128,
+      "UID": 182
+    },
+    {
+      "propType": "clockindicator",
+      "x": 60,
+      "y": 170,
+      "UID": 178
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "dialog",
+      "x": 75,
+      "y": 99,
+      "w": 14,
+      "h": 14,
+      "UID": 164,
+      "dialogstart": "",
+      "dialogfinish": "",
+      "text": "BoxButton"
+    },
+    {
+      "zoneType": "spawn",
+      "x": 42,
+      "y": 37
+    },
+    {
+      "zoneType": "exit",
+      "x": 392,
+      "y": 142,
+      "w": 13,
+      "h": 41,
+      "UID": 165,
+      "nextLevel": "lvl7"
+    }
+   ]
+  }
