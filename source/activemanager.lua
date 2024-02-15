@@ -57,12 +57,14 @@ ActiveManager.UpdateActivatables = function ()
             local groups = act.activegroup
             local activeType = act.activetype
             if activeType == "Any" then
+                local activeFlag = false
                 for i2 = 1, #groups, 1 do
                     if ActiveManager.GroupIsActive(groups[i2]) then
-                        act.activated = true
+                        activeFlag = true
                         break
                     end
                 end
+                act.activated = activeFlag
             elseif activeType == "Every" then
                 local activeFlag = true
                 for i2 = 1, #groups, 1 do

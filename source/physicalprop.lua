@@ -22,6 +22,7 @@ function PhysicalProp:init(x, y)
     self.movingflag = false
     self.onground = true
     self.freefall = 0
+    self.notapplyimpulses = false
 end
 
 function PhysicalProp:IsFalling()
@@ -56,6 +57,9 @@ function PhysicalProp:TryMoveLeft(s)
 end
 
 function PhysicalProp:collisionResponse(other)
+    if self.notapplyimpulses then
+        return nil
+    end
     if other then
         if (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide) then
             return gfx.sprite.kCollisionTypeOverlap
@@ -68,6 +72,9 @@ function PhysicalProp:collisionResponse(other)
 end
 
 function PhysicalProp:ApplyVelocity()
+    if self.notapplyimpulses then
+        return
+    end
     self.velocityY = self.velocityY+self.gravity
     if self.momentumX > 0 then
         self.momentumX = self.momentumX-self.gravity

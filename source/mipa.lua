@@ -17,6 +17,7 @@ EQUIPMENT =
     None = 0,
     MagnetHand = 1,
     PowerRing = 2,
+    Bomber = 3,
 }
 
 function Mipa:init(x, y)
@@ -27,6 +28,12 @@ function Mipa:init(x, y)
     self:setCollideRect(3,3,8,11)
     self:add() -- Add to draw list
     self:setTag(TAG.Player)
+    self.damagerectangle = gfx.sprite.new()
+    self.damagerectangle:setCenter(0.5, 0.5)
+    self.damagerectangle:setCollideRect(3,3,8,11)
+    self.damagerectangle:setTag(TAG.Effect)  
+    self.damagerectangle:add()
+    self:moveTo(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
@@ -94,7 +101,7 @@ function Mipa:init(x, y)
 end
 
 function Mipa:Konami()
-    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing}
+    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing, EQUIPMENT.Bomber}
     self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Honey, PASSIVEITEMS.AdjustableJump, PASSIVEITEMS.MidFallJump}
 end
 
@@ -222,6 +229,7 @@ function Mipa:RegisterAnimations()
     self:AddAnimation("walkbox", {35, 36, 37})
     self:AddAnimation("downbox", {38})
     self:AddAnimation("sliping", {39, 40, 41}, 6)
+    self:AddAnimation("shootbomb", {42})
 end
 
 function Mipa:SetAnimation(anim)
@@ -324,6 +332,10 @@ function Mipa:PickAnimation()
         affix = "box"
     end
     if not self:IsDead() then
+        if self.shootbombtimer then
+            self:SetAnimation("shootbomb")
+            return
+        end
         if self:IsOnFloor() then
             if self:IsDown() then
                 self:SetAnimation("down"..affix)
@@ -482,6 +494,7 @@ function Mipa:TryJump()
     end
     if not self:IsOnFloor() and canDoubleJump then
         self.candoublejump = false
+        self.highestY = self.y
         self.velocityY = self.maxjumpvelocity
         return true
     end
@@ -511,6 +524,7 @@ function Mipa:Damage(damage)
         end
         self.speed = 1.01 -- so will be able to push her body without animation glitched, like a box
         SoundManager:PlaySound("MipaGameOver")
+        self:GetRidOffBox()
     end
 
     InvertedColorsFrames = InvertedColorsFrames+4
@@ -577,6 +591,9 @@ function Mipa:ApplyVelocity()
     local disiredX = _x + self.velocityX
     local disiredY = _y + self.velocityY
     local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
+    if self.damagerectangle then
+        self.damagerectangle:moveTo(actualX-7, actualY-7)
+    end
     local lastground = self.onground
     local lasthighestY = self.highestY
     local lastonwall = self.lastframonwall
@@ -590,7 +607,17 @@ function Mipa:ApplyVelocity()
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
         if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) and not self:IsDead() then
-            self:FatalDamage()
+            local allowDamage = true
+            if self.holdingbox ~= nil and self.damagerectangle then
+                local inter = collisionObject:getBoundsRect():intersection(self.damagerectangle:getBoundsRect())
+                if inter:isEmpty() then
+                    allowDamage = false
+                end
+                print("true rect X "..inter.x.." Y "..inter.y.." w "..inter.width.." h "..inter.height)
+            end
+            if allowDamage then
+                self:FatalDamage()
+            end
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
             if actualX ~= disiredX then
@@ -703,7 +730,12 @@ function Mipa:ApplyVelocity()
         self.skipdeathscreen = true
         self.hp = 0
         if not self.IsClone then
-            UIIsnt:Death()
+            if UIIsnt ~= nil then
+                UIIsnt:CancleDialog()
+                UIIsnt:Death()
+            end
+            SoundManager:PlaySound("MipaGameOver")
+            self:GetRidOffBox()
         end
     end
     if self.y < 35 then
@@ -783,6 +815,7 @@ function Mipa:ApplyHoldingBox()
         self.holdingbox:moveTo(_x, _y-12+offset)
     end
 end
+
 function Mipa:CheckSpaceForMipaWithBox(box)
     local _x, _y = self:getPosition()
     local offsetX = -7
@@ -790,34 +823,25 @@ function Mipa:CheckSpaceForMipaWithBox(box)
     local collider = gfx.sprite.addEmptyCollisionSprite(_x+offsetX, _y+offsetY,1,1)
     collider:setTag(TAG.Effect)
     collider:setCollideRect(1,-9,12,23)
-    local _, _, collisions, length = collider:checkCollisions(_x+offsetX, _y+offsetY)
-    --gfx.sprite.removeSprite(collider)
-    for i=1,length do
-        local collision = collisions[i]
-        local collisionType = collision.type
-        local collisionObject = collision.other
+    local collisions = collider:overlappingSprites(_x+offsetX, _y+offsetY)
+    gfx.sprite.removeSprite(collider)
+    for i=1,#collisions do
+        local collisionObject = collisions[i]
         local collisionTag = collisionObject:getTag()
-        print("colide ", i)
         if collisionObject ~= self and collisionObject ~= box and collisionTag ~= TAG.Effect then
-            print("colide x ", collisionObject.x)
-            print("colide y ", collisionObject.y)
-            --gfx.sprite.removeSprite(collisionObject)
             return false
         end
     end
     return true
 end
 function Mipa:CheckSpaceForBox(futureX, futureY)
-    local collider = gfx.sprite.addEmptyCollisionSprite(0,0,12,12)
-    collider:moveTo(futureX, futureY)
-    collider:setCollideRect(0,0,12,12)
-    local _, _, collisions, length = collider:checkCollisions(futureX, futureY)
-    for i=1,length do
-        local collision = collisions[i]
-        local collisionType = collision.type
-        local collisionObject = collision.other
+    local collider = gfx.sprite.addEmptyCollisionSprite(futureX,futureY,12,12)
+    collider:setTag(TAG.Effect)
+    local collisions = collider:overlappingSprites()
+    for i=1,#collisions do
+        local collisionObject = collisions[i]
         local collisionTag = collisionObject:getTag()
-        if collisionType ~= gfx.sprite.kCollisionTypeOverlap and collisionObject ~= self then
+        if collisionObject ~= self and collisionTag ~= TAG.Effect then
             gfx.sprite.removeSprite(collider)
             return false
         end
@@ -826,66 +850,179 @@ function Mipa:CheckSpaceForBox(futureX, futureY)
     return true
 end
 
+function Mipa:TryThroweBoxUpward()
+    local _x, _y = self:getPosition()
+    local momentumvalue = 3
+    local momentumImpulseX = 0
+    local pushoff = 0
+    if self.mirrored == gfx.kImageUnflipped then
+        momentumImpulseX = momentumvalue
+        pushoff = 8
+    else
+        momentumImpulseX = -momentumvalue
+        pushoff = -20
+    end
+    local box_x, box_y = self.holdingbox:getPosition()
+    if self:CheckSpaceForBox(box_x+pushoff, box_y-16) then
+        self:setCollideRect(3,3,8,11)
+        self.holdingbox:moveTo(box_x+pushoff+6, box_y-10)
+        self.holdingbox.momentumX = momentumImpulseX
+        self.holdingbox.velocityY = momentumvalue
+        self.holdingbox:setTag(TAG.PropPushable)
+        self.holdingbox.notapplyimpulses = false
+        self.holdingbox.gravity = 0.35
+        self.holdingbox = nil
+        SoundManager:PlaySound("Weep")
+        return true
+    end
+    return false
+end
+
+function Mipa:TryThroweBoxForward()
+    local _x, _y = self:getPosition()
+    local momentumvalue = 3
+    local momentumImpulseX = 0
+    local pushoff = 0
+    if self.mirrored == gfx.kImageUnflipped then
+        momentumImpulseX = momentumvalue
+        pushoff = 8
+    else
+        momentumImpulseX = -momentumvalue
+        pushoff = -20
+    end
+    local box_x, box_y = self.holdingbox:getPosition()
+    if self:CheckSpaceForBox(box_x+pushoff, box_y) then
+        self:setCollideRect(3,3,8,11)
+        self.holdingbox:moveTo(box_x+pushoff+6, box_y+7)
+        self.holdingbox.momentumX = momentumImpulseX
+        self.holdingbox.velocityY = momentumvalue
+        self.holdingbox:setTag(TAG.PropPushable)
+        self.holdingbox.notapplyimpulses = false
+        self.holdingbox.gravity = 0.35
+        self.holdingbox = nil
+        SoundManager:PlaySound("Weep")
+        return true
+    end
+    return false
+end
+
+function Mipa:GetRidOffBox()
+    if self.holdingbox then
+        self:setCollideRect(3,3,8,11)
+        self.holdingbox:setTag(TAG.PropPushable)
+        self.holdingbox.notapplyimpulses = false
+        self.holdingbox.gravity = 0.35
+        self.holdingbox = nil
+    end
+end
+
+function Mipa:TryPlaceBox()
+    local _x, _y = self:getPosition()
+    local momentumvalue = 3
+    local momentumImpulseX = 0
+    local pushoff = 0
+    if self.mirrored == gfx.kImageUnflipped then
+        momentumImpulseX = momentumvalue
+        pushoff = 8
+    else
+        momentumImpulseX = -momentumvalue
+        pushoff = -20
+    end
+    local box_x, box_y = self.holdingbox:getPosition()
+    if self:CheckSpaceForBox(box_x+pushoff, box_y+5) then
+        self:setCollideRect(3,3,8,11)
+        self.holdingbox:moveTo(box_x+pushoff+6, box_y+11)
+        self.holdingbox:setTag(TAG.PropPushable)
+        self.holdingbox.notapplyimpulses = false
+        self.holdingbox.gravity = 0.35
+        self.holdingbox = nil
+        SoundManager:PlaySound("Woop")
+        return true
+    end
+    return false
+end
+
 function Mipa:RingAction()
     if self.holdingbox == nil then
         local facingoffset = 0
         if self.mirrored == gfx.kImageUnflipped then
-            facingoffset = 5
+            facingoffset = 3
         else
-            facingoffset = -5
+            facingoffset = -15
         end
         local _x, _y = self:getPosition()
-        local _, _, collisions, length = self:checkCollisions(self.x+facingoffset, self.y)
-        for i=1,length do
-            local collision = collisions[i]
-            local collisionType = collision.type
-            local collisionObject = collision.other
+        local collider = gfx.sprite.addEmptyCollisionSprite(_x+facingoffset, _y-5, 12, 12)
+        collider:setTag(TAG.Effect);
+        local collisions = collider:overlappingSprites()
+        for i=1,#collisions do
+            local collisionObject = collisions[i]
             local collisionTag = collisionObject:getTag()
             if collisionTag == TAG.PropPushable then
-                --if self:CheckSpaceForMipaWithBox(collisionObject) then
-                if self:CheckSpaceForBox(_x, _y-12) then
+                if self:CheckSpaceForMipaWithBox(collisionObject) then
                     self:setCollideRect(1,-9,12,23)
                     self.holdingbox = collisionObject
                     collisionObject:setTag(TAG.Effect)
                     collisionObject.velocityX = 0
                     collisionObject.velocityY = 0
                     collisionObject.momentumX = 0
+                    collisionObject.notapplyimpulses = true
                     SoundManager:PlaySound("Woop")
                 else
                     SoundManager:PlaySound("No")
                 end
             end
         end
+        gfx.sprite.removeSprite(collider)
     else
-        local _x, _y = self:getPosition()
-        local momentumvalue = 3
-        local momentumImpulseX = 0
-        local pushoff = 0
-        if self.mirrored == gfx.kImageUnflipped then
-            momentumImpulseX = momentumvalue
-            pushoff = 12
-        else
-            momentumImpulseX = -momentumvalue
-            pushoff = -12
+        if not self:TryThroweBoxUpward() then
+           if not self:TryThroweBoxForward() then
+                if not self:TryPlaceBox() then
+                    SoundManager:PlaySound("No")
+                end
+            end
         end
-        local box_x, box_y = self.holdingbox:getPosition()
-        if self:CheckSpaceForBox(box_x+pushoff, box_y) then
-            self:setCollideRect(3,3,8,11)
-            self.holdingbox:moveBy(pushoff, 0)
-            self.holdingbox.momentumX = momentumImpulseX
-            self.holdingbox.velocityY = momentumvalue
-            self.holdingbox:setTag(TAG.PropPushable)
-            self.holdingbox = nil
-            SoundManager:PlaySound("Weep")
-        else
-            SoundManager:PlaySound("No")  
+    end
+end
+
+function Mipa:BomberAction()
+    if self.lastbomb ~= nil then
+        SoundManager:PlaySound("No")
+        return
+    end 
+    
+    if self.shootbombtimer == nil then
+        self.shootbombtimer = pd.frameTimer.new(7)
+        self.shootbombtimer.repeats = false
+        self.shootbombtimer.timerEndedCallback = function(timer)
+            self.shootbombtimer = nil
+        end
+    end
+    local bullet = Bullet(self.x, self.y-2)
+    bullet:setImage(AssetsLoader.LoadImage("images/Effects/bomb"), self.mirrored)
+    bullet:setCollideRect(2, 1, 6, 6)
+    self.lastbomb = bullet
+    if self.mirrored == gfx.kImageUnflipped then
+        bullet.speed = 7
+    else
+        bullet.speed = -7
+    end
+    SoundManager:PlaySound("Woop")
+    bullet.lifedistance = 300
+    bullet.lastpushonhit = false
+    bullet.OnHit = function (collision)
+        SoundManager:PlaySound("Heavyland")
+        Clashbomb(bullet.x-4, bullet.y-4, self.mirrored, self)
+    end
+    bullet.OnDestory = function()
+        if self.lastbomb == bullet then
+            self.lastbomb = nil
         end
     end
 end
 
 function Mipa:update()
     self.velocityX = 0
-    if not self:IsDead() and (UIIsnt == nil or not UIIsnt:IsCutscene()) then
+    if not self:IsDead() and (UIIsnt == nil or not UIIsnt:IsCutscene()) and self.shootbombtimer == nil then
         self:ProcessWalking()
         if pd.buttonJustPressed(pd.kButtonA) then
             local jumped = self:TryJump()
@@ -895,10 +1032,18 @@ function Mipa:update()
         end
         if pd.buttonJustPressed(pd.kButtonB) then
             if self:IsDown() then
-                self:NextEquipment()
+                if self.holdingbox ~= nil then
+                    if not self:TryPlaceBox() then
+                        SoundManager:PlaySound("No")
+                    end
+                else
+                    self:NextEquipment()
+                end
             else
                 if self:IsEquipped(EQUIPMENT.PowerRing) then
                     self:RingAction()
+                elseif self:IsEquipped(EQUIPMENT.Bomber) and self:IsOnFloor() then
+                    self:BomberAction()
                 end
             end 
         end

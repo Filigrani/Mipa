@@ -28,7 +28,7 @@ function Level:init(levelPath)
 end
 
 function Level:CreateTile(ID, X, Y)
-    if ID ~= 4 then
+    if ID ~= 4 and ID ~= 5 and ID ~= 6 then
         self.tilemap:setTileAtPosition(X, Y, ID)
     end
     local WorldX = self.jsonTable.root_x+14*(X-1)
@@ -57,11 +57,22 @@ function Level:CreateTile(ID, X, Y)
             YOffset = -7
         end
         SlapColider:setCenter(0, 0)
-        SlapColider:setImage(self.imagetable:getImage(4))
+        SlapColider:setImage(self.imagetable:getImage(ID))
         SlapColider:setBounds(WorldX, WorldY-YOffset, TileW, TileH)
         SlapColider:setCollideRect(0, 0, TileW, TileH)
         SlapColider:add()
         SlapColider.Breaks = true
+    end
+    if ID == 6 then
+        local Colider = gfx.sprite.new()
+        local TileW = 14
+        local TileH = 14
+        Colider:setCenter(0, 0)
+        Colider:setImage(self.imagetable:getImage(ID))
+        Colider:setBounds(WorldX, WorldY, TileW, TileH)
+        Colider:setCollideRect(0, 0, TileW, TileH)
+        Colider:add()
+        Colider.IsBreakableTile = true
     end
     if ID == 302 then
         Spike(WorldX, WorldY)
@@ -538,5 +549,5 @@ function Level:RenderTilemap()
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
     layerSprite:add()
-    gfx.sprite.addWallSprites(tilemap,  {2,3,4,5,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
+    gfx.sprite.addWallSprites(tilemap,  {2,3,4,5,6,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
 end

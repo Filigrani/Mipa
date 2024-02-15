@@ -43,8 +43,12 @@
       "line": "#Note\nExpedition Log Number 1.\nThese rays, or more accurately lasers, have odd structure.\nTheir power is high enough to destroy metal. But nevertheless, walls and boxes block radiation.\nWall and boxes materials cannot be defined.\n#Mipa\nOh...\nWell, at least I already know that lasers are bad, and boxes are good!"
     },   
     {
+      "key": "Note2",
+      "line": "#Note\nExpedition Log Number 2.\nCurrently unknown, how foreign objects end up here.\nBut any attempt to bring them out the room they are in was unsuccessful.\nMost strange, that origin of some objects for sure not alien.\n#None\nFPS counter cheat: ③③③④④④②②②②"
+    },  
+    {
       "key": "PokeyWaterFall",
-      "line": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa\nOH! Sorry, my visors seeing everything in monochrome... "
+      "line": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa\nOH! Sorry, my visors seeing everything in monochrome...\n#Poky\nDon't jump on bridge! It's flimsy."
     },
     {
       "key": "JobeeTest",
@@ -61,6 +65,22 @@
     {
       "key": "KoaKola",
       "line": "#Mipa\nHow weird!\nVery carbonated liquid in bottle!\nIt pulls so much....\nI guess, I can even use it...\n#None\nPress ① button in air to do second jump."
+    },
+    {
+      "key": "KoaKolaLost",
+      "line": "#Mipa\nBottle is just disappeared!\nLooks like, I can't bring stuff from previous rooms...\n...\nHope I will find it again!\nIt was fun!"
+    },
+    {
+      "key": "KoaKolaGotAgain",
+      "line": "#Mipa\nYay!\n#None\nAll current passive items can be seen in upper-right corner."
+    },
+    {
+      "key": "DirtTiles",
+      "line": "#Mipa\nThe soil... Intresting..."
+    },
+    {
+      "key": "WaterfallTiles",
+      "line": "#Mipa\nOh what is it?\nWaterfall? Lavafall? I can't see..."
     }
   ]
 }

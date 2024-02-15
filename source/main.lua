@@ -30,6 +30,7 @@ import "raycasttrigger"
 import "creature"
 import "cheatsmanager"
 import "credits"
+import "clashbomb"
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
@@ -44,7 +45,7 @@ LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 9
+LevelsLimit = 10
 DialogboxMode = SaveManager.Load("dialogboxmode") or "dyn"
 local font = gfx.font.new('font/Asheville Ayu')
 

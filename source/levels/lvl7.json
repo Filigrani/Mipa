@@ -35,15 +35,6 @@
     },
     {
       "propType": "button",
-      "x": 118,
-      "y": 257,
-      "UID": 214,
-      "timer": 0,
-      "indicatorUID": 0,
-      "group": "E"
-    },
-    {
-      "propType": "button",
       "x": 32,
       "y": 113,
       "UID": 222,
@@ -192,17 +183,6 @@
   "zones":
    [
     {
-      "zoneType": "dialog",
-      "x": 184,
-      "y": 243,
-      "w": 14,
-      "h": 14,
-      "UID": 193,
-      "dialogstart": "",
-      "dialogfinish": "",
-      "text": "BoxButton"
-    },
-    {
       "zoneType": "koasoda",
       "x": 227,
       "y": 169,
@@ -221,7 +201,7 @@
       "w": 13,
       "h": 41,
       "UID": 195,
-      "nextLevel": "lvl7"
+      "nextLevel": "lvl8"
     }
    ]
   }

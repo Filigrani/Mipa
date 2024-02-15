@@ -33,7 +33,7 @@ function RayCastTrigger:update()
         --  hitdistance < closetshitdistance make it only accept most close (in left orindated lasers) objects that blocks off laser.
         -- Ignore TAG.Effect because collision of them made for differnet purpose.
         -- Ignore TAG.Player so, we can cast ray past Mipa, and damage trigger will hurt her.
-        if self.parent ~= collisionObject and hitdistance < closetshitdistance and collisionTag ~= TAG.Effect and collisionTag ~= TAG.Player and collisionTag ~= TAG.Interactive then
+        if self.parent ~= collisionObject and hitdistance < closetshitdistance and (collisionTag ~= TAG.Effect or (collisionTag == TAG.Effect and collisionObject.notapplyimpulses)) and collisionTag ~= TAG.Player and collisionTag ~= TAG.Interactive then
             closetshitdistance = hitdistance
             self.lasthitdistance = hitdistance
             HadHit = true

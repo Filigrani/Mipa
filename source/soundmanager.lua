@@ -45,6 +45,7 @@ AddSound("Note")
 AddSound("Tick")
 AddSound("Stop")
 AddSound("Warning")
+AddSound("Heavyland")
 
 function SoundManager:PlaySound(name, vol, ignorecutscene)
     if UIIsnt and UIIsnt:IsCutscene() then

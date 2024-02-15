@@ -52,6 +52,10 @@ function Bullet:LastHit(collision, lastfreefall)
 end
 
 function Bullet:LastPush()
+    if not self.lastpushonhit then
+        return
+    end
+
     self:moveBy(self.speed, 0)
     local _, _, collisions, length = self:checkCollisions(self.x, self.y)
     for i=1,length do
@@ -76,12 +80,14 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
                 self.freefall = 0
                 self:LastHit(collision, lastfreefall)
                 self:LastPush()
-                gfx.sprite.removeSprite(self)
+                self:Destroy()
+                return
             elseif collision.normal.y == 1 then       
                 self.velocityY = 0
                 self:LastHit(collision, lastfreefall)
                 self:LastPush()
-                gfx.sprite.removeSprite(self)
+                self:Destroy()
+                return
             end
 
             if self.velocityX > 0 then
@@ -89,7 +95,8 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
                     self.velocityX = 0
                     self:LastHit(collision, lastfreefall)
                     self:LastPush()
-                    gfx.sprite.removeSprite(self)
+                    self:Destroy()
+                    return
                 end                  
             end
             if self.velocityX < 0 then
@@ -97,7 +104,8 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
                     self.velocityX = 0
                     self:LastHit(collision, lastfreefall)
                     self:LastPush()
-                    gfx.sprite.removeSprite(self)
+                    self:Destroy()
+                    return
                 end                  
             end                  
         end
@@ -119,10 +127,10 @@ function Bullet:ApplyVelocity()
     self.freefall = self.freefall + self.gravity
 
     if self.velocityX == 0 and self.velocityY == 0 then
-        gfx.sprite.removeSprite(self)
+        self:Destroy()
     end
     if self.y > 400 then
-        gfx.sprite.removeSprite(self)
+        self:Destroy()
     end
 end
 
@@ -130,10 +138,17 @@ local function distance( x1, y1, x2, y2 )
 	return math.sqrt( (x2-x1)^2 + (y2-y1)^2 )
 end
 
+function Bullet:Destroy()
+    if self.OnDestory then
+        self.OnDestory();
+    end
+    gfx.sprite.removeSprite(self)
+end
+
 function Bullet:update()
     if self.lifedistance > 0 then
         if distance(self.x, self.y, self.spawnX, self.spawnY) > self.lifedistance then
-            gfx.sprite.removeSprite(self)
+            self:Destroy()
         end
     end
     self:ApplyVelocity()
