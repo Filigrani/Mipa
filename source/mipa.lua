@@ -31,13 +31,14 @@ function Mipa:init(x, y)
     self.damagerectangle = gfx.sprite.new()
     self.damagerectangle:setCenter(0.5, 0.5)
     self.damagerectangle:setCollideRect(3,3,8,11)
+
     self.damagerectangle:setTag(TAG.Effect)  
     self.damagerectangle:add()
     self:moveTo(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
-    self.equipment = {EQUIPMENT.MagnetHand}
+    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing}
     self.passiveitems = {}
     self.selectedequipment = 1
     -- Moving vars
@@ -49,6 +50,7 @@ function Mipa:init(x, y)
     self.velocityX = 0
     self.velocityY = 0
     self.movingflag = false
+    self.canbecontrolled = true
     -- Physic
     self.maxjumpvelocity = -10
     self.gravity = 1
@@ -78,6 +80,7 @@ function Mipa:init(x, y)
         self:MayNextFrame()    
     end
     self.animationtimer:start()
+    self.lastmirrored = gfx.kImageUnflipped
     self.mirrored = gfx.kImageUnflipped
     self.IsClone = false
     self.skipdeathscreen = false
@@ -397,6 +400,18 @@ function Mipa:SetDitherImageTable()
     self.mipaimagedithered = ditheredtable
 end
 
+function Mipa:SetMirrored(mirrored)
+    if mirrored then
+        self.mirrored = gfx.kImageFlippedX 
+    else
+        self.mirrored = gfx.kImageUnflipped
+    end
+end
+
+function Mipa:IsMirrored()
+    return self.mirrored == gfx.kImageFlippedX
+end
+
 function Mipa:UpdateAnimation()
     self:PickAnimation()
     local spritePath = self.currentanimation.."/"..self.animationframe
@@ -411,10 +426,11 @@ function Mipa:UpdateAnimation()
         else
             imagetable = self.mipaimages
         end
-    end   
-    if framechanged or self.IsClone then
+    end
+    if framechanged or self.IsClone or (self.lastmirrored ~= self.mirrored) then
         self:setImage(imagetable:getImage(self.animationframe), self.mirrored)
         self.lastimage = spritePath
+        self.lastmirrored = self.mirrored
     end
     self:ToggleEvenFrame()
 end
@@ -451,7 +467,7 @@ function Mipa:TryMoveRight()
         return false
     end
     if not self:IsDead() and (not self:IsPulling() and not self:IsPulling())then -- So when push her body she not facing to motion direction
-        self.mirrored = gfx.kImageUnflipped
+        self:SetMirrored(false)
     end
     if not self:IsDown() then
         self.velocityX = self:GetSpeed()
@@ -465,7 +481,7 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
         return false
     end
     if not self:IsDead() and (not self:IsPulling() and not self:IsPulling()) then
-        self.mirrored = gfx.kImageFlippedX
+        self:SetMirrored(true)
     end
     if not self:IsDown() then
         self.velocityX = -self:GetSpeed()
@@ -475,7 +491,7 @@ end
 
 function Mipa:TryJump()  
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
-        if self.mirrored == gfx.kImageFlippedX then
+        if self:IsMirrored() then
             self.momentumX = self.jumpoffwallmomentum
         else
             self.momentumX = -self.jumpoffwallmomentum
@@ -609,11 +625,14 @@ function Mipa:ApplyVelocity()
         if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) and not self:IsDead() then
             local allowDamage = true
             if self.holdingbox ~= nil and self.damagerectangle then
-                local inter = collisionObject:getBoundsRect():intersection(self.damagerectangle:getBoundsRect())
+                local colrect = collisionObject:getBoundsRect()
+                local damrect = self.damagerectangle:getBoundsRect()
+                damrect.width = 8
+                damrect.height = 11
+                local inter = colrect:intersection(damrect)
                 if inter:isEmpty() then
                     allowDamage = false
                 end
-                print("true rect X "..inter.x.." Y "..inter.y.." w "..inter.width.." h "..inter.height)
             end
             if allowDamage then
                 self:FatalDamage()
@@ -700,9 +719,9 @@ function Mipa:ApplyVelocity()
                             SoundManager:PlaySound("Splash", 0.1)
                         end
                         if collision.normal.x > 0 then
-                            self.mirrored = gfx.kImageFlippedX
+                            self:SetMirrored(true)
                         else
-                            self.mirrored = gfx.kImageUnflipped
+                            self:SetMirrored(false)
                         end
                     end
                 end
@@ -759,7 +778,7 @@ function Mipa:ProcessPulling()
         local bullet = Bullet(self.x, self.y-2)
         bullet:setImage(AssetsLoader.LoadImage("images/Effects/pull"), self.mirrored)
         bullet:setCollideRect(0, 0, 10, 10)
-        if self.mirrored == gfx.kImageUnflipped then
+        if not self:IsMirrored() then
             bullet.speed = 5
         else
             bullet.speed = -5
@@ -855,7 +874,7 @@ function Mipa:TryThroweBoxUpward()
     local momentumvalue = 3
     local momentumImpulseX = 0
     local pushoff = 0
-    if self.mirrored == gfx.kImageUnflipped then
+    if not self:IsMirrored() then
         momentumImpulseX = momentumvalue
         pushoff = 8
     else
@@ -883,7 +902,7 @@ function Mipa:TryThroweBoxForward()
     local momentumvalue = 3
     local momentumImpulseX = 0
     local pushoff = 0
-    if self.mirrored == gfx.kImageUnflipped then
+    if not self:IsMirrored() then
         momentumImpulseX = momentumvalue
         pushoff = 8
     else
@@ -921,7 +940,7 @@ function Mipa:TryPlaceBox()
     local momentumvalue = 3
     local momentumImpulseX = 0
     local pushoff = 0
-    if self.mirrored == gfx.kImageUnflipped then
+    if not self:IsMirrored() then
         momentumImpulseX = momentumvalue
         pushoff = 8
     else
@@ -945,7 +964,7 @@ end
 function Mipa:RingAction()
     if self.holdingbox == nil then
         local facingoffset = 0
-        if self.mirrored == gfx.kImageUnflipped then
+        if not self:IsMirrored() then
             facingoffset = 3
         else
             facingoffset = -15
@@ -1001,7 +1020,7 @@ function Mipa:BomberAction()
     bullet:setImage(AssetsLoader.LoadImage("images/Effects/bomb"), self.mirrored)
     bullet:setCollideRect(2, 1, 6, 6)
     self.lastbomb = bullet
-    if self.mirrored == gfx.kImageUnflipped then
+    if not self:IsMirrored() then
         bullet.speed = 7
     else
         bullet.speed = -7
@@ -1020,9 +1039,20 @@ function Mipa:BomberAction()
     end
 end
 
+function Mipa:AnimStunLock()
+    return self.shootbombtimer ~= nil
+end
+
+function Mipa:CanControl()
+    if not self.canbecontrolled then
+        return false
+    end
+    return not self:IsDead() and (UIIsnt == nil or not UIIsnt:IsCutscene()) and not self:AnimStunLock()
+end
+
 function Mipa:update()
     self.velocityX = 0
-    if not self:IsDead() and (UIIsnt == nil or not UIIsnt:IsCutscene()) and self.shootbombtimer == nil then
+    if self:CanControl() then
         self:ProcessWalking()
         if pd.buttonJustPressed(pd.kButtonA) then
             local jumped = self:TryJump()

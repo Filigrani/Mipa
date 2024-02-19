@@ -27,55 +27,80 @@ function Level:init(levelPath)
     self:ParceZones()
 end
 
-function Level:CreateTile(ID, X, Y)
-    if ID ~= 4 and ID ~= 5 and ID ~= 6 then
-        self.tilemap:setTileAtPosition(X, Y, ID)
+TILESNAMES = 
+{
+	STONE = 1,
+    STONE_SLAB_TOP = 2,
+	STONE_SLAB_BOTTOM = 3,
+	SHATRED_STONE_SLAB_TOP = 4,
+	SHATRED_STONE_SLAB_BOTTOM = 5,
+	SHATRED_STONE = 6,
+    SPIKE = 302,
+}
+
+function Level:CreateTileCollider(x, y, w, h, image, colOffsetX, colOffsetY)
+    local colider = gfx.sprite.new()
+    if noupdate then
+        colider:setUpdatesEnabled(false)
     end
+    if image then
+        colider:setImage(image)
+    else
+        colider:setVisible(false)
+    end
+    colider:setCenter(0, 0)
+    colider:setBounds(x, y, 14, 14)
+    colider:setCollideRect(colOffsetX, colOffsetY, w, h)
+    colider:add()
+    --colider:markDirty()
+    return colider
+end
+
+function Level:CreateTile(ID, X, Y)
     local WorldX = self.jsonTable.root_x+14*(X-1)
     local WorldY = self.jsonTable.root_y+14*(Y-1)
-    if ID == 2 or ID == 3 then
-        local SlapColider = gfx.sprite.new()
-        local TileW = 14
-        local TileH = 7
-        local YOffset = 0
-        if ID == 3 then
-            YOffset = -7
-        end
-        SlapColider:setUpdatesEnabled(false) 
-        SlapColider:setVisible(false)
-        SlapColider:setCenter(0, 0)
-        SlapColider:setBounds(WorldX, WorldY-YOffset, TileW, TileH)
-        SlapColider:setCollideRect(0, 0, TileW, TileH)
-        SlapColider:addSprite()
-    end
-    if ID == 4 or ID == 5 then
-        local SlapColider = gfx.sprite.new()
-        local TileW = 14
-        local TileH = 7
-        local YOffset = 0
-        if ID == 5 then
-            YOffset = -7
-        end
-        SlapColider:setCenter(0, 0)
-        SlapColider:setImage(self.imagetable:getImage(ID))
-        SlapColider:setBounds(WorldX, WorldY-YOffset, TileW, TileH)
-        SlapColider:setCollideRect(0, 0, TileW, TileH)
-        SlapColider:add()
-        SlapColider.Breaks = true
-    end
-    if ID == 6 then
-        local Colider = gfx.sprite.new()
+    local DefaultRender = true
+    -- Special tiles
+    if ID == TILESNAMES.SPIKE then
+        Spike(WorldX, WorldY)
+    elseif ID == TILESNAMES.STONE_SLAB_TOP 
+    or ID == TILESNAMES.STONE_SLAB_BOTTOM
+    or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP 
+    or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM 
+    or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM 
+    or ID == TILESNAMES.SHATRED_STONE 
+    then
+        DefaultRender = false
         local TileW = 14
         local TileH = 14
-        Colider:setCenter(0, 0)
-        Colider:setImage(self.imagetable:getImage(ID))
-        Colider:setBounds(WorldX, WorldY, TileW, TileH)
-        Colider:setCollideRect(0, 0, TileW, TileH)
-        Colider:add()
-        Colider.IsBreakableTile = true
+        local ColisionOffsetX = 0
+        local ColisionOffsetY = 0
+        if ID == TILESNAMES.STONE_SLAB_TOP 
+        or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP 
+        then
+            TileH = 7
+        end
+    
+        if ID == TILESNAMES.STONE_SLAB_BOTTOM 
+        or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM 
+        then
+            TileH = 7
+            ColisionOffsetY = 7
+        end
+    
+        local col = self:CreateTileCollider(WorldX, WorldY, TileW, TileH, self.imagetable:getImage(ID), ColisionOffsetX, ColisionOffsetY)
+
+        if ID == TILESNAMES.SHATRED_STONE then
+            col.IsBreakableTile = true
+        end
+
+        if ID == TILESNAMES.SHATRED_STONE_SLAB_TOP or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM then
+            col.Breaks = true
+        end
     end
-    if ID == 302 then
-        Spike(WorldX, WorldY)
+
+    if DefaultRender then
+        self.tilemap:setTileAtPosition(X, Y, ID)
     end
 end
 
@@ -549,5 +574,15 @@ function Level:RenderTilemap()
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
     layerSprite:add()
-    gfx.sprite.addWallSprites(tilemap,  {2,3,4,5,6,302,501,602,603} , self.jsonTable.root_x, self.jsonTable.root_y)
+    
+    gfx.sprite.addWallSprites(tilemap,  {
+        TILESNAMES.STONE_SLAB_TOP,
+        TILESNAMES.STONE_SLAB_BOTTOM,
+        TILESNAMES.SHATRED_STONE_SLAB_TOP,
+        TILESNAMES.SHATRED_STONE_SLAB_BOTTOM,
+        TILESNAMES.SHATRED_STONE,
+        TILESNAMES.SPIKE,
+        501,
+        602,
+        603} , self.jsonTable.root_x, self.jsonTable.root_y)
 end
