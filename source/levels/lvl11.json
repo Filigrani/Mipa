@@ -1,0 +1,373 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "103 103 1 103 103 0 0 0 103 103 103 103 103 103 103 0 103 103 103 103 0 0 0 0 103 1 103 103 1 0 103 0 103 103 103 103 0 0 0 0 103 103 103 0 0 0 103 0 103 103 103 103 0 0 0 0 103 103 1 0 0 0 103 0 103 103 103 0 0 0 0 0 103 103 0 0 0 0 103 0 103 103 103 0 0 0 0 0 1 0 0 0 103 103 1 0 103 103 103 0 0 0 0 0 0 0 0 0 103 1 1 0 103 103 103 1 0 0 0 0 0 0 0 103 103 103 1 0 103 103 103 103 0 0 0 0 0 0 0 103 103 103 103 0 103 103 103 103 103 0 0 0 1 0 0 0 0 103 103 0 103 103 103 103 1 0 1 0 103 103 0 0 0 103 103 0 103 103 1 103 103 0 0 0 103 103 103 0 0 103 103 0 103 103 0 0 0 0 0 0 1 0 0 0 0 103 103 0 103 103 1 1 2 0 0 0 1 1 1 0 0 103 103 0 103 103 0 0 0 0 0 0 0 0 103 0 1 103 103 0 103 103 0 0 0 0 2 0 0 0 103 0 0 103 103 0 103 103 0 3 0 0 0 0 2 0 103 0 0 103 103 0 1 1 1 1 0 0 0 0 103 103 103 0 0 103 103 0 1 1 103 103 1 0 0 0 103 103 103 0 0 103 103 0 1 0 103 103 103 0 0 0 1 1 1 103 0 103 103 0 1 2 1 1 103 0 0 0 0 0 103 103 0 103 103 0 0 0 0 3 103 2 0 0 0 0 103 103 0 103 103 0 103 2 1 1 103 1 0 0 0 0 103 103 0 103 103 0 103 0 0 0 0 2 0 0 0 0 103 103 0 103 103 0 103 0 3 0 0 2 0 0 0 0 103 0 0 103 103 0 103 0 103 0 0 0 0 0 1 0 1 0 0 1 1 0 103 0 103 0 3 1 0 0 1 0 0 0 1 1 1 0 103 103 1 1 1 1 0 0 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "button",
+      "x": 60,
+      "y": 127,
+      "UID": 285,
+      "timer": 1,
+      "indicatorUID": 0,
+      "group": "A"
+    },
+    {
+      "propType": "button",
+      "x": 173,
+      "y": 127,
+      "UID": 298,
+      "timer": 7,
+      "indicatorUID": 300,
+      "group": "T"
+    },
+    {
+      "propType": "button",
+      "x": 228,
+      "y": 64,
+      "UID": 293,
+      "timer": 7,
+      "indicatorUID": 302,
+      "group": "G"
+    },
+    {
+      "propType": "button",
+      "x": 301,
+      "y": 155,
+      "UID": 294,
+      "timer": 1,
+      "indicatorUID": 0,
+      "group": "F"
+    },
+    {
+      "propType": "button",
+      "x": 340,
+      "y": 197,
+      "UID": 310,
+      "timer": 7,
+      "indicatorUID": 311,
+      "group": "J"
+    },
+    {
+      "propType": "button",
+      "x": 368,
+      "y": 43,
+      "UID": 317,
+      "timer": 7,
+      "indicatorUID": 316,
+      "group": "M"
+    },
+    {
+      "propType": "button",
+      "x": 214,
+      "y": 197,
+      "UID": 320,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "N"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 18,
+      "y": 220,
+      "UID": 286,
+      "group": "B"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 185,
+      "y": 206,
+      "UID": 287,
+      "group": "C"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 200,
+      "y": 164,
+      "UID": 289,
+      "group": "D"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 298,
+      "y": 74,
+      "UID": 312,
+      "group": "P"
+    },
+    {
+      "propType": "door",
+      "x": 149,
+      "y": 99,
+      "UID": 299,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 3,
+      "y": 99,
+      "UID": 304,
+      "h": 41,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "K",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 261,
+      "y": 99,
+      "UID": 290,
+      "h": 42,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 4,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 88,
+      "y": 141,
+      "UID": 296,
+      "h": 41,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "G",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 149,
+      "y": 127,
+      "UID": 297,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "T",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 200,
+      "y": 79,
+      "UID": 303,
+      "h": 28,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 298,
+      "y": 57,
+      "UID": 309,
+      "h": 13,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "J",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 354,
+      "y": 155,
+      "UID": 313,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "P",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 328,
+      "y": 197,
+      "UID": 315,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "M",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 200,
+      "y": 183,
+      "UID": 318,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "N",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 379,
+      "y": 113,
+      "UID": 321,
+      "h": 28,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "N",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 102,
+      "y": 85,
+      "UID": 284,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 298,
+      "y": 29,
+      "UID": 292,
+      "group": "F",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 270,
+      "y": 52,
+      "UID": 308,
+      "w": 112,
+      "a": 0,
+      "group": "L",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 144,
+      "y": 87,
+      "UID": 288,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 256,
+      "y": 85,
+      "UID": 291,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 186,
+      "y": 74,
+      "UID": 307,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 354,
+      "y": 141,
+      "UID": 314,
+      "group": "P",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 196,
+      "y": 170,
+      "UID": 319,
+      "group": "N",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "clockindicator",
+      "x": 145,
+      "y": 114,
+      "UID": 300
+    },
+    {
+      "propType": "clockindicator",
+      "x": 75,
+      "y": 142,
+      "UID": 302
+    },
+    {
+      "propType": "clockindicator",
+      "x": 285,
+      "y": 57,
+      "UID": 311
+    },
+    {
+      "propType": "clockindicator",
+      "x": 324,
+      "y": 184,
+      "UID": 316
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "spawn",
+      "x": 25,
+      "y": 133
+    },
+    {
+      "zoneType": "exit",
+      "x": 392,
+      "y": 113,
+      "w": 19,
+      "h": 28,
+      "UID": 301,
+      "nextLevel": "lvl12"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 141,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 99,
+      "w": 14,
+      "h": 14
+    }
+   ]
+  }

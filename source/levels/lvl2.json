@@ -143,6 +143,20 @@
       "h": 28,
       "UID": 56,
       "nextLevel": "lvl3"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 169,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 127,
+      "w": 14,
+      "h": 14
     }
    ]
   }

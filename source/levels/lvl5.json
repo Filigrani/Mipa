@@ -236,7 +236,7 @@
     "x": 88,
     "y": 169,
     "UID": 153,
-    "text": "Note1"
+    "noteID": 1
   },
   {
     "zoneType": "spawn",

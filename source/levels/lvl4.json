@@ -249,7 +249,7 @@
       "x": 18,
       "y": 43,
       "UID": 130,
-      "text": "Note0"
+      "noteID": 0
     },
     {
       "zoneType": "trigger",
@@ -273,6 +273,20 @@
       "h": 28,
       "UID": 123,
       "nextLevel": "lvl5"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 197,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 395,
+      "y": 155,
+      "w": 14,
+      "h": 14
     }
    ]
   }

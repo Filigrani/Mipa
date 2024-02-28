@@ -31,7 +31,9 @@ function Activator:init(x, y, group, timer, indicatorUID)
                 self.timertimeleft = self.timertimeleft-1
                 if self.timertimeleft == 0 then
                     self.activated = false
-                    SoundManager:PlaySound("Stop")
+                    if self.indicator then
+                        SoundManager:PlaySound("Stop")
+                    end
                 else
                     self:TimerTick()
                 end
@@ -75,6 +77,10 @@ function Activator:PressButton()
             SoundManager:PlaySound("No")
         end
     else
+        if self.indicator == nil and self.timertimeleft > 0 then
+            SoundManager:PlaySound("No")
+            return
+        end
         SoundManager:PlaySound("Button")
         self.timertimeleft = self.timertime
         self.activated = true

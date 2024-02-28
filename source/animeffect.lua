@@ -6,6 +6,8 @@ class("AnimEffect").extends(gfx.sprite)
 function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset, mirrored)
     if mirrored == nil then
         mirrored = gfx.kImageUnflipped
+    else
+        mirrored = gfx.kImageFlippedX
     end
     self.imagetable = AssetsLoader.LoadImageTable("images/"..tablename)
     self.currentindex = 1
@@ -40,5 +42,7 @@ function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset, mir
 end
 
 function AnimEffect:update()
-
+    if self.CustomUpdate then
+        self.CustomUpdate()
+    end
 end

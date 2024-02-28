@@ -27,6 +27,7 @@ function UI:init()
     self.lastglitch = 0
     self.glitchframes = 0
     self.dialogYroot = 175
+    self.skipflash = 0
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -146,6 +147,63 @@ function UI:UpdateEquipment(equipment, selectedIndex, passiveitems)
             eq.icon:setImage(AssetsLoader.LoadImage("images/UI/passive"..item))
         end
     end
+    ShouldUpdatePauseMenu = true
+end
+
+function UI:PauseMenuDown(type, ori)
+    if MipaInst then
+        if type == 1 then
+            if #MipaInst.passiveitems > 0 then
+                self.pauseoverlay.type = 2
+                self.pauseoverlay.selected = 1
+            elseif #FoundNotes > 0 then
+                self.pauseoverlay.type = 3
+                self.pauseoverlay.selected = 1
+            else
+                return
+            end
+        elseif type == 2 then
+            if #FoundNotes > 0 then
+                self.pauseoverlay.type = 3
+                self.pauseoverlay.selected = 1
+            else
+                self.pauseoverlay.type = 1
+                self.pauseoverlay.selected = 1
+            end
+        elseif type == 3 then
+            self.pauseoverlay.type = 1
+            self.pauseoverlay.selected = 1
+        end
+    end
+    self:PauseSelector()
+end
+
+function UI:PauseMenuUp(type, ori)
+    if MipaInst then
+        if type == 1 then
+            if #FoundNotes > 0 then
+                self.pauseoverlay.type = 3
+                self.pauseoverlay.selected = 1
+            elseif #MipaInst.passiveitems > 0 then
+                self.pauseoverlay.type = 2
+                self.pauseoverlay.selected = 1
+            else
+                return
+            end
+        elseif type == 2 then
+            self.pauseoverlay.type = 1
+            self.pauseoverlay.selected = 1
+        elseif type == 3 then
+            if #MipaInst.passiveitems > 0 then
+                self.pauseoverlay.type = 2
+                self.pauseoverlay.selected = 1
+            else
+                self.pauseoverlay.type = 1
+                self.pauseoverlay.selected = 1
+            end
+        end
+    end
+    self:PauseSelector()
 end
 
 function UI:Update()
@@ -190,6 +248,76 @@ function UI:Update()
         if self.glitchoverlay ~= nil then
             gfx.sprite.removeSprite(self.glitchoverlay)
             self.glitchoverlay = nil
+        end
+    end
+    if self.pauseoverlay then
+        if pd.buttonJustPressed(pd.kButtonA) then
+            if MipaInst then
+                if self.pauseoverlay.type == 1 then
+                    self:StartDialog(GetDialogDataFromString("ExamineEquipment"..MipaInst.equipment[self.pauseoverlay.selected]))
+                elseif self.pauseoverlay.type == 2 then
+                    self:StartDialog(GetDialogDataFromString("ExaminePassive"..MipaInst.passiveitems[self.pauseoverlay.selected]))
+                elseif self.pauseoverlay.type == 3 then
+                    self:StartDialog(GetDialogDataFromString("Note"..FoundNotes[self.pauseoverlay.selected]))
+                end
+            end
+        end
+        if pd.buttonJustPressed(pd.kButtonDown) then
+            self:PauseMenuDown(self.pauseoverlay.type)
+        end
+        if pd.buttonJustPressed(pd.kButtonUp) then
+            self:PauseMenuUp(self.pauseoverlay.type)
+        end
+        if pd.buttonJustPressed(pd.kButtonB) then
+            self:HidePauseMenu()
+        end
+        if pd.buttonJustPressed(pd.kButtonLeft) then
+            local max = 0
+            if self.pauseoverlay.type == 1 then
+                if MipaInst then
+                    max = #MipaInst.equipment
+                end
+            elseif self.pauseoverlay.type == 2 then
+                if MipaInst then
+                    max = #MipaInst.passiveitems
+                end
+            elseif self.pauseoverlay.type == 3 then
+                max = #FoundNotes
+            end
+            if max > 0 then
+                if self.pauseoverlay.selected then
+                    if self.pauseoverlay.selected-1 < 1 then
+                        self.pauseoverlay.selected = max
+                    else
+                        self.pauseoverlay.selected = self.pauseoverlay.selected-1
+                    end
+                end
+            end
+            self:PauseSelector()
+        end
+        if pd.buttonJustPressed(pd.kButtonRight) then
+            local max = 0
+            if self.pauseoverlay.type == 1 then
+                if MipaInst then
+                    max = #MipaInst.equipment
+                end
+            elseif self.pauseoverlay.type == 2 then
+                if MipaInst then
+                    max = #MipaInst.passiveitems
+                end
+            elseif self.pauseoverlay.type == 3 then
+                max = #FoundNotes
+            end
+            if max > 0 then
+                if self.pauseoverlay.selected then
+                    if self.pauseoverlay.selected+1 > max then
+                        self.pauseoverlay.selected = 1
+                    else
+                        self.pauseoverlay.selected = self.pauseoverlay.selected+1
+                    end
+                end
+            end
+            self:PauseSelector()
         end
     end
 end
@@ -346,6 +474,8 @@ function UI:DialogPosUpdate()
         self.dialogtextsprite:moveTo(7, self.dialogYroot)
     end
     self.dialogbg:moveTo(0, self.dialogYroot-5)
+    self.dialogSkip:moveTo(343, self.dialogYroot+43)
+    
 end
 
 function UI:ProcessDialog()
@@ -370,6 +500,18 @@ function UI:ProcessDialog()
         end
         if not self.dialogtextsprite:isVisible() then
             self.dialogtextsprite:setVisible(true)
+        end
+        if self.CanSkipThisDialog then
+            if self.skipflash > 30 then
+                self.skipflash = 0
+                if self.dialogSkip:isVisible() then
+                    self.dialogSkip:setVisible(false)
+                else
+                    self.dialogSkip:setVisible(true)
+                end
+            else
+                self.skipflash = self.skipflash + 1
+            end
         end
         if ActorChanged then
             if ShowActor then
@@ -426,33 +568,41 @@ function UI:ProcessDialog()
                     self.currenttext = ""
                     self.dialogtextimage = gfx.image.new(388, 62)
                 else
+                    print("[UI] Dialog "..self.dialogdata.Key.." finished")
+                    table.insert(SeenDialogs, self.dialogdata.Key)
                     self:CancleDialog()
                 end
             end
         end
         local disiredYRoot = self.dialogYroot
-        if DialogboxMode == "dyn" then      
-            if MipaInst ~= nil then         
-                if MipaInst.x > 0 and MipaInst.x < 400 then -- if out of bounds, dont make any changes
-                    if MipaInst.y > 170 then
-                        disiredYRoot = 2
-                    else
-                        if MipaInst.y < 150 then
-                            disiredYRoot = 175
-                        end
-                    end                
-                end
+
+        if (self:IsShowingPause() and self.pauseoverlay.type ~= 3) or DialogboxMode == "fixeddown" then
+            disiredYRoot = 175
+        else
+            
+            if (self:IsShowingPause() and self.pauseoverlay.type == 3) or DialogboxMode == "fixedup" then
+                disiredYRoot = 2
             else
-                disiredYRoot = 175
+                if DialogboxMode == "dyn" then      
+                    if MipaInst ~= nil then         
+                        if MipaInst.x > 0 and MipaInst.x < 400 then -- if out of bounds, dont make any changes
+                            if MipaInst.y > 170 then
+                                disiredYRoot = 2
+                            else
+                                if MipaInst.y < 150 then
+                                    disiredYRoot = 175
+                                end
+                            end                
+                        end
+                    else
+                        disiredYRoot = 175
+                    end
+                end
             end
-            if disiredYRoot ~= self.dialogYroot then
-                self.dialogYroot = disiredYRoot
-                self:DialogPosUpdate()
-            end
-        elseif DialogboxMode == "fixedup" then
-            self.dialogYroot = 2
-        elseif DialogboxMode == "fixeddown" then
-            self.dialogYroot = 175
+        end
+        if disiredYRoot ~= self.dialogYroot then
+            self.dialogYroot = disiredYRoot
+            self:DialogPosUpdate()
         end
     end
 end
@@ -474,10 +624,18 @@ function UI:LoadDialogUI()
     DialogTextSprite:setCenter(0, 0)
     DialogTextSprite:moveTo(91, 175)
     DialogTextSprite:setZIndex(Z_Index.UI)
+
+    local DialogSkip = gfx.sprite.new()
+    DialogSkip:setCenter(0, 0)
+    DialogSkip:moveTo(343, 218)
+    DialogSkip:setZIndex(Z_Index.UI)
+    DialogSkip:setImage(AssetsLoader.LoadImage("images/UI/HoldToSkip", true))
+    self.dialogSkip = DialogSkip
     self.dialogtextimage = gfx.image.new(388, 62)
     self.dialogbg = BG
     self.dialogactor = Actor
     self.dialogtextsprite = DialogTextSprite
+    
     self:DialogPosUpdate()
 end
 
@@ -493,6 +651,7 @@ function UI:CancleDialog()
     self.dialogbg:remove()
     self.dialogactor:remove()
     self.dialogtextsprite:remove()
+    self.dialogSkip:remove()
 end
 
 function UI:StartDialog(data, onstart, onfinish)
@@ -508,6 +667,10 @@ function UI:StartDialog(data, onstart, onfinish)
     self.dialogbg:add()
     self.dialogactor:add()
     self.dialogtextsprite:add()
+    self.dialogSkip:add()
+    self.CanSkipThisDialog = self:CanSkipDialog(data.Key)
+    self.dialogSkip:setVisible(self.CanSkipThisDialog)
+    self.skipflash = 0
     if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then -- in case when we start new dialog when previous was still in process
         TrackableManager.ProcessCommandLine(self.ondialogfinish)
     end
@@ -570,6 +733,13 @@ function UI:IsCutscene()
     return true
 end
 
+function UI:IsShowingPause()
+    if self.pauseoverlay == nil then
+        return false
+    end
+    return true
+end
+
 function UI:StartCutscene(name)
     print("[UI] Trying to load cutscene "..name)
     self.scenejsonTable = GetJSONData("images/UI/cutscenes/"..name..".json")
@@ -587,4 +757,68 @@ function UI:StartCutscene(name)
     self.sceneimages = #self.scenejsonTable.frames
     self.sceneimagetable = AssetsLoader.LoadImageTable("images/UI/cutscenes/"..self.scenejsonTable.sheet)
     self:NextCutsceneFrame()
+end
+
+function UI:CanSkipDialog(dialogKey)
+    for i = 1, #SeenDialogs, 1 do
+        if dialogKey == SeenDialogs[i] then
+            return true
+        end
+    end
+    return false
+end
+
+function UI:PauseSelector()
+    if self.pauseoverlay then
+        if self.pauseoverlay.selector then
+            if self.pauseoverlay.type == 1 then
+                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImage("images/UI/pause/slotselectora"))
+                self.pauseoverlay.selector:moveTo(178 + 30*self.pauseoverlay.selected, 30)
+            elseif self.pauseoverlay.type == 2 then
+                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImage("images/UI/pause/slotselectorp"))
+                self.pauseoverlay.selector:moveTo(180 + 31*self.pauseoverlay.selected, 61)
+            elseif self.pauseoverlay.type == 3 then
+                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImage("images/UI/pause/slotselectora"))
+                if self.pauseoverlay.selected == 1 then
+                    self.pauseoverlay.selector:moveTo(221,178)
+                end
+                if self.pauseoverlay.selected == 2 then
+                    self.pauseoverlay.selector:moveTo(251,188)
+                end
+                if self.pauseoverlay.selected == 3 then
+                    self.pauseoverlay.selector:moveTo(281,176)
+                end
+            end
+        end
+    end
+end
+
+function UI:HidePauseMenu()
+    if self.pauseoverlay then
+        gfx.sprite.removeSprite(self.pauseoverlay.selector)
+        gfx.sprite.removeSprite(self.pauseoverlay)
+        self.pauseoverlay.selector = nil
+        self.pauseoverlay = nil
+    end
+end
+
+function UI:ShowPauseMenu()
+    self:CancleDialog()
+    local img = GetPauseMenuImage(true)
+    img:setInverted(true)
+    self.pauseoverlay = gfx.sprite.new()
+    self.pauseoverlay:setCenter(0, 0)
+    self.pauseoverlay:moveTo(0, 0)
+    self.pauseoverlay:setZIndex(Z_Index.UI)
+    self.pauseoverlay:add()
+    self.pauseoverlay:setImage(img)
+    self.pauseoverlay.selected = 1
+    self.pauseoverlay.type = 1
+
+    self.pauseoverlay.selector = gfx.sprite.new()
+    self.pauseoverlay.selector:setCenter(0, 0)
+    self.pauseoverlay.selector:moveTo(0, 0)
+    self.pauseoverlay.selector:setZIndex(Z_Index.UI)
+    self.pauseoverlay.selector:add()
+    self:PauseSelector()
 end

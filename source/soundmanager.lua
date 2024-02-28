@@ -2,16 +2,19 @@ local pd <const> = playdate
 local snd = pd.sound
 SoundManager = {}
 local sounds = {}
-local soundvariants = {}
-local function AddSound(name, variants)
+local function AddSound(name, variants, caninterupt)
+    sounds[name] = {}
+    sounds[name].caninterupt = caninterupt
     if variants == nil then
-        sounds[name] = snd.sampleplayer.new('sfx/'..name)
-        soundvariants[name] = -1
+        sounds[name].sound = snd.sampleplayer.new('sfx/'..name)
+        sounds[name].variants = -1
     else
+        sounds[name] = {}
+        sounds[name].sound = {}
+        sounds[name].variants = variants
         for i=0, variants do
-            sounds[name..i] = snd.sampleplayer.new('sfx/'..name..i)
+            table.insert(sounds[name].sound, snd.sampleplayer.new('sfx/'..name..i))
         end
-        soundvariants[name] = variants
     end
 end
 
@@ -46,6 +49,10 @@ AddSound("Tick")
 AddSound("Stop")
 AddSound("Warning")
 AddSound("Heavyland")
+AddSound("Wooah")
+AddSound("PfffBrr")
+AddSound("Pfff", nil, true)
+
 
 function SoundManager:PlaySound(name, vol, ignorecutscene)
     if UIIsnt and UIIsnt:IsCutscene() then
@@ -57,20 +64,25 @@ function SoundManager:PlaySound(name, vol, ignorecutscene)
     if vol ~= nil then
         volume = vol
     end
-    local variants = soundvariants[name]
-    if variants == -1 then
-        if sounds[name] ~= nil and not sounds[name]:isPlaying() then
-            sounds[name]:setVolume(volume)
-            sounds[name]:play(1)
-        end
-    else
-        for i=0, variants do
-            if sounds[name..i] ~= nil and sounds[name..i]:isPlaying() then
-                return
+
+    if sounds[name] ~= nil then
+        local data = sounds[name]
+        if data.variants == -1 then
+            if not data.sound:isPlaying() or data.caninterupt then
+                sounds[name].sound:setVolume(volume)
+                sounds[name].sound:play(1)
             end
-            local RandomIndex = math.random(0, variants)
-            sounds[name..RandomIndex]:setVolume(volume)
-            sounds[name..RandomIndex]:play(1)
+        else
+            if not data.caninterupt then
+                for i=0, data.variants do
+                    if data.sound[i] ~= nil and data.sound[i]:isPlaying() then
+                        return
+                    end
+                end
+            end
+            local RandomIndex = math.random(1, data.variants+1)
+            data.sound[RandomIndex]:setVolume(volume)
+            data.sound[RandomIndex]:play(1)
         end
     end
 end

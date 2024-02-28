@@ -81,6 +81,26 @@
     {
       "key": "WaterfallTiles",
       "line": "#Mipa\nOh what is it?\nWaterfall? Lavafall? I can't see..."
+    },
+    {
+      "key": "ExamineEquipment1",
+      "line": "#Mipa\nThis is mine Magnet Hand!\nI can use this to pull objects!\n...\nI guess, I always had it...can't remember."
+    },
+    {
+      "key": "ExamineEquipment2",
+      "line": "#Mipa\nThis mysterious ring gives POWER!\nSo...it can be called Power Ring!\n...\nThis can help me to lift heavy objects, maybe even throw them."
+    },
+    {
+      "key": "ExamineEquipment3",
+      "line": "#Mipa\nCrashbomber!\nI feel, like I seen one before, but never had a chance to use it before."
+    },
+    {
+      "key": "ExaminePassive1",
+      "line": "#Mipa\nThis is bottle! And it has very carbonated liquid inside of it.\nIt has lable sticker attached to it saying 'KoaKola'.\nI have no idea what it means."
+    },
+    {
+      "key": "ExaminePassive2",
+      "line": "#Mipa\nJobee gave me this jar. She said this honey very sticky.\nAnd this is true!"
     }
   ]
 }

@@ -36,6 +36,21 @@ TILESNAMES =
 	SHATRED_STONE_SLAB_BOTTOM = 5,
 	SHATRED_STONE = 6,
     SPIKE = 302,
+    ConveyorBeltsEdgeLeft_BOTTOM = 501,
+    ConveyorBelts_BOTTOM = 502,
+    ConveyorBeltsEdgeRight_BOTTOM = 503,
+
+    ConveyorBeltsEdgeLeft_TOP = 504,
+    ConveyorBelts_TOP = 505,
+    ConveyorBeltsEdgeRight_TOP = 506,
+
+    ConveyorBeltsEdgeLeftInversed_BOTTOM = 507,
+    ConveyorBeltsInversed_BOTTOM = 508,
+    ConveyorBeltsEdgeRightInversed_BOTTOM = 509,
+
+    ConveyorBeltsEdgeLeftInversed_TOP = 510,
+    ConveyorBeltsInversed_TOP = 511,
+    ConveyorBeltsEdgeRightInversed_TOP = 512,
 }
 
 function Level:CreateTileCollider(x, y, w, h, image, colOffsetX, colOffsetY)
@@ -68,7 +83,19 @@ function Level:CreateTile(ID, X, Y)
     or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP 
     or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM 
     or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM 
-    or ID == TILESNAMES.SHATRED_STONE 
+    or ID == TILESNAMES.SHATRED_STONE
+    or ID == TILESNAMES.ConveyorBeltsEdgeLeft_BOTTOM
+    or ID == TILESNAMES.ConveyorBeltsEdgeLeftInversed_BOTTOM
+    or ID == TILESNAMES.ConveyorBelts_BOTTOM
+    or ID == TILESNAMES.ConveyorBeltsInversed_BOTTOM
+    or ID == TILESNAMES.ConveyorBeltsEdgeRight_BOTTOM
+    or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_BOTTOM
+    or ID == TILESNAMES.ConveyorBeltsEdgeLeft_TOP
+    or ID == TILESNAMES.ConveyorBeltsEdgeLeftInversed_TOP
+    or ID == TILESNAMES.ConveyorBelts_TOP
+    or ID == TILESNAMES.ConveyorBeltsInversed_TOP
+    or ID == TILESNAMES.ConveyorBeltsEdgeRight_TOP
+    or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_TOP
     then
         DefaultRender = false
         local TileW = 14
@@ -76,13 +103,25 @@ function Level:CreateTile(ID, X, Y)
         local ColisionOffsetX = 0
         local ColisionOffsetY = 0
         if ID == TILESNAMES.STONE_SLAB_TOP 
-        or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP 
+        or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP
+        or ID == TILESNAMES.ConveyorBelts_TOP
+        or ID == TILESNAMES.ConveyorBeltsInversed_TOP
+        or ID == TILESNAMES.ConveyorBeltsEdgeLeft_TOP
+        or ID == TILESNAMES.ConveyorBeltsEdgeLeftInversed_TOP
+        or ID == TILESNAMES.ConveyorBeltsEdgeRight_TOP
+        or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_TOP
         then
             TileH = 7
         end
     
         if ID == TILESNAMES.STONE_SLAB_BOTTOM 
-        or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM 
+        or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM
+        or ID == TILESNAMES.ConveyorBelts_BOTTOM
+        or ID == TILESNAMES.ConveyorBeltsInversed_BOTTOM
+        or ID == TILESNAMES.ConveyorBeltsEdgeLeft_BOTTOM
+        or ID == TILESNAMES.ConveyorBeltsEdgeLeftInversed_BOTTOM
+        or ID == TILESNAMES.ConveyorBeltsEdgeRight_BOTTOM
+        or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_BOTTOM
         then
             TileH = 7
             ColisionOffsetY = 7
@@ -96,6 +135,33 @@ function Level:CreateTile(ID, X, Y)
 
         if ID == TILESNAMES.SHATRED_STONE_SLAB_TOP or ID == TILESNAMES.SHATRED_STONE_SLAB_BOTTOM then
             col.Breaks = true
+        end
+
+        if ID >= 501 and ID <= 512 then
+            if ID >= 501 and ID <= 506 then
+                col.DefaultSpriteID = ID
+                col.ReversedSpriteID = ID+6
+                col.Inversed = false
+            else
+                col.DefaultSpriteID = ID-6
+                col.ReversedSpriteID = ID
+                col.Inversed = true
+            end
+            col.IsConveyorBelts = true
+            col.animationtimer = pd.frameTimer.new(2)
+            col.animationtimer.repeats = true
+            col.even = false
+            col:setImage(self.imagetable:getImage(col.DefaultSpriteID))
+            col.animationtimer.timerEndedCallback = function(timer)
+                if col.even then
+                    col.even = false
+                    col:setImage(self.imagetable:getImage(col.DefaultSpriteID))
+                else
+                    col.even = true
+                    col:setImage(self.imagetable:getImage(col.ReversedSpriteID))
+                end
+            end
+            col.animationtimer:start()
         end
     end
 
@@ -471,6 +537,60 @@ function Level:CreateProp(propData)
     elseif type == "blob" then
         local c = Creature(propData.x, propData.y)
         c.enemyname = "blob"
+    elseif type == "boxdropper" then
+        local dropper = Activatable(propData.x, propData.y, propData.group, false, propData.activeType)
+        local img = AssetsLoader.LoadImage("images/Props/boxdropper")
+        dropper:setImage(img)
+        dropper.DropBox = function ()
+            
+            AnimEffect(dropper.x+5, dropper.y+12, "Effects/BigCloud", 1, true, false)
+            AnimEffect(dropper.x+3, dropper.y+13, "Effects/BigCloud", 1, true, false)
+            AnimEffect(dropper.x+1, dropper.y+11, "Effects/BigCloud", 1, true, false)
+            
+            local BoxUID = propData.UID.."box"
+            --[[
+            local oldbox = TrackableManager.GetByUID(propData.UID.."box")
+            if oldbox then
+                for i = 1, 10, 1 do
+                    local speadX = 8
+                    local spreadY = -1*i
+                    local effectX = math.floor(math.random(-speadX,speadX)+0.5)
+                    local animSpeed = math.floor(math.random(1,3)+0.5)
+                    AnimEffect(oldbox.x+effectX, oldbox.y+spreadY, "Effects/BigCloud", animSpeed, true, false)
+                end
+            end
+            TrackableManager.RemoveByUID(BoxUID)
+            local box =  PhysicalProp(propData.x+7, propData.y+7)
+            TrackableManager.Add(box, propData.UID.."box")
+            --]]
+            local box = TrackableManager.GetByUID(propData.UID.."box")
+            if box == nil then
+                box =  PhysicalProp(propData.x+7, propData.y+7)
+                TrackableManager.Add(box, propData.UID.."box")
+                box.Dropper = dropper
+            end
+            if box then
+                for i = 1, 10, 1 do
+                    local speadX = 8
+                    local spreadY = -1*i
+                    local effectX = math.floor(math.random(-speadX,speadX)+0.5)
+                    local animSpeed = math.floor(math.random(1,3)+0.5)
+                    AnimEffect(box.x+effectX, box.y+spreadY, "Effects/BigCloud", animSpeed, true, false)
+                end
+                box:moveTo(propData.x+7, propData.y+7)
+            end
+        end
+        if propData.active then
+            dropper.DropBox()
+        end
+        dropper.CustomUpdate = function()
+            if dropper.lastactive ~= dropper.activated then
+                if dropper.activated then
+                    dropper.DropBox()
+                end
+            end
+        end
+        TrackableManager.Add(dropper, propData.UID)
     end
 end
 
@@ -494,16 +614,21 @@ function Level:CreateZone(zoneData)
             h = zoneData.h
         end
         local t = Trigger(zoneData.x, zoneData.y, w, h)
+        local StrKey = ""
         if type == "note" then
             t:setImage(AssetsLoader.LoadImage("images/Props/Note"))
+            StrKey = "Note"..zoneData.noteID
+        else 
+            StrKey = zoneData.text
         end
-        t.dialogdata = GetDialogDataFromString(zoneData.text)
+        t.dialogdata = GetDialogDataFromString(StrKey)
         t.ondialogstart = zoneData.dialogstart
         t.ondialogfinish = zoneData.dialogfinish
         t.OnTrigger = function ()
             if type == "note" then
                 InvertedColorsFrames = 2
                 SoundManager:PlaySound("Note")
+                AddFoundNote(zoneData.noteID)
             end
             UIIsnt:StartDialog(t.dialogdata, t.ondialogstart, t.ondialogfinish)
         end
@@ -515,6 +640,9 @@ function Level:CreateZone(zoneData)
             TrackableManager.ProcessCommandLine(t.ontriggercommand)
         end
         TrackableManager.Add(t, zoneData.UID)
+    elseif type == "invizcolider" then
+        local t = Dummy(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        t:setCollideRect(0,0,zoneData.w, zoneData.h)
     elseif type == "exit" then
         local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
         t.nextlevel = zoneData.nextLevel
@@ -582,7 +710,17 @@ function Level:RenderTilemap()
         TILESNAMES.SHATRED_STONE_SLAB_BOTTOM,
         TILESNAMES.SHATRED_STONE,
         TILESNAMES.SPIKE,
-        501,
-        602,
-        603} , self.jsonTable.root_x, self.jsonTable.root_y)
+        TILESNAMES.ConveyorBelts_TOP,
+        TILESNAMES.ConveyorBeltsInversed_TOP,
+        TILESNAMES.ConveyorBeltsEdgeLeft_TOP,
+        TILESNAMES.ConveyorBeltsEdgeLeftInversed_TOP,
+        TILESNAMES.ConveyorBeltsEdgeRight_TOP,
+        TILESNAMES.ConveyorBeltsEdgeRightInversed_TOP,
+        TILESNAMES.ConveyorBelts_BOTTOM,
+        TILESNAMES.ConveyorBeltsInversed_BOTTOM,
+        TILESNAMES.ConveyorBeltsEdgeLeft_BOTTOM,
+        TILESNAMES.ConveyorBeltsEdgeLeftInversed_BOTTOM,
+        TILESNAMES.ConveyorBeltsEdgeRight_BOTTOM,
+        TILESNAMES.ConveyorBeltsEdgeRightInversed_BOTTOM
+    } , self.jsonTable.root_x, self.jsonTable.root_y)
 end

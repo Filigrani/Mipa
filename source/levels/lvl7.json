@@ -148,7 +148,7 @@
       "x": 116,
       "y": 58,
       "UID": 197,
-      "group": "B",
+      "group": "F",
       "active": 0,
       "activeType": "Every"
     },
@@ -202,6 +202,20 @@
       "h": 41,
       "UID": 195,
       "nextLevel": "lvl8"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 183,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 127,
+      "w": 14,
+      "h": 14
     }
    ]
   }

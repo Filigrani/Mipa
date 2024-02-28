@@ -1,0 +1,207 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "103 103 103 103 103 0 0 0 103 103 103 1 103 103 103 0 103 103 103 103 0 0 0 0 1 1 103 103 103 103 103 0 103 103 103 103 0 0 0 0 1 1 103 103 103 1 1 0 103 103 103 103 0 0 0 0 0 1 103 103 103 1 103 0 103 103 103 103 0 0 0 0 0 0 103 103 103 103 103 0 103 103 103 103 2 0 0 0 0 0 0 0 103 103 103 0 103 103 103 103 1 0 0 0 0 0 0 0 0 103 103 0 103 103 103 103 0 0 0 0 0 0 0 0 0 103 103 0 103 103 103 103 103 0 0 0 0 0 0 0 0 103 103 0 103 103 103 103 0 0 0 0 0 0 0 0 103 103 103 0 103 103 103 103 103 0 0 0 0 0 0 0 0 103 103 0 103 103 103 103 0 0 0 0 0 0 0 103 103 103 103 0 103 103 103 103 103 0 0 0 0 0 0 0 0 103 1 0 103 103 103 1 0 0 0 0 0 0 0 0 0 103 103 0 103 103 103 103 1 2 0 0 0 0 0 0 0 103 103 0 103 103 103 103 0 0 0 0 0 0 0 103 0 103 103 0 103 103 103 103 0 0 0 0 0 0 0 0 0 103 103 0 103 103 103 103 1 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 103 0 0 103 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 103 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 103 103 103 103 103 0 0 0 0 0 0 0 0 0 1 0 103 103 103 103 103 0 0 0 0 0 0 0 0 1 1 0 103 103 103 103 103 0 0 0 0 0 0 0 1 1 1 0 103 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 103 103 103 0 0 0 0 0 0 0 0 0 0 0 3 0 103 103 103 103 103 402 0 0 1 103 103 103 103 1 1 0 103 103 103 103 103 405 0 0 103 103 103 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "boxbutton",
+      "x": 103,
+      "y": 206,
+      "UID": 331,
+      "group": "A"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 130,
+      "y": 192,
+      "UID": 336,
+      "group": "B"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 158,
+      "y": 178,
+      "UID": 337,
+      "group": "C"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 186,
+      "y": 206,
+      "UID": 338,
+      "group": "D"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 214,
+      "y": 178,
+      "UID": 339,
+      "group": "E"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 229,
+      "y": 206,
+      "UID": 340,
+      "group": "F"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 256,
+      "y": 206,
+      "UID": 341,
+      "group": "G"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 284,
+      "y": 220,
+      "UID": 343,
+      "group": "H"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 354,
+      "y": 228,
+      "UID": 345,
+      "group": "L"
+    },
+    {
+      "propType": "door",
+      "x": 4,
+      "y": 99,
+      "UID": 326,
+      "h": 41,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "K",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 102,
+      "y": 85,
+      "UID": 329,
+      "group": "A",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 130,
+      "y": 86,
+      "UID": 324,
+      "group": "B",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 158,
+      "y": 86,
+      "UID": 330,
+      "group": "C",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 186,
+      "y": 86,
+      "UID": 332,
+      "group": "D",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 214,
+      "y": 86,
+      "UID": 333,
+      "group": "E",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 228,
+      "y": 86,
+      "UID": 334,
+      "group": "F",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 256,
+      "y": 86,
+      "UID": 335,
+      "group": "G",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 284,
+      "y": 43,
+      "UID": 342,
+      "group": "H",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 354,
+      "y": 71,
+      "UID": 344,
+      "group": "L",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "spawn",
+      "x": 25,
+      "y": 133
+    },
+    {
+      "zoneType": "exit",
+      "x": 392,
+      "y": 113,
+      "w": 19,
+      "h": 28,
+      "UID": 325,
+      "nextLevel": "lvl13"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 141,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 99,
+      "w": 14,
+      "h": 14
+    }
+   ]
+  }

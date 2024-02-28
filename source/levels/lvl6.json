@@ -267,6 +267,20 @@
       "h": 41,
       "UID": 165,
       "nextLevel": "lvl7"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 184,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 128,
+      "w": 14,
+      "h": 14
     }
    ]
   }

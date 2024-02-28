@@ -40,14 +40,54 @@ MenuInst = nil
 MipaInst = nil
 CreditsInst = nil
 CurrentLevel = nil
+CurrentLevelName = "menu"
 NextLevel = "menu"
 LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 10
+LevelsLimit = 13
 DialogboxMode = SaveManager.Load("dialogboxmode") or "dyn"
 local font = gfx.font.new('font/Asheville Ayu')
+ShouldUpdatePauseMenu = false
+SeenDialogs = {}
+FoundNotes = {}
+
+AddFoundNote = function (noteID)
+	for i = 1, #FoundNotes, 1 do
+		if FoundNotes[i] == noteID then
+			return
+		end
+	end
+	table.insert(FoundNotes, noteID)
+	table.sort(FoundNotes)
+end
+
+local function OpenItemsMenu()
+	if UIIsnt then
+		UIIsnt:ShowPauseMenu()
+	end
+end
+
+local function AddSystemMenuButtons()
+	local menu = pd.getSystemMenu()
+	menu:removeAllMenuItems()
+
+	if CurrentLevelName ~= "menu" then
+		local menuItem, error = menu:addMenuItem("main menu", function()
+			NextLevel = "menu"
+			StartGame()
+		end)
+		if CurrentLevelName ~= "credits" then
+			local menuItem, error = menu:addMenuItem("Restart level", function()
+				StartGame()
+			end)
+			local menuItem, error = menu:addMenuItem("items", function()
+				OpenItemsMenu()
+			end)
+		end
+	end
+end
 
 StartGame = function ()
 	InvertedColorsFrames = 0
@@ -66,7 +106,10 @@ StartGame = function ()
 	MenuInst = nil
 	CreditsInst = nil
 	if NextLevel == "menu" then
+		pd.setMenuImage(nil, 0)
 		MenuInst = Menu()
+		CurrentLevelName = "menu"
+		AddSystemMenuButtons()
 		return
 	end
 	if NextLevel == "credits" then
@@ -76,6 +119,8 @@ StartGame = function ()
 		UIIsnt.oneglitchover = function ()
 			CreditsInst = Credits()
 		end
+		CurrentLevelName = "credits"
+		AddSystemMenuButtons()
 		return
 	end
 	--local clone = Mipa(165, 134)
@@ -83,9 +128,14 @@ StartGame = function ()
 		clone.IsClone = true
 		clone.hp = 1
 	end
-	CurrentLevel = Level("levels/"..NextLevel..".json")
+	if CurrentLevelName ~= NextLevel then
+		SeenDialogs = {}
+	end
+	CurrentLevelName = NextLevel
+	CurrentLevel = Level("levels/"..CurrentLevelName..".json")
 	UIIsnt = UI()
 	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
+	AddSystemMenuButtons()
 end
 
 DeathTrigger = function ()
@@ -139,19 +189,101 @@ DeathTrigger = function ()
 		fadetimer:start()
     end
 end
+
+GetPauseMenuImage = function (extended)
+	local img = gfx.image.new(400, 240)
+	gfx.pushContext(img)
+		gfx.setImageDrawMode(gfx.kDrawModeCopy)
+		if extended then
+			AssetsLoader.LoadImage("images/UI/pause/bg_extended"):draw(0,0)
+		else
+			AssetsLoader.LoadImage("images/UI/pause/bg"):draw(0,0)
+		end
+		if MipaInst then
+			for i = 1, #MipaInst.equipment, 1 do
+				local overlay = AssetsLoader.LoadImage("images/UI/pause/a"..MipaInst.equipment[i])
+				if overlay then
+					overlay:draw(0,0)
+				end
+			end
+			for i = 1, #MipaInst.passiveitems, 1 do
+				local overlay = AssetsLoader.LoadImage("images/UI/pause/p"..MipaInst.passiveitems[i])
+				if overlay then
+					overlay:draw(0,0)
+				end
+			end
+		end
+
+		if extended then
+			for i = 1, #MipaInst.equipment, 1 do
+				local slot = AssetsLoader.LoadImage("images/UI/pause/slota")
+				local item = AssetsLoader.LoadImage("images/UI/equip"..MipaInst.equipment[i])
+				local x = 178 + 30*i
+				local y = 30
+				if slot then
+					slot:draw(x,y)
+				end
+				if item then
+					item:draw(x,y)
+				end
+			end
+			for i = 1, #MipaInst.passiveitems, 1 do
+				local slot = AssetsLoader.LoadImage("images/UI/pause/slotp")
+				local item = AssetsLoader.LoadImage("images/UI/passive"..MipaInst.passiveitems[i])
+				local x = 180 + 31*i
+				local y = 61
+				if slot then
+					slot:draw(x,y)
+				end
+				if item then
+					item:draw(x,y)
+				end
+			end
+			for i = 1, #FoundNotes, 1 do
+				local noteID = FoundNotes[i]
+				local item = AssetsLoader.LoadImage("images/UI/pause/Note"..noteID)
+				if i == 1 then
+					item:draw(221,178)
+				elseif i == 2 then
+					item:draw(251,188)
+				elseif i == 3 then
+					item:draw(281,176)
+				end
+			end
+		end
+	gfx.popContext()
+	return img
+end
+
+local function UpdatePauseMenu()
+	if MipaInst == nil then
+		pd.setMenuImage(nil, 0)
+		return
+	end
+	if ShouldUpdatePauseMenu then
+		ShouldUpdatePauseMenu = false
+		pd.setMenuImage(GetPauseMenuImage(false), 0)
+		print("[Main] PauseMenu Updated")
+	end
+end
+
+function pd.gameWillPause()
+	print("[PlayDate] gameWillPause")
+	if UIIsnt then
+		UIIsnt:HidePauseMenu()
+	end
+end
+
+function pd.gameWillResume()
+	print("[PlayDate] gameWillResume")
+	UpdatePauseMenu()
+end
+
 local function loadGame()
 	CheatsManager.RegisterCheats()
 	LocalizationManager.Load()
 	gfx.setFont(font)
 	pd.display.setInverted(true)
-	local menu = pd.getSystemMenu()
-	local menuItem, error = menu:addMenuItem("Restart level", function()
-		StartGame()
-	end)
-	local menuItem, error = menu:addMenuItem("main menu", function()
-		NextLevel = "menu"
-		StartGame()
-	end)
 	StartGame()
 end
 
@@ -192,16 +324,12 @@ local function updateGame()
 	end
 end
 
-local function drawGame()
-
-end
-
 loadGame()
 
 function pd.update()
 	updateGame()
-	drawGame()
 	if DebugFlags.FPSCounter then
 		pd.drawFPS(385,0) -- FPS widget
 	end
+	UpdatePauseMenu()
 end

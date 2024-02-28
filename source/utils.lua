@@ -31,8 +31,8 @@ DebugFlags =
 
 null = nil
 
-GetDialogDataFromString = function (str)
-	local rawText = LocalizationManager.GetLine(str)
+GetDialogDataFromString = function (key)
+	local rawText = LocalizationManager.GetLine(key)
 	local rawLines = {}
 	if string.find(rawText, "\n") then
 		for l in string.gmatch(rawText, '([^\n]+)') do
@@ -42,6 +42,7 @@ GetDialogDataFromString = function (str)
 		table.insert(rawLines, rawText)
 	end
 	local DialogData = {}
+	DialogData.Key = key
 	local Prefix = "#"
 	local LastActor = "Mipa"
 	for i = 1, #rawLines, 1 do

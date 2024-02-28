@@ -90,6 +90,12 @@ function PhysicalProp:ApplyVelocity()
     if self.momentumX ~= 0 then
         self.velocityX = self.velocityX+self.momentumX
     end
+    if self.velocityXnextframe ~= nil then
+        if self.velocityXnextframe ~= 0 then
+            self.velocityX = self.velocityX+self.velocityXnextframe
+            self.velocityXnextframe = 0
+        end
+    end
 
     local logIt = false
 
@@ -118,12 +124,20 @@ function PhysicalProp:ApplyVelocity()
                 self.onground = true
                 self.velocityY = 0
                 self.freefall = 0
+                if collisionObject.IsConveyorBelts then
+                    if collisionObject.Inversed then
+                        self.velocityXnextframe  = -1
+                    else
+                        self.velocityXnextframe = 1
+                    end
+                --elseif collisionObject.velocityXnextframe then
+                --    self.velocityXnextframe = collisionObject.velocityXnextframe
+                end
                 if not lastground and self.onground and lastfreefall > 5 then
                     AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
                     SoundManager:PlaySound("Bloop", 0.3)
                     if collisionTag == TAG.Player and not lastground then
-                        print("Damage "..lastfreefall)
-    
+                        print("Damage "..lastfreefall) 
                         if lastfreefall > 10 then
                             collisionObject:Damage(2)
                         else
@@ -186,8 +200,12 @@ function PhysicalProp:ApplyVelocity()
     else
         self.movingflag = false
     end
-    if self.y > 240 then
-        gfx.sprite.removeSprite(self)
+    if self.y > 250 then
+        if self.Dropper then
+            self.Dropper:DropBox()
+        else
+            gfx.sprite.removeSprite(self)
+        end
     end
 end
 

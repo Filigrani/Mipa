@@ -27,7 +27,7 @@
       "y": 43,
       "UID": 216,
       "timer": 5,
-      "indicatorUID": 234,
+      "indicatorUID": 231,
       "group": "D"
     },
     {
@@ -63,7 +63,7 @@
       "y": 211,
       "UID": 266,
       "timer": 2,
-      "indicatorUID": 234,
+      "indicatorUID": 0,
       "group": "G"
     },
     {
@@ -240,7 +240,7 @@
       "x": 368,
       "y": 211,
       "UID": 265,
-      "text": "Note2"
+      "noteID": 2
     },
     {
       "zoneType": "koasoda",
@@ -261,6 +261,20 @@
       "h": 41,
       "UID": 213,
       "nextLevel": "lvl9"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 183,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 127,
+      "w": 14,
+      "h": 14
     }
    ]
   }

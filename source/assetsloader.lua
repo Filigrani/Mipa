@@ -22,7 +22,10 @@ AssetsLoader.SetAsset = function (assetpath, asset)
     print("[AssetsLoader] Image Table Loaded: ", assetpath)
 end
 
-AssetsLoader.LoadImage = function (path)
+AssetsLoader.LoadImage = function (path, localizable)
+    if localizable and LocalizationManager.currentlanguage ~= "english" then
+        path = path.."-"..LocalizationManager.currentlanguage
+    end
     local asset = AssetsLoader.assets[path]
     if asset ~= nil then
         return asset
@@ -30,6 +33,10 @@ AssetsLoader.LoadImage = function (path)
         asset = gfx.image.new(path)
         if asset == nil then
             print("[AssetsLoader] Can't load Image ", path)
+            if localizable then
+                print("[AssetsLoader] Trying to find non localized version...")
+                return AssetsLoader.LoadImage(path, false)
+            end
             return nil
         end
         AssetsLoader.assets[path] = asset
@@ -38,7 +45,11 @@ AssetsLoader.LoadImage = function (path)
     end
 end
 
-AssetsLoader.LoadImageTable = function (path)
+AssetsLoader.LoadImageTable = function (path, localizable)
+    if localizable and LocalizationManager.currentlanguage ~= "english" then
+        path = path.."-"..LocalizationManager.currentlanguage
+    end
+
     local asset = AssetsLoader.assets[path]
     if asset ~= nil then
         return asset
@@ -46,6 +57,10 @@ AssetsLoader.LoadImageTable = function (path)
         asset = gfx.imagetable.new(path)
         if asset == nil then
             print("[AssetsLoader] Can't load Image Table: ", path)
+            if localizable then
+                print("[AssetsLoader] Trying to find non localized version...")
+                return AssetsLoader.LoadImageTable(path, false)
+            end
             return nil
         end
         AssetsLoader.assets[path] = asset

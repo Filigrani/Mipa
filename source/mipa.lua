@@ -38,7 +38,7 @@ function Mipa:init(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
-    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing}
+    self.equipment = {EQUIPMENT.MagnetHand}
     self.passiveitems = {}
     self.selectedequipment = 1
     -- Moving vars
@@ -101,6 +101,7 @@ function Mipa:init(x, y)
     self.holdingbox = nil
     self.lastframonwall = false
     self.jumpoffwallmomentum = 10
+    self.dialogskipframe = 0
 end
 
 function Mipa:Konami()
@@ -489,6 +490,50 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
     return false
 end
 
+function Mipa:DoWingsFX()
+    local wings = AnimEffect(0, 0, "Effects/wings", 1, true, false, self.mirrored)
+    wings.Mipa = self
+    wings.CustomUpdate = function ()
+        if wings.Mipa then
+            if wings.Mipa:IsMirrored() then
+                wings:moveTo(self.x+5, self.y-7)
+            else
+                wings:moveTo(self.x-17, self.y-7)
+            end
+        end
+    end
+    wings.CustomUpdate()
+end
+
+function Mipa:DoCloudsFX()
+    local _x, _y = self:getPosition()
+    _x = _x-5
+    local bigcloudSpread = 15
+    local bigcloudYOffset = 5
+    AnimEffect(_x, _y+bigcloudYOffset, "Effects/BigCloud", 2, true, false, self.mirrored)
+    AnimEffect(_x-bigcloudSpread, _y+bigcloudYOffset, "Effects/BigCloud", 2, true, false)
+    AnimEffect(_x+bigcloudSpread, _y+bigcloudYOffset, "Effects/BigCloud", 2, true, false, true)
+    local cloudTimer = pd.frameTimer.new(1)
+    cloudTimer.Mipa = self
+    cloudTimer.timerEndedCallback = function(timer)
+        _x, _y = cloudTimer.Mipa:getPosition()
+        if not self:IsFlying() then
+            cloudTimer:remove()
+        end
+        for i = 1, 2, 1 do
+            local speadX = 12
+            local spreadY = 2
+            local effectX = math.floor(math.random(-speadX,speadX)+0.5)
+            local effectY = math.floor(math.random(-spreadY,spreadY)+0.5)
+            local animSpeed = math.floor(math.random(1,3)+0.5)
+            local effect = AnimEffect(_x+effectX, _y+effectY, "Effects/SmallParticle", animSpeed, true, false)
+        end
+    end
+    cloudTimer.repeats = true
+    cloudTimer:start()
+end
+
+
 function Mipa:TryJump()  
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
         if self:IsMirrored() then
@@ -512,6 +557,8 @@ function Mipa:TryJump()
         self.candoublejump = false
         self.highestY = self.y
         self.velocityY = self.maxjumpvelocity
+        self:DoCloudsFX()
+        SoundManager:PlaySound("Pfff")
         return true
     end
 end
@@ -532,6 +579,9 @@ function Mipa:Damage(damage)
         self.hp = 0
     else
         self.hp = self.hp-damage
+        if UIIsnt ~= nil then
+            UIIsnt.glitchframes = 3
+        end
     end
 
     if self:IsDead() then
@@ -543,7 +593,7 @@ function Mipa:Damage(damage)
         self:GetRidOffBox()
     end
 
-    InvertedColorsFrames = InvertedColorsFrames+4
+    InvertedColorsFrames = InvertedColorsFrames+1
     SoundManager:PlaySound("Scream")
 end
 
@@ -603,6 +653,12 @@ function Mipa:ApplyVelocity()
     if self.momentumX ~= 0 then
         self.velocityX = self.velocityX+self.momentumX
     end
+    if self.velocityXnextframe ~= nil then
+        if self.velocityXnextframe ~= 0 then
+            self.velocityX = self.velocityX+self.velocityXnextframe
+            self.velocityXnextframe = 0
+        end
+    end
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
     local disiredY = _y + self.velocityY
@@ -652,6 +708,16 @@ function Mipa:ApplyVelocity()
                 self.velocityY = 0
                 self.highestY = self.y
 
+                if collisionObject.IsConveyorBelts then
+                    if collisionObject.Inversed then
+                        self.velocityXnextframe  = -1
+                    else
+                        self.velocityXnextframe = 1
+                    end
+                elseif collisionObject.velocityXnextframe then
+                    self.velocityXnextframe = collisionObject.velocityXnextframe
+                end
+
                 if lasthighestY ~= 0 and not lastground then
                     local freefall = 0
                     if self.y > lasthighestY then
@@ -681,7 +747,9 @@ function Mipa:ApplyVelocity()
                 if collisionObject.enemyname ~= nil and collisionObject.enemyname == "blob" then
                     if not collisionObject.squshed then
                         collisionObject.squshed = true
+                        collisionObject.movingdirection = 0
                         collisionObject.thinkticks = 0
+                        SoundManager:PlaySound("Splash", 0.5)
                     end
                 end
             elseif collision.normal.y == 1 then
@@ -976,7 +1044,7 @@ function Mipa:RingAction()
         for i=1,#collisions do
             local collisionObject = collisions[i]
             local collisionTag = collisionObject:getTag()
-            if collisionTag == TAG.PropPushable then
+            if collisionTag == TAG.PropPushable or collisionTag == TAG.Enemy then
                 if self:CheckSpaceForMipaWithBox(collisionObject) then
                     self:setCollideRect(1,-9,12,23)
                     self.holdingbox = collisionObject
@@ -1047,7 +1115,7 @@ function Mipa:CanControl()
     if not self.canbecontrolled then
         return false
     end
-    return not self:IsDead() and (UIIsnt == nil or not UIIsnt:IsCutscene()) and not self:AnimStunLock()
+    return not self:IsDead() and (UIIsnt == nil or (not UIIsnt:IsCutscene() and not UIIsnt:IsShowingPause())) and not self:AnimStunLock()
 end
 
 function Mipa:update()
@@ -1079,6 +1147,16 @@ function Mipa:update()
         end
         if pd.buttonJustPressed(pd.kButtonUp) then
             self:Interact()
+        end
+        if pd.buttonIsPressed(pd.kButtonUp) then
+            if self.dialogskipframe < 25 then
+                self.dialogskipframe = self.dialogskipframe+1
+            else
+                self.dialogskipframe = 0 
+                if UIIsnt then
+                    UIIsnt:CancleDialog()
+                end
+            end
         end
     end
     self:ApplyVelocity()

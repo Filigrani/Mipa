@@ -14,6 +14,7 @@ function Creature:init(x, y)
     self.speed = 1.01
     self.velocityX = 0
     self.velocityY = 0
+    self.momentumX = 0
     -- Physic
     self.gravity = 1
     self.movingflag = false
@@ -42,6 +43,8 @@ function Creature:init(x, y)
     self.movingdirection = 0
     self.thinkticks = 1
     self.bumpwall = false
+    self.homeX = 0
+    self.homeY = 0
     print("Creature Created")
 end
 
@@ -86,6 +89,9 @@ function Creature:TryJump()
 end
 
 function Creature:collisionResponse(other)
+    if self.notapplyimpulses then
+        return nil
+    end
     if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard or other:getTag() == TAG.ObstacleCastNoPlayer) or other:getTag() == TAG.HazardNoColide then
         return gfx.sprite.kCollisionTypeOverlap
     end
@@ -93,18 +99,43 @@ function Creature:collisionResponse(other)
 end
 
 function Creature:ApplyVelocity()
+    if self.notapplyimpulses then
+        return
+    end
     self.velocityY = self.velocityY+self.gravity
+    if self.momentumX > 0 then
+        self.momentumX = self.momentumX-self.gravity
+        if self.momentumX <= 0 then
+            self.momentumX = 0
+        end
+    elseif self.momentumX < 0 then
+        self.momentumX = self.momentumX+self.gravity
+        if self.momentumX >= 0 then
+            self.momentumX = 0
+        end
+    end
+    if self.momentumX ~= 0 then
+        self.velocityX = self.velocityX+self.momentumX
+    end
+    if self.velocityXnextframe ~= nil then
+        if self.velocityXnextframe ~= 0 then
+            self.velocityX = self.velocityX+self.velocityXnextframe
+            self.velocityXnextframe = 0
+        end
+    end
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
     local disiredY = _y + self.velocityY
+    local collider = gfx.sprite.new()
+    collider:setTag(TAG.Effect);
+    collider:setCollideRect(2,7,10,7)
+    collider:moveTo(disiredX, _y)
+    collider:add()
+    gfx.sprite.removeSprite(collider)
+    self.bumpwall = false
     local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
     local lastground = self.onground
     local lastfreefall = self.freefall
-    if actualX ~= disiredX then
-        self.bumpwall = true
-    else
-        self.bumpwall = false
-    end
     self.onground = false
     for i=1,length do
         local collision = collisions[i]
@@ -116,6 +147,15 @@ function Creature:ApplyVelocity()
                 self.onground = true
                 self.velocityY = 0
                 self.freefall = 0
+                if collisionObject.IsConveyorBelts then
+                    if collisionObject.Inversed then
+                        self.velocityXnextframe  = -1
+                    else
+                        self.velocityXnextframe = 1
+                    end
+                elseif collisionObject.velocityXnextframe then
+                    self.velocityXnextframe = collisionObject.velocityXnextframe
+                end
                 if not lastground and self.onground and lastfreefall > 5 then
                     AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
                     SoundManager:PlaySound("Bloop", 0.3)
@@ -127,6 +167,7 @@ function Creature:ApplyVelocity()
                 if collisionTag == TAG.Player then
                     --collisionObject:Damage(1)
                 end
+                self.bumpwall = true
             end
         end
     end
@@ -144,11 +185,25 @@ function Creature:ApplyVelocity()
         self.movingflag = false
     end
     if self.y > 400 then
-        gfx.sprite.removeSprite(self)
+        if self.homeX == 0 and self.homeY == 0 then
+            gfx.sprite.removeSprite(self)
+        else
+            self.thinkticks = 50
+            self.movingdirection = 0
+            self:moveTo(self.homeX, self.homeY)
+            self:SetAnimation("spawn")
+        end
     end
 end
 
 function Creature:update()
+    if self.homeX == 0 and self.homeY == 0 then
+        if self:IsOnFloor() then
+            self.homeX = self.x
+            self.homeY = self.y
+        end
+    end
+    
     self.velocityX = 0
     self:AIUpdate()
     self:ApplyVelocity()
@@ -156,6 +211,11 @@ function Creature:update()
 end
 
 function Creature:AIUpdate()
+    if self.momentumX > 0 or self.notapplyimpulses then
+        self.movingdirection = 0
+        return
+    end
+    
     self.thinkticks = self.thinkticks+1
 
     if self.thinkticks >= 100 then
@@ -169,7 +229,7 @@ function Creature:AIUpdate()
     end
     if self.thinkticks >= 200 then
         if self.movingdirection ~= 0 and not self.squshed then
-            self.movingdirection = -1
+            --self.movingdirection = -1
         end
     end
     if self.bumpwall then
@@ -184,18 +244,21 @@ function Creature:AIUpdate()
         self:setCollideRect(2,10,10,4)
         if self.thinkticks >= 30 then
             if MipaInst ~= nil then
-                MipaInst.velocityY = -12
+                MipaInst.velocityY = -15
+                MipaInst.canjump = false
                 MipaInst:ApplyVelocity()
-                self.thinkticks = 0
+                self.thinkticks = 85
                 self.squshed = false
                 self:setCollideRect(2,7,10,7)
             end
         end
     else
-        if self.movingdirection == 1 then
-            self:TryMoveRight()
-        elseif self.movingdirection == -1 then
-            self:TryMoveLeft()
+        if self:IsOnFloor() then
+            if self.movingdirection == 1 then
+                self:TryMoveRight()
+            elseif self.movingdirection == -1 then
+                self:TryMoveLeft()
+            end
         end
     end
 end
@@ -205,15 +268,9 @@ function Creature:UpdateAnimation()
     local spritePath = self.currentanimation.."/"..self.animationframe
     if self.lastimage ~= spritePath then
         local imagetable = self.imagetable
-        if self.IsClone and self:IsEvenFrame() then
-            if self.mipaimagedithered == nil then
-                self:SetDitherImageTable()
-            end
-            imagetable = self.mipaimagedithered
-        end
         local img = imagetable:getImage(self.animationframe)
         self:setImage(img, self.mirrored) 
-        self.lastimage = spritePath 
+        self.lastimage = spritePath
     end
 end
 
@@ -242,7 +299,9 @@ end
 function Creature:RegisterAnimations()
     self:AddAnimation("idle", {1})
     self:AddAnimation("walk", {1, 3, 2, 4})
-    self:AddAnimation("reset", {5})
+    self:AddAnimation("squshed", {5})
+    self:AddAnimation("rest", {6})
+    self:AddAnimation("spawn", {10,9,8,7,6}, nil, false)
 end
 
 function Creature:SetAnimation(anim)
@@ -329,11 +388,23 @@ function Creature:MayNextFrame()
 end
 
 function Creature:PickAnimation()
+    if self.currentanimation == "spawn" then
+        if self.animationfinished then 
+            self:SetAnimation("rest")
+        end
+        return
+    end
+    
+    
     if self:IsMoving() then
         self:SetAnimation("walk")
     else
-        if self.movingdirection == -1 then
-            self:SetAnimation("reset")
+        if self.movingdirection == 0 then
+            if self.squshed then
+                self:SetAnimation("squshed")
+            else
+                self:SetAnimation("rest")
+            end
         else
             self:SetAnimation("idle")
         end

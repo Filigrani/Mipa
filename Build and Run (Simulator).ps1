@@ -43,5 +43,8 @@ if ($sim)
     }
 }
 
+# Remove Paint .net image source files.
+Remove-Item "$build\*" -Recurse -Include *.pdn
+
 # Run (Simulator)
 & "$Env:PLAYDATE_SDK_PATH\bin\PlaydateSimulator.exe" "$pdx"

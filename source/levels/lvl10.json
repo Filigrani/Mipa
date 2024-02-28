@@ -139,7 +139,21 @@
       "w": 28,
       "h": 41,
       "UID": 114,
-      "nextLevel": "menu"
+      "nextLevel": "lvl11"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 141,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 85,
+      "w": 14,
+      "h": 14
     }
    ]
   }

@@ -49,8 +49,8 @@
     },
     {
       "propType": "indicator",
-      "x": 172,
-      "y": 71,
+      "x": 307,
+      "y": 86,
       "UID": 3,
       "group": "A",
       "active": 0,
@@ -116,6 +116,20 @@
       "h": 26,
       "UID": 24,
       "nextLevel": "lvl1"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 127,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 85,
+      "w": 14,
+      "h": 14
     }
    ]
   }
