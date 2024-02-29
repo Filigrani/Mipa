@@ -3,8 +3,12 @@ local gfx <const> = pd.graphics
 
 class("Creature").extends(gfx.sprite)
 
-function Creature:init(x, y)
-    self.imagetable = AssetsLoader.LoadImageTable("images/blob")
+function Creature:init(x, y, name)
+    if name == nil then
+        name = "blob"
+    end
+    self.name = name
+    self.imagetable = AssetsLoader.LoadImageTable("images/"..name)
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Object)
     self:setCollideRect(2,7,10,7)
@@ -45,7 +49,7 @@ function Creature:init(x, y)
     self.bumpwall = false
     self.homeX = 0
     self.homeY = 0
-    print("Creature Created")
+    print("Creature "..name.." Created")
 end
 
 function Creature:IsFalling()

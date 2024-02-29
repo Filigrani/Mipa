@@ -534,7 +534,7 @@ function Mipa:DoCloudsFX()
 end
 
 
-function Mipa:TryJump()  
+function Mipa:TryJump()
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
         if self:IsMirrored() then
             self.momentumX = self.jumpoffwallmomentum

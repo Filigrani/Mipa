@@ -89,6 +89,47 @@ local function AddSystemMenuButtons()
 	end
 end
 
+debugsin = false
+crankSinusVal = 1
+gameTicks = 0
+
+UpdateSinusMiniGame = function ()
+	if not debugsin then
+		return
+	end
+	if referenceSinus == nil then
+		referenceSinus = gfx.sprite.new()
+		referenceSinus:setCenter(0, 0)
+		referenceSinus:setZIndex(Z_Index.AllAtop)
+		referenceSinus:moveTo(0, 60)
+		referenceSinus:add()
+	end
+	if crankSinus == nil then
+		crankSinus = gfx.sprite.new()
+		crankSinus:setCenter(0, 0)
+		crankSinus:setZIndex(Z_Index.AllAtop)
+		crankSinus:moveTo(0, 60)
+		crankSinus:add()
+	end
+	local refimg = gfx.image.new(400, 120)
+	gfx.pushContext(refimg)
+	    gfx.drawSineWave(0, 60, 400, 60, 30, 30, 56, gameTicks)
+    gfx.popContext()
+    refimg = refimg:fadedImage(0.5, gfx.image.kDitherTypeDiagonalLine)
+	referenceSinus:setImage(refimg)
+
+	local img = gfx.image.new(400, 120)
+	gfx.pushContext(img)
+	    gfx.drawSineWave(0, 60, 400, 60, 30, 30, CrankManager.Abosulte+1, gameTicks)
+    gfx.popContext()
+	crankSinus:setImage(img)
+end
+
+
+DrawCrankSinus = function (change)
+	crankSinusVal = crankSinusVal+change
+end
+
 StartGame = function ()
 	InvertedColorsFrames = 0
 	gfx.sprite.removeAll()
@@ -105,6 +146,9 @@ StartGame = function ()
 	TrackableManager.Reset()
 	MenuInst = nil
 	CreditsInst = nil
+	if NextLevel == "sintest" or debugsin then
+		return
+	end
 	if NextLevel == "menu" then
 		pd.setMenuImage(nil, 0)
 		MenuInst = Menu()
@@ -326,10 +370,17 @@ end
 
 loadGame()
 
+local lastTime = playdate.getCurrentTimeMilliseconds()
+
 function pd.update()
+	local currentTime = playdate.getCurrentTimeMilliseconds()
+	local deltaTime = currentTime - lastTime
+	lastTime = currentTime
+	gameTicks = gameTicks+1
 	updateGame()
 	if DebugFlags.FPSCounter then
 		pd.drawFPS(385,0) -- FPS widget
 	end
 	UpdatePauseMenu()
+	UpdateSinusMiniGame()
 end

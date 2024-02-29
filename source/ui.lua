@@ -28,6 +28,8 @@ function UI:init()
     self.glitchframes = 0
     self.dialogYroot = 175
     self.skipflash = 0
+    self.pixelfadeX = 0
+    self.pixelfadeY = 0
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -319,6 +321,28 @@ function UI:Update()
             end
             self:PauseSelector()
         end
+    end
+    if self.startpixelfade then
+        self.pixelfadeX = self.pixelfadeX+0.1
+        self.pixelfadeY = self.pixelfadeY+0.1
+
+        if self.pixelfadeX >= 3 or self.pixelfadeY >= 3 then
+            self.pixelfadeX = 3
+            self.pixelfadeY = 3
+            self.startpixelfade = false
+            self.startpixelfadeout = true
+        end
+        pd.display.setMosaic(self.pixelfadeX, self.pixelfadeY)
+    elseif self.startpixelfadeout then
+        self.pixelfadeX = self.pixelfadeX-0.1
+        self.pixelfadeY = self.pixelfadeY-0.1
+
+        if self.pixelfadeX <= 0 or self.pixelfadeY <= 0 then
+            self.pixelfadeX = 0
+            self.pixelfadeY = 0
+            self.startpixelfadeout = false
+        end
+        pd.display.setMosaic(self.pixelfadeX, self.pixelfadeY)
     end
 end
 
@@ -821,4 +845,22 @@ function UI:ShowPauseMenu()
     self.pauseoverlay.selector:setZIndex(Z_Index.UI)
     self.pauseoverlay.selector:add()
     self:PauseSelector()
+end
+
+function UI:PixelFade()
+    self.pixelfadeX = 0
+    self.pixelfadeY = 0
+    self.startpixelfade = true
+    pd.display.setMosaic(self.pixelfadeX, self.pixelfadeY)
+end
+
+function UI:Currupt()
+    local img = playdate.graphics.getDisplayImage()
+    img = img:scaledImage(0.3, 0.3):scaledImage(1.2, 1.2)
+    local test = gfx.sprite.new()
+    test:setCenter(0, 0)
+    test:moveTo(0, 0)
+    test:setZIndex(Z_Index.AllAtop)
+    test:add()
+    test:setImage(img)
 end

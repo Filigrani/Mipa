@@ -11,8 +11,12 @@ CrankManager.Changed = function(num)
     for i = 1, #CrankManager.crankables, 1 do
         CrankManager.crankables[i]:Changed(num)
     end
+    CrankManager.Abosulte = pd.getCrankPosition()
     print("change "..num)
+    DrawCrankSinus(num)
 end
+
+CrankManager.Abosulte = 0
 
 CrankManager.NewPlatform = function (x, y, dis)
     local data = {}
