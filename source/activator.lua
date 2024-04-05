@@ -35,7 +35,9 @@ function Activator:init(x, y, group, timer, indicatorUID)
                         SoundManager:PlaySound("Stop")
                     end
                 else
-                    self:TimerTick()
+                    if self.indicator ~= nil then
+                        self:TimerTick()
+                    end
                 end
             end
         end)

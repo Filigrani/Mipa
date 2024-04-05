@@ -3,6 +3,7 @@ SaveManager = {}
 
 SaveManager.Save = function (entrykey, content)
     pd.datastore.write(content, entrykey, true)
+    print("[SaveManager] Saved entry ", entrykey)
 end
 
 SaveManager.Load = function (entrykey)

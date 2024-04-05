@@ -21,10 +21,19 @@ function Level:init(levelPath)
     self.tilemap = pd.graphics.tilemap.new()
     self.tilemap:setImageTable(self.imagetable)
     self.tilemap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)  
+    SoundManager:StopSound("MipaGameOver")
+
+    if self.jsonTable.music == nil then
+        SoundManager:PlayMusic("BG1")
+    else
+        SoundManager:PlayMusic(self.jsonTable.music)
+    end
+    
     self:ParceTileMap() 
     self:RenderTilemap()
     self:ParceProps()
     self:ParceZones()
+    
 end
 
 TILESNAMES = 
@@ -200,6 +209,10 @@ function Level:CreateProp(propData)
     local type = propData.propType
     if type == "box" then
         TrackableManager.Add(PhysicalProp(propData.x, propData.y), propData.UID)
+    elseif type == "trash" then
+        local trashbox = PhysicalProp(propData.x, propData.y)
+        trashbox:setImage("images/Props/Trash")
+        trashbox.isTrash = true
     elseif type == "button" then
         local butt = Activator(propData.x, propData.y, propData.group, propData.timer, propData.indicatorUID)
         local img = AssetsLoader.LoadImage("images/Props/Button0")
@@ -535,14 +548,16 @@ function Level:CreateProp(propData)
         end
         waterfall.animationtimer:start()
     elseif type == "blob" then
-        local c = Creature(propData.x, propData.y)
+        local c = Blob(propData.x, propData.y)
         c.enemyname = "blob"
+    elseif type == "wasp" then
+        local c = Wasp(propData.x, propData.y)
+        c.enemyname = "wasp"
     elseif type == "boxdropper" then
         local dropper = Activatable(propData.x, propData.y, propData.group, false, propData.activeType)
         local img = AssetsLoader.LoadImage("images/Props/boxdropper")
         dropper:setImage(img)
         dropper.DropBox = function ()
-            
             AnimEffect(dropper.x+5, dropper.y+12, "Effects/BigCloud", 1, true, false)
             AnimEffect(dropper.x+3, dropper.y+13, "Effects/BigCloud", 1, true, false)
             AnimEffect(dropper.x+1, dropper.y+11, "Effects/BigCloud", 1, true, false)
@@ -578,6 +593,17 @@ function Level:CreateProp(propData)
                     AnimEffect(box.x+effectX, box.y+spreadY, "Effects/BigCloud", animSpeed, true, false)
                 end
                 box:moveTo(propData.x+7, propData.y+7)
+                if box.childs then
+                    for i = 1, #box.childs, 1 do
+                        local child = box.childs[i]
+                        if child then
+                            if child.Remove then
+                                child:Remove()
+                            end
+                            gfx.sprite.removeSprite(child)
+                        end
+                    end
+                end
             end
         end
         if propData.active then
@@ -627,6 +653,7 @@ function Level:CreateZone(zoneData)
         t.OnTrigger = function ()
             if type == "note" then
                 InvertedColorsFrames = 2
+                SoundManager:FadeMusicForWhile(240)
                 SoundManager:PlaySound("Note")
                 AddFoundNote(zoneData.noteID)
             end
@@ -640,6 +667,14 @@ function Level:CreateZone(zoneData)
             TrackableManager.ProcessCommandLine(t.ontriggercommand)
         end
         TrackableManager.Add(t, zoneData.UID)
+    elseif type == "navright" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        t.navtype = "right"
+        t.triggeronce = false
+    elseif type == "navleft" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        t.navtype = "left"
+        t.triggeronce = false
     elseif type == "invizcolider" then
         local t = Dummy(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
         t:setCollideRect(0,0,zoneData.w, zoneData.h)
@@ -669,6 +704,18 @@ function Level:CreateZone(zoneData)
                 end
                 MipaInst:AddPassiveItem(PASSIVEITEMS.KoaKola)
             end
+        end
+    elseif type == "trashspawner" then
+        local Spawner = Dummy(zoneData.x, zoneData.y)
+        if self.shootbombtimer == nil then
+            Spawner.spawntimer = pd.frameTimer.new(zoneData.spawnperioud)
+            Spawner.spawntimer.repeats = true
+            Spawner.spawntimer.timerEndedCallback = function(timer)
+                local trashbox = PhysicalProp(zoneData.x, zoneData.y)
+                trashbox:setImage(AssetsLoader.LoadImage("images/Props/Trash"))
+                trashbox.isTrash = true
+            end
+            Spawner.spawntimer:start()
         end
     end
 end

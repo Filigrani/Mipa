@@ -3,7 +3,8 @@ local gfx <const> = pd.graphics
 
 class("Clashbomb").extends(gfx.sprite)
 
-function Clashbomb:init(x, y, mirrored, mipa)
+function Clashbomb:init(x, y, mirrored, mipa, parant)
+    self.IsClashBomb = true
     self:moveTo(x, y)
     self:setZIndex(Z_Index.BG)
     self:setCenter(0, 0) 
@@ -25,6 +26,19 @@ function Clashbomb:init(x, y, mirrored, mipa)
 	end
 	self.explodetimer.repeats = false
 	self.explodetimer:start()
+
+    if parant then
+        self.parent = parant
+        self.parentXOffset = x-parant.x
+        self.parentYOffset = y-parant.y
+        if parant.childs == nil then
+            parant.childs = {self}
+        else
+            table.insert(parant.childs, self)
+        end
+    end
+    self.fallingdown = false
+    self.gravity = 0.35
 end
 
 function Clashbomb:collisionResponse(other)
@@ -43,6 +57,7 @@ function Clashbomb:DestoryBlocks()
         offsetx =self.x-7
     end
     local collider = gfx.sprite.addEmptyCollisionSprite(offsetx, offsety, 7, 22)
+    collider:setTag(TAG.Effect)
     --[[
     local _, _, collisions, length = collider:checkCollisions(offsetx, offsety)
     for i=1,length do
@@ -59,9 +74,23 @@ function Clashbomb:DestoryBlocks()
         if collision.IsBreakableTile then
             gfx.sprite.removeSprite(collision)
         end
+        if self.dangerous and collision.IsMipa then
+            collision:Damage(1)
+        end
     end
     gfx.sprite.removeSprite(collider)
-    print(length)
+    if self.dangerous then
+        local explosioncolider = gfx.sprite.addEmptyCollisionSprite(self.x-25, self.y-25, 50, 50)
+        explosioncolider:setTag(TAG.Effect)
+        local explosioncolissions = explosioncolider:overlappingSprites()
+        for i=1,#explosioncolissions do
+            local collision = explosioncolissions[i]
+            if collision.IsMipa then
+                collision:Damage(1)
+            end
+        end
+        gfx.sprite.removeSprite(explosioncolider)
+    end
 end
 
 function Clashbomb:BeginExplosion()
@@ -97,6 +126,38 @@ function Clashbomb:DoExposionEffect()
     local effect = AnimEffect(self.x+effectX, self.y+effectY, "Effects/SimpleExplosion", animSpeed, true, false)
 end
 
+function Clashbomb:Remove()
+    self.explodetimer:remove()
+end
+
+function Clashbomb:DisarmAndFall()
+    self.explodetimer:remove()
+    self.fallingdown = true
+    self.parent = nil
+end
+
+function Clashbomb:ApplyFalling()
+    local _x, _y = self:getPosition()
+    local disiredX = _x
+    local disiredY = _y + self.gravity
+    local actualX, _, collisions, length = self:moveWithCollisions(disiredX, disiredY)
+    local onground = false
+    for i=1,length do
+        local collision = collisions[i]
+        local collisionType = collision.type
+        local collisionObject = collision.other
+        local collisionTag = collisionObject:getTag()
+        if collisionType == gfx.sprite.kCollisionTypeSlide then
+            if collision.normal.y == -1 then
+                onground = true
+            end
+        end
+    end
+    if onground then
+        self.fallingdown = false
+    end
+end
+
 function Clashbomb:update()
     if self.frame == 2 then
         self.frame = 1
@@ -104,4 +165,12 @@ function Clashbomb:update()
         self.frame = 2
     end
     self:setImage(self.imagetable:getImage(self.frame), self.mirrored)
+
+    if self.parent then
+        self:moveTo(self.parent.x+self.parentXOffset, self.parent.y+self.parentYOffset)
+    end
+
+    if self.fallingdown then
+        --self:ApplyFalling()
+    end
 end

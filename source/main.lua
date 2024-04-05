@@ -3,7 +3,9 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/frametimer"
+import "settings"
 import "savemanager"
+Settings = SaveManager.Load("settings") or DefaultSettings
 import "localizationmanager"
 import "assetsloader"
 import "utils"
@@ -31,6 +33,8 @@ import "creature"
 import "cheatsmanager"
 import "credits"
 import "clashbomb"
+import "blob"
+import "wasp"
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
@@ -47,7 +51,6 @@ CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
 LevelsLimit = 13
-DialogboxMode = SaveManager.Load("dialogboxmode") or "dyn"
 local font = gfx.font.new('font/Asheville Ayu')
 ShouldUpdatePauseMenu = false
 SeenDialogs = {}
@@ -69,6 +72,52 @@ local function OpenItemsMenu()
 	end
 end
 
+local function OpenAddons()
+	SoundManager:PlayMusic("Xband")
+	if MenuInst then
+		local addonsOptions = {}
+		local LevelNames = ""
+	    if playdate.file.isdir("/Shared/Mipa/Levels") then
+			print("[Add-ons] Scanning Levels Folder")
+			local files = playdate.file.listFiles("/Shared/Mipa/Levels")
+			for i = 1, #files, 1 do
+				if LevelNames == "" then
+					LevelNames = files[i]
+				else
+					LevelNames = LevelNames.."\n"..files[i]
+				end
+				table.insert(addonsOptions, 
+				{
+				posX = 40, posY = i*20, fn = function()
+					NextLevel = "Shared/Mipa/Levels/"..files[i]
+					StartGame()
+				end
+				})
+			end
+		end
+		if #addonsOptions == 0 then
+			LevelNames = "No custom levels found"
+			table.insert(addonsOptions, 
+			{
+			posX = 40, posY = 20, fn = function()
+				MenuInst:SetMenu("start")
+				SoundManager:PlayMusic("Menu")
+			end
+			})
+		end
+		MenuInst.menus["addons"].options = addonsOptions
+		MenuInst:SetMenu("addons")
+		local addontextimage = gfx.image.new(194, 213)
+		addontextimage:clear(gfx.kColorClear)
+		gfx.setImageDrawMode(gfx.kDrawModeCopy)
+		gfx.pushContext(addontextimage)
+			gfx.drawTextInRect(LevelNames, 0, 0, 194, 213, nil, "")
+		gfx.popContext()
+		gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
+		MenuInst.addontextsprite:setImage(addontextimage)
+	end
+end
+
 local function AddSystemMenuButtons()
 	local menu = pd.getSystemMenu()
 	menu:removeAllMenuItems()
@@ -86,6 +135,11 @@ local function AddSystemMenuButtons()
 				OpenItemsMenu()
 			end)
 		end
+	else
+		local menuItem, error = menu:addMenuItem("add-on levels", function()
+			NextLevel = "menu"
+			OpenAddons()
+		end)
 	end
 end
 
@@ -93,10 +147,15 @@ debugsin = false
 crankSinusVal = 1
 gameTicks = 0
 
+
 UpdateSinusMiniGame = function ()
 	if not debugsin then
 		return
 	end
+
+	local a = math.sin(math.rad(gameTicks)) 
+	a = a*30
+	print("A ", a)
 	if referenceSinus == nil then
 		referenceSinus = gfx.sprite.new()
 		referenceSinus:setCenter(0, 0)
@@ -113,14 +172,14 @@ UpdateSinusMiniGame = function ()
 	end
 	local refimg = gfx.image.new(400, 120)
 	gfx.pushContext(refimg)
-	    gfx.drawSineWave(0, 60, 400, 60, 30, 30, 56, gameTicks)
+	    gfx.drawSineWave(0, 60, 400, 60, a, a, 56, gameTicks)
     gfx.popContext()
     refimg = refimg:fadedImage(0.5, gfx.image.kDitherTypeDiagonalLine)
 	referenceSinus:setImage(refimg)
 
 	local img = gfx.image.new(400, 120)
 	gfx.pushContext(img)
-	    gfx.drawSineWave(0, 60, 400, 60, 30, 30, CrankManager.Abosulte+1, gameTicks)
+	    gfx.drawSineWave(0, 60, 400, 60, a, a, CrankManager.Abosulte+1, gameTicks)
     gfx.popContext()
 	crankSinus:setImage(img)
 end
@@ -150,6 +209,7 @@ StartGame = function ()
 		return
 	end
 	if NextLevel == "menu" then
+		SoundManager:PlayMusic("Menu")
 		pd.setMenuImage(nil, 0)
 		MenuInst = Menu()
 		CurrentLevelName = "menu"
@@ -164,6 +224,7 @@ StartGame = function ()
 			CreditsInst = Credits()
 		end
 		CurrentLevelName = "credits"
+		SoundManager:PauseMusic()
 		AddSystemMenuButtons()
 		return
 	end
@@ -176,7 +237,14 @@ StartGame = function ()
 		SeenDialogs = {}
 	end
 	CurrentLevelName = NextLevel
-	CurrentLevel = Level("levels/"..CurrentLevelName..".json")
+	if string.find(CurrentLevelName, "/") == nil then
+		CurrentLevel = Level("levels/"..CurrentLevelName..".json")
+	else
+		CurrentLevel = Level(CurrentLevelName)
+	end
+
+	
+	
 	UIIsnt = UI()
 	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
 	AddSystemMenuButtons()

@@ -4,7 +4,8 @@ deathimagetable = AssetsLoader.LoadImageTable("images/ui/death")
 glitchtable = AssetsLoader.LoadImageTable("images/ui/glitch")
 class('UI').extends(playdate.graphics.sprite)
 import "jsonloader"
-
+-- Optimize calls of requisting settings
+local dialogMode = SettingsManager:Get("dialogboxmode")
 function UI:init()
     UI.super.init(self)
     self.heartsimagetable = AssetsLoader.LoadImageTable("images/ui/hp")
@@ -599,15 +600,14 @@ function UI:ProcessDialog()
             end
         end
         local disiredYRoot = self.dialogYroot
-
-        if (self:IsShowingPause() and self.pauseoverlay.type ~= 3) or DialogboxMode == "fixeddown" then
+        if (self:IsShowingPause() and self.pauseoverlay.type ~= 3) or dialogMode == "fixeddown" then
             disiredYRoot = 175
         else
             
-            if (self:IsShowingPause() and self.pauseoverlay.type == 3) or DialogboxMode == "fixedup" then
+            if (self:IsShowingPause() and self.pauseoverlay.type == 3) or dialogMode == "fixedup" then
                 disiredYRoot = 2
             else
-                if DialogboxMode == "dyn" then      
+                if dialogMode == "dyn" then      
                     if MipaInst ~= nil then         
                         if MipaInst.x > 0 and MipaInst.x < 400 then -- if out of bounds, dont make any changes
                             if MipaInst.y > 170 then

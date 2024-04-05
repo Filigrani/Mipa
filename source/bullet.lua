@@ -24,6 +24,8 @@ function Bullet:init(x, y)
     self.spawnX = x
     self.spawnY = y
     self.lastpushonhit = false
+    self.Dangerous = false
+    self.IsBullet = true
 end
 
 function Bullet:IsFalling()

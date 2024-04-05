@@ -136,15 +136,40 @@ function PhysicalProp:ApplyVelocity()
                 if not lastground and self.onground and lastfreefall > 5 then
                     AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
                     SoundManager:PlaySound("Bloop", 0.3)
-                    if collisionTag == TAG.Player and not lastground then
+                    if (collisionTag == TAG.Player or (collisionObject.IsWasp and not self.isTrash)) and not lastground then
                         print("Damage "..lastfreefall) 
                         if lastfreefall > 10 then
-                            collisionObject:Damage(2)
+                            collisionObject:Damage(2, true)
                         else
-                            collisionObject:Damage(1)
+                            collisionObject:Damage(1, true)
+                        end
+                        if collisionObject.IsWasp then
+                            if collisionObject:IsMirrored() then
+                                self.momentumX = 5
+                            else
+                                self.momentumX = -5
+                            end
+                            
+                            self.velocityY = -5
+                            AnimEffect(_x+5, _y+5, "Effects/BigCloud", animSpeed, true, false)
+                            if collisionObject.paintimer == nil then
+                                collisionObject.paintimer = pd.frameTimer.new(30)
+                                collisionObject.paintimer.repeats = false
+                                collisionObject.paintimer.timerEndedCallback = function(timer)
+                                    collisionObject.paintimer = nil
+                                end
+                                
+                            end
                         end
                     end                    
-                end         
+                end
+                if lastfreefall > 2 then
+                    if self.isTrash then
+                        AnimEffect(_x-13, _y-5, "Effects/Trashbox", 4, true, false)
+                        gfx.sprite.removeSprite(self)
+                        return
+                    end
+                end    
             elseif collision.normal.y == 1 then       
                 self.velocityY = 0
                 self.momentumX = 0

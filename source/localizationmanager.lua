@@ -3,7 +3,7 @@ LocalizationManager = {}
 LocalizationManager.currentlocalization = {}
 LocalizationManager.backuplocalization = {}
 LocalizationManager.defaultlanguage = "english"
-LocalizationManager.currentlanguage = SaveManager.Load("lang") or LocalizationManager.defaultlanguage
+LocalizationManager.currentlanguage = Settings.lang or LocalizationManager.defaultlanguage
 
 import "jsonloader"
 

@@ -3,6 +3,10 @@ local gfx <const> = pd.graphics
 
 class("Mipa").extends(gfx.sprite)
 
+-- Optimize calls of requisting settings
+local LowHpFXEnabled = SettingsManager:Get("lowhpglitches")
+local DamageGlitchesEnabled = SettingsManager:Get("damageglitches")
+
 PASSIVEITEMS = 
 {
     None = 0,
@@ -102,6 +106,7 @@ function Mipa:init(x, y)
     self.lastframonwall = false
     self.jumpoffwallmomentum = 10
     self.dialogskipframe = 0
+    self.IsMipa = true
 end
 
 function Mipa:Konami()
@@ -570,17 +575,33 @@ function Mipa:collisionResponse(other)
     return gfx.sprite.kCollisionTypeSlide
 end
 
-function Mipa:Damage(damage)
+function Mipa:Damage(damage, ignoreimmune)
     if self:IsDead() or DebugFlags.NoDamage then
         return
+    end
+
+    if ignoreimmune == nil then
+        if self.damageimunetimer == nil then
+            self.damageimunetimer = pd.frameTimer.new(30)
+            self.damageimunetimer.repeats = false
+            self.damageimunetimer.timerEndedCallback = function(timer)
+                self.damageimunetimer = nil
+            end
+        else
+            return
+        end
     end
 
     if damage > self.hp then
         self.hp = 0
     else
         self.hp = self.hp-damage
-        if UIIsnt ~= nil then
-            UIIsnt.glitchframes = 3
+        
+        if DamageGlitchesEnabled then
+            if UIIsnt ~= nil then
+                UIIsnt.glitchframes = 3
+                InvertedColorsFrames = InvertedColorsFrames+1
+            end
         end
     end
 
@@ -590,10 +611,9 @@ function Mipa:Damage(damage)
         end
         self.speed = 1.01 -- so will be able to push her body without animation glitched, like a box
         SoundManager:PlaySound("MipaGameOver")
+        SoundManager:PauseMusic()
         self:GetRidOffBox()
     end
-
-    InvertedColorsFrames = InvertedColorsFrames+1
     SoundManager:PlaySound("Scream")
 end
 
@@ -602,7 +622,7 @@ function Mipa:FatalDamage()
         return
     end
 
-    self:Damage(self.hp)
+    self:Damage(self.hp, true)
 end
 
 function Mipa:TryClimb()
@@ -691,7 +711,14 @@ function Mipa:ApplyVelocity()
                 end
             end
             if allowDamage then
-                self:FatalDamage()
+                if collisionObject.damage == 0 or collisionObject.damage == nil then
+                    self:FatalDamage()
+                else
+                    self:Damage(collisionObject.damage)
+                end
+                if collisionObject.destoryOnDamage then
+                    gfx.sprite.removeSprite(collisionObject)
+                end
             end
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
@@ -822,6 +849,7 @@ function Mipa:ApplyVelocity()
                 UIIsnt:Death()
             end
             SoundManager:PlaySound("MipaGameOver")
+            SoundManager:PauseMusic()
             self:GetRidOffBox()
         end
     end
@@ -1044,7 +1072,7 @@ function Mipa:RingAction()
         for i=1,#collisions do
             local collisionObject = collisions[i]
             local collisionTag = collisionObject:getTag()
-            if collisionTag == TAG.PropPushable or collisionTag == TAG.Enemy then
+            if collisionTag == TAG.PropPushable or (collisionTag == TAG.Enemy and collisionObject.IsGrabbable) then
                 if self:CheckSpaceForMipaWithBox(collisionObject) then
                     self:setCollideRect(1,-9,12,23)
                     self.holdingbox = collisionObject
@@ -1169,10 +1197,12 @@ function Mipa:update()
             end 
         end
     end
-    if not self:IsDead() and self.hp == 1 and not self.IsClone then
-        if UIIsnt ~= nil then
-            if math.random(0,100) <= 0.002 then
-                UIIsnt.glitchframes = math.floor(math.random(2,7)+0.5)
+    if LowHpFXEnabled then
+        if not self:IsDead() and self.hp == 1 and not self.IsClone then
+            if UIIsnt ~= nil then
+                if math.random(0,100) <= 0.002 then
+                    UIIsnt.glitchframes = math.floor(math.random(2,7)+0.5)
+                end
             end
         end
     end
