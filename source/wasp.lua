@@ -17,14 +17,21 @@ function Wasp:init(x, y)
     -- Movement
     self.speed = 1.66
     self.IsWasp = true
-    self.hp = 3
+    self.hp = 1
     self.maxhp = 3
     self.damagable = true
     self.damageimuneframes = 0
     self.damagesound = "BzzFast"
+    self.noAIUpdates = false
 end
 
 function Creature:collisionResponse(other)
+    
+    if self.escape then
+        return gfx.sprite.kCollisionTypeOverlap
+    end
+    
+    
     if self.notapplyimpulses then
         return nil
     end
@@ -63,9 +70,57 @@ end
 function Wasp:Death()
     SoundManager:PauseMusic()
     if UIIsnt ~= nil then
-        UIIsnt:StartDialog(GetDialogDataFromString("Okay\nOkay....\nYou finished that build.\nIn fact that boss was unfinished.\nAswell as cutscene that leads to that level missing.\nSo all I can say, is thanks for testing.\n#Mipa\nYes! Thank you!\nYou can press round button to quit to menu.\nOh wait, this breaking narrative.\n#None\nThat way better. So you just press round button and it opens pause menu and you press MAIN MENU\nThat simple, yes."))
+        --UIIsnt:StartDialog(GetDialogDataFromString("Okay\nOkay....\nYou finished that build.\nIn fact that boss was unfinished.\nAswell as cutscene that leads to that level missing.\nSo all I can say, is thanks for testing.\n#Mipa\nYes! Thank you!\nYou can press round button to quit to menu.\nOh wait, this breaking narrative.\n#None\nThat way better. So you just press round button and it opens pause menu and you press MAIN MENU\nThat simple, yes."))
+        local dialog = GetDialogDataFromString("WaspDefeat")
+        UIIsnt:StartDialog(dialog, nil, "ChangeActor 387 Escape\nMusic None\nBigTrashKoaKola 383")
+        NextLevel = "lvl14b"
     end
     self.defeated = true
+end
+
+function Wasp:DoCloudsFX()
+    local _x, _y = self:getPosition()
+    _x = _x-5
+    local bigcloudSpread = 15
+    local bigcloudYOffset = 5
+    AnimEffect(_x, _y+bigcloudYOffset, "Effects/BigCloud", 2, true, false, self.mirrored)
+    AnimEffect(_x-bigcloudSpread, _y+bigcloudYOffset, "Effects/BigCloud", 2, true, false)
+    AnimEffect(_x+bigcloudSpread, _y+bigcloudYOffset, "Effects/BigCloud", 2, true, false, true)
+    local cloudTimer = pd.frameTimer.new(1)
+    cloudTimer.Mipa = self
+    cloudTimer.timerEndedCallback = function(timer)
+        _x, _y = cloudTimer.Mipa:getPosition()
+        if not self:IsFlying() then
+            cloudTimer:remove()
+        end
+        for i = 1, 2, 1 do
+            local speadX = 12
+            local spreadY = 2
+            local effectX = math.floor(math.random(-speadX,speadX)+0.5)
+            local effectY = math.floor(math.random(-spreadY,spreadY)+0.5)
+            local animSpeed = math.floor(math.random(1,3)+0.5)
+            local effect = AnimEffect(_x+effectX, _y+effectY, "Effects/SmallParticle", animSpeed, true, false)
+        end
+    end
+    cloudTimer.repeats = true
+    cloudTimer:start()
+    self.cloudtimer = cloudTimer
+end
+
+function Wasp:DoWingsFX()
+    local wings = AnimEffect(0, 0, "Effects/WingsPair", 1, true, false, self.mirrored)
+    wings:setCenter(0.5, 0.5)
+    wings.Wasp = self
+    wings.CustomUpdate = function()
+        if wings.Wasp then
+            if wings.Wasp:IsMirrored() then
+                wings:moveTo(self.x, self.y)
+            else
+                wings:moveTo(self.x, self.y)
+            end
+        end
+    end
+    wings.CustomUpdate()
 end
 
 function Wasp:Shoot()    
@@ -91,8 +146,8 @@ function Wasp:Shoot()
     bullet:setCollideRect(2, 1, 6, 6)
     bullet.speed = speed
     bullet.destoryOnDamage = true
-    bullet.damage = 1
-    bullet:setTag(TAG.HazardNoColide)   
+    bullet.damage = 0
+    bullet:setTag(TAG.HazardNoColide)
     SoundManager:PlaySound("Woop")
     bullet.lifedistance = 500
     bullet.lastpushonhit = false
@@ -101,6 +156,14 @@ function Wasp:Shoot()
         local bomb = Clashbomb(bullet.x-4, bullet.y-4, self.mirrored, self, collision.other)
         bomb.dangerous = true
     end
+    bullet.CustomHazardFn = function (Mipa)
+        print("bullet.CustomHazardFn")
+        SoundManager:PlaySound("Heavyland")
+        local bomb = Clashbomb(bullet.x-4, bullet.y-4, self.mirrored, self, Mipa)
+        DrawCrank()
+        bomb.dangerous = true
+        bullet.OnDestory()
+    end
     bullet.OnDestory = function()
         if self.lastbomb == bullet then
             self.lastbomb = nil
@@ -108,12 +171,49 @@ function Wasp:Shoot()
     end
 end
 
+function Wasp:SetActorAct(command)
+    if command ~= nil and command ~= "" then
+        print("[Wasp] SetActorAct "..command)
+        if command == "JustStand" then
+            self.noAIUpdates = true
+            self.mirrored = gfx.kImageFlippedX
+        elseif command == "STOCK" then
+            self.noAIUpdates = false
+        elseif command == "Escape" then
+            self.escape = true
+            self.maxjumpvelocity = -40
+            self.gravity = 0
+            self:setTag(TAG.Effect)
+        end
+    end
+end
+
 function Wasp:AIUpdate()
-    if self.momentumX > 0 or self.notapplyimpulses or self.defeated then
-        self.movingdirection = 0
+    if self.escape then
+        if self.x < 223 then
+            self:TryMoveRight()
+        else
+            if self.velocityY == 0 then
+                self.velocityY = -10
+                self:DoWingsFX()
+                self:DoCloudsFX()
+                SoundManager:PlaySound("Wooah")
+            end
+        end
+
+        if self.y < 35 then
+            self.cloudtimer:remove()
+            gfx.sprite.removeSprite(self)
+        end
+        
         return
     end
     
+    
+    if self.momentumX > 0 or self.notapplyimpulses or self.defeated or self.noAIUpdates then
+        self.movingdirection = 0
+        return
+    end
     self.thinkticks = self.thinkticks+1
 
     if self.thinkticks >= 35 and self.paintimer == nil then
@@ -150,6 +250,7 @@ function Wasp:AIUpdate()
             
             if self:IsOnFloor() then
                 if self.lastxbeforejump ~= self.x then
+                    self:DoWingsFX()
                     self:TryJump()
                 else
                     if self.movingdirection == 1 then
@@ -188,7 +289,7 @@ function Wasp:PickAnimation()
         self:SetAnimation("shoot")
         return
     end
-    if self.paintimer or self.defeated then
+    if self.paintimer or (self.defeated and not self.escape) then
         self:SetAnimation("pain")
         return
     end

@@ -1,0 +1,89 @@
+{
+  "sequences": 
+  [
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro1",
+      "onfinished": "",
+      "frames":
+      [
+        {
+          "image": 1,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro2",
+      "onfinished": "",
+      "frames":
+      [
+        {
+          "image": 2,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro3",
+      "onfinished": "",
+      "frames":
+      [
+        {
+          "image": 3,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro4",
+      "onfinished": "",
+      "frames":
+      [
+        {
+          "image": 4,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro5",
+      "onfinished": "",
+      "frames":
+      [
+        {
+          "image": 5,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro6",
+      "onfinished": "",
+      "frames":
+      [
+        {
+          "image": 6,
+          "duration": 1
+        }
+      ]
+    },
+    {
+      "sheet": "Intro",
+      "linkeddialog": "Intro7",
+      "onfinished": "Level menu",
+      "frames":
+      [
+        {
+          "image": 7,
+          "duration": 1
+        }
+      ]
+    }
+  ]
+}

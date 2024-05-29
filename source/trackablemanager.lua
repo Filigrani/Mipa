@@ -3,6 +3,7 @@ local gfx <const> = pd.graphics
 TrackableManager = {}
 TrackableManager.trackables = {}
 TrackableManager.logicfunctions = {}
+TrackableManager.executeQueue = {}
 
 TrackableManager.RegisterLogicBlock = function (uid, code)
     TrackableManager.logicfunctions[tostring(uid)] = load(code, #code)
@@ -19,6 +20,7 @@ end
 TrackableManager.Reset = function ()
     TrackableManager.trackables = {}
     TrackableManager.logicfunctions = {}
+    TrackableManager.executeQueue = {}
 end
 
 TrackableManager.Add = function (obj, uid)
@@ -62,8 +64,25 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         end
     elseif command == "Spawn" then
         local type = parameters[2]
-        if type and type == "box" then
+        if type == "box" then
             PhysicalProp(tonumber(parameters[3]), tonumber(parameters[4]))
+        end
+        if type == "wasp" then
+            local data = {}
+            data.propType = "wasp"
+            data.x = tonumber(parameters[3])
+            data.y = tonumber(parameters[4])
+            if parameters[5] ~= nil then
+                data.actoraction = parameters[5]
+            else
+                data.actoraction = ""
+            end
+            if parameters[6] ~= nil then
+                data.UID  = parameters[6]
+            else
+                data.UID  = "wasp"
+            end
+            CurrentLevel:CreateProp(data)
         end
     elseif command == "Glitch" then
         UIIsnt.glitchframes = tonumber(parameters[2])
@@ -71,11 +90,59 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         if UIIsnt ~= nil then
             UIIsnt:StartDialog(GetDialogDataFromString(parameters[2]))
         end
+    elseif command == "NoControl" then
+        if MipaInst ~= nil then
+            MipaInst.canbecontrolled = false
+        end
+    elseif command == "ReturnControl" then
+        if MipaInst ~= nil then
+            MipaInst.canbecontrolled = true
+        end
+    elseif command == "DropFunnyBridge" then
+        local UID = parameters[2]
+        local funnybridge = TrackableManager.GetByUID(UID)
+        if funnybridge then
+            funnybridge:Drop()
+        end
+    elseif command == "SkipFallDamage" then
+        if MipaInst then
+            MipaInst.skipfalldamage = true
+        end
+    elseif command == "ChangeActor" then
+        local UID = parameters[2]
+        local Action = parameters[3]
+        local Actor = TrackableManager.GetByUID(UID)
+        if Actor then
+            Actor:SetActorAct(Action)
+        else
+            print("[TrackableManager][ChangeActor] Actor with UID "..UID.." not found!")
+        end
+    elseif command == "Music" then
+        if parameters[2] == "None" then
+            parameters[2] = ""
+        end
+        SoundManager:PlayMusic(parameters[2])
+    elseif command == "MusicStop" then
+        SoundManager:FadeMusicForWhile(70)
+    elseif command == "MipaPosition" then
+        if MipaInst then
+            MipaInst:moveTo(parameters[2], parameters[3])
+        end
+    elseif command == "Cutscene" then
+        UIIsnt:StartCutscene(parameters[2])
+    elseif command == "Level" then
+        NextLevel = parameters[2]
+        StartGame()
+    elseif command == "BigTrash" then
+        local TrashSpawner = TrackableManager.GetByUID(parameters[2])
+        TrashSpawner.pendingBigTrash = true
+    elseif command == "BigTrashKoaKola" then
+        local TrashSpawner = TrackableManager.GetByUID(parameters[2])
+        TrashSpawner.pendingBigTrashKoaKola = true
     end
 end
 
-TrackableManager.ProcessCommandLine = function (rawText)
-    print("[TrackableManager] ProcessCommandLine: "..rawText)
+TrackableManager.AddCommandLineToQueue = function (rawText)
     local CommandsLines = {}
     if string.find(rawText, "\n") then
         for l in string.gmatch(rawText, '([^\n]+)') do
@@ -84,9 +151,44 @@ TrackableManager.ProcessCommandLine = function (rawText)
     else
         table.insert(CommandsLines, rawText)
     end
-    if #CommandsLines > 0 then
-        for i = 1, #CommandsLines, 1 do
-            TrackableManager.ExecuteCommand(CommandsLines[i])            
-        end 
+
+    local element = {}
+    element.Commands = CommandsLines
+    element.CurrentIndex = 1
+    element.OnHold = 0
+    table.insert(TrackableManager.executeQueue, element)
+end
+
+TrackableManager.ProcessCommandLine = function (rawText)
+    print("[TrackableManager] ProcessCommandLine: "..rawText)
+    TrackableManager.AddCommandLineToQueue(rawText)
+end
+
+TrackableManager.Update = function ()
+    if #TrackableManager.executeQueue > 0 then
+        local element = TrackableManager.executeQueue[1]
+        if element.OnHold == 0 then
+            local currentCommand = element.Commands[element.CurrentIndex]
+            local command = currentCommand
+            local parameters = {}
+            if string.find(currentCommand, " ") then
+                for l in string.gmatch(currentCommand, '%S+') do
+                    table.insert(parameters, l)
+                end
+                command = parameters[1]
+            end
+            element.CurrentIndex = element.CurrentIndex+1
+            if element.CurrentIndex > #element.Commands then
+                table.remove(TrackableManager.executeQueue, 1)
+            end
+            if command == "Delay" then
+                element.OnHold =  tonumber(parameters[2])
+            else
+                TrackableManager.ExecuteCommand(currentCommand)
+                TrackableManager.Update()
+            end
+        else
+            element.OnHold = element.OnHold-1
+        end
     end
 end

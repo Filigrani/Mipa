@@ -45,8 +45,8 @@ CheatsManager.RegisterCheats = function ()
     --                      1234567890
     CheatsManager.AddCheat("UUDDLRLRBA", function ()
         if MipaInst then
-            MipaInst.hpmax = 10
-            MipaInst.hp = 10
+            MipaInst.hpmax = 5
+            MipaInst.hp = 5
             MipaInst:Konami()
         end
     end)

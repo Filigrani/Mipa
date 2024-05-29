@@ -114,11 +114,17 @@ function PhysicalProp:ApplyVelocity()
     local lastground = self.onground
     local lastfreefall = self.freefall
     self.onground = false
+    self.onbridge = false
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
+
+        if collisionObject.IsFunnyBringe then
+            self.onbridge = true
+        end
+
         if collisionType == gfx.sprite.kCollisionTypeSlide then
             if collision.normal.y == -1 then
                 self.onground = true
@@ -158,16 +164,34 @@ function PhysicalProp:ApplyVelocity()
                                 collisionObject.paintimer.timerEndedCallback = function(timer)
                                     collisionObject.paintimer = nil
                                 end
-                                
                             end
                         end
                     end                    
                 end
-                if lastfreefall > 2 then
+                if lastfreefall > 5 then
+                    if self.isKoaKola then
+                        if CurrentLevel then
+                            local zoneData = {}
+                            zoneData.x = _x-7
+                            zoneData.y = _y-7
+                            zoneData.zoneType = "koasoda"
+                            CurrentLevel:CreateZone(zoneData)
+                        end
+                    end
                     if self.isTrash then
                         AnimEffect(_x-13, _y-5, "Effects/Trashbox", 4, true, false)
                         gfx.sprite.removeSprite(self)
                         return
+                    end
+                else
+                    if self.isTrash then
+                        if collisionObject.IsWasp or collisionObject.IsMipa then
+                            AnimEffect(_x-13, _y-5, "Effects/Trashbox", 4, true, false)
+                            gfx.sprite.removeSprite(self)
+                            if collisionObject.IsMipa and lastfreefall > 1 then
+                                collisionObject:Damage(1, true)
+                            end
+                        end
                     end
                 end    
             elseif collision.normal.y == 1 then       
@@ -211,6 +235,11 @@ function PhysicalProp:ApplyVelocity()
                 end
             end                     
         end
+        if collision.normal.x ~= 0 then
+            if self.onbridge and collisionTag ~= TAG.Default and not collisionObject.IsFunnyBringe  then
+                self.velocityY = -2
+            end
+        end
     end
     if logIt then
         --print("[PhysicalProp:ApplyVelocity()] PostForLoop -> self.velocityX ", self.velocityX)
@@ -225,7 +254,7 @@ function PhysicalProp:ApplyVelocity()
     else
         self.movingflag = false
     end
-    if self.y > 250 then
+    if self.y > 250 or self.x > 397 or self.x < 0 then
         if self.Dropper then
             self.Dropper:DropBox()
         else

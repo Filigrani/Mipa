@@ -1,5 +1,6 @@
 TAG =
 {
+	Default = 1,
 	Player = 1,
 	Enemy = 2,
 	Prop = 3,
@@ -44,7 +45,7 @@ GetDialogDataFromString = function (key)
 	local DialogData = {}
 	DialogData.Key = key
 	local Prefix = "#"
-	local LastActor = "Mipa"
+	local LastActor = "#None"
 	for i = 1, #rawLines, 1 do
 		local rawLine = rawLines[i]
 		if string.sub(rawLine,1,string.len(Prefix)) == Prefix then

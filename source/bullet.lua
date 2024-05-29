@@ -142,7 +142,7 @@ end
 
 function Bullet:Destroy()
     if self.OnDestory then
-        self.OnDestory();
+        self.OnDestory()
     end
     gfx.sprite.removeSprite(self)
 end

@@ -3,6 +3,7 @@ import "CoreLibs/graphics"
 import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/frametimer"
+import "CoreLibs/ui"
 import "settings"
 import "savemanager"
 Settings = SaveManager.Load("settings") or DefaultSettings
@@ -35,6 +36,8 @@ import "credits"
 import "clashbomb"
 import "blob"
 import "wasp"
+import "funnybridge"
+
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
@@ -44,17 +47,20 @@ MenuInst = nil
 MipaInst = nil
 CreditsInst = nil
 CurrentLevel = nil
-CurrentLevelName = "menu"
-NextLevel = "menu"
+CurrentLevelName = "intro"
+NextLevel = "intro"
 LoadNextLevel = false
 CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
-LevelsLimit = 13
+IsReplay = false
+LevelsLimit = 15
 local font = gfx.font.new('font/Asheville Ayu')
 ShouldUpdatePauseMenu = false
 SeenDialogs = {}
-FoundNotes = {}
+FoundNotes = SaveManager.Load("notes") or {}
+DrawCrankFrames = 0
+CrankedThisFrame = false
 
 AddFoundNote = function (noteID)
 	for i = 1, #FoundNotes, 1 do
@@ -64,6 +70,7 @@ AddFoundNote = function (noteID)
 	end
 	table.insert(FoundNotes, noteID)
 	table.sort(FoundNotes)
+	SaveManager.Save("notes", FoundNotes)
 end
 
 local function OpenItemsMenu()
@@ -122,7 +129,7 @@ local function AddSystemMenuButtons()
 	local menu = pd.getSystemMenu()
 	menu:removeAllMenuItems()
 
-	if CurrentLevelName ~= "menu" then
+	if CurrentLevelName ~= "menu" and CurrentLevelName ~= "intro" then
 		local menuItem, error = menu:addMenuItem("main menu", function()
 			NextLevel = "menu"
 			StartGame()
@@ -136,10 +143,18 @@ local function AddSystemMenuButtons()
 			end)
 		end
 	else
-		local menuItem, error = menu:addMenuItem("add-on levels", function()
-			NextLevel = "menu"
-			OpenAddons()
-		end)
+		if CurrentLevelName == "intro" then
+			local menuItem, error = menu:addMenuItem("skip intro", function()
+				if UIIsnt then
+					UIIsnt:SkipIntro()
+				end
+			end)
+		else
+			local menuItem, error = menu:addMenuItem("add-on levels", function()
+				NextLevel = "menu"
+				OpenAddons()
+			end)
+		end
 	end
 end
 
@@ -190,6 +205,7 @@ DrawCrankSinus = function (change)
 end
 
 StartGame = function ()
+	IsReplay = false
 	InvertedColorsFrames = 0
 	gfx.sprite.removeAll()
 	local timers = playdate.frameTimer.allTimers()
@@ -209,10 +225,21 @@ StartGame = function ()
 		return
 	end
 	if NextLevel == "menu" then
-		SoundManager:PlayMusic("Menu")
+		NoSoundsInCutscenes = true
+		SoundManager:PlayMusic("Intro")
 		pd.setMenuImage(nil, 0)
 		MenuInst = Menu()
 		CurrentLevelName = "menu"
+		AddSystemMenuButtons()
+		return
+	end
+	if NextLevel == "intro" then
+		NoSoundsInCutscenes = false
+		SoundManager:PlayMusic("Intro")
+		pd.setMenuImage(nil, 0)
+		CurrentLevelName = "intro"
+		UIIsnt = UI()
+		UIIsnt:StartCutscene("Intro")
 		AddSystemMenuButtons()
 		return
 	end
@@ -235,6 +262,8 @@ StartGame = function ()
 	end
 	if CurrentLevelName ~= NextLevel then
 		SeenDialogs = {}
+	else
+		IsReplay = true
 	end
 	CurrentLevelName = NextLevel
 	if string.find(CurrentLevelName, "/") == nil then
@@ -301,6 +330,15 @@ DeathTrigger = function ()
 		fadetimer:start()
     end
 end
+
+DrawCrank = function ()
+	DrawCrankFrames = 60
+end
+
+StopDrawCrank = function ()
+	DrawCrankFrames = 0
+end
+
 
 GetPauseMenuImage = function (extended)
 	local img = gfx.image.new(400, 240)
@@ -430,10 +468,14 @@ local function updateGame()
 	local change = playdate.getCrankChange()
 	if change ~= 0 then
 		CrankManager.Changed(change)
+		CrankedThisFrame = true
+	else
+		CrankedThisFrame = false
 	end
 	if CreditsInst ~= nil then
 		CreditsInst:Update()
 	end
+	TrackableManager.Update()
 end
 
 loadGame()
@@ -451,4 +493,8 @@ function pd.update()
 	end
 	UpdatePauseMenu()
 	UpdateSinusMiniGame()
+	if DrawCrankFrames > 0 then
+		DrawCrankFrames = DrawCrankFrames-1
+		pd.ui.crankIndicator:draw()
+	end
 end

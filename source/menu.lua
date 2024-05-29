@@ -426,7 +426,7 @@ function Menu:init()
 
         if pd.buttonJustPressed(pd.kButtonB) then
             self:SetMenu("start")
-            SoundManager:PlayMusic("Menu")
+            SoundManager:PlayMusic("Intro")
         end
     end, false)
 

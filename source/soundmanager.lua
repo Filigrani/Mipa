@@ -6,6 +6,7 @@ local musicplayer = nil
 local lastmusicloaded = ""
 local musicresumetimer = nil
 SoundManager.MusicVolume = 1
+NoSoundsInCutscenes = true
 do
     local vol = 5
     local savevol = Settings.musicvolume
@@ -87,6 +88,9 @@ AddSound("Heavyland")
 AddSound("Wooah")
 AddSound("PfffBrr")
 AddSound("Pfff", nil, true)
+AddSound("Wooop", nil, true)
+AddSound("Crip", nil, true)
+AddSound("Dzip", 1, true)
 AddSound("BossFight")
 
 function SoundManager:PlayMusic(name, smooth)
@@ -108,7 +112,7 @@ function SoundManager:PlayMusic(name, smooth)
     else
         musicplayer:stop()
         if not justplayfromstart then
-            musicplayer:load("music/"..name)
+            musicplayer = pd.sound.fileplayer.new("music/"..name)
         end
     end
     if smooth then
@@ -205,7 +209,9 @@ end
 function SoundManager:PlaySound(name, vol, ignorecutscene)
     if UIIsnt and UIIsnt:IsCutscene() then
         if ignorecutscene == nil then
-            return
+            if NoSoundsInCutscenes then
+                return
+            end
         end
     end
     local volume = 1

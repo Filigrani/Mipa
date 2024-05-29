@@ -14,6 +14,7 @@ function Blob:init(x, y)
     self:add() -- Add to draw list
     self:setTag(TAG.Enemy)
     self.IsGrabbable = true
+    self.Mipa = nil
 end
 
 function Blob:collisionResponse(other)
@@ -42,6 +43,25 @@ function Blob:ApplyVelocity()
                         AnimEffect(self.x-7, collision.otherRect.y-14, "Effects/ground", 1, true)
                         SoundManager:PlaySound("Bloop", 0.3)
                     end
+                end
+            end
+        end
+    end
+    self.Mipa = nil
+    if self:IsOnFloor() then
+        local _, _, collisions2, length = self:checkCollisions(self.x, self.y-1)
+        for i=1,length do
+            local collision = collisions2[i]
+            local collisionType = collision.type
+            local collisionObject = collision.other
+            local collisionTag = collisionObject:getTag()
+            if collisionObject.IsMipa then
+                self.Mipa = collisionObject
+                if not self.squshed then
+                    self.movingdirection = 0
+                    self.thinkticks = 0
+                    self.squshed = true
+                    SoundManager:PlaySound("Splash")
                 end
             end
         end
@@ -96,21 +116,23 @@ function Blob:AIUpdate()
     if self.squshed then
         self:setCollideRect(2,10,10,4)
         if self.thinkticks >= 30 then
-            if MipaInst ~= nil then
-                MipaInst.velocityY = -15
-                MipaInst.canjump = false
-                MipaInst:ApplyVelocity()
-                self.thinkticks = 85
-                self.squshed = false
-                self:setCollideRect(2,7,10,7)
+            if self.Mipa ~= nil then
+                self.Mipa.velocityY = -15
+                self.Mipa.canjump = false
+                self.Mipa:ApplyVelocity()
             end
+            self.thinkticks = 85
+            self.squshed = false
+            self:setCollideRect(2,7,10,7)
         end
-    else
+    else        
         if self:IsOnFloor() then
             if self.movingdirection == 1 then
                 self:TryMoveRight()
+                --SoundManager:PlaySound("Slip", 0.07)
             elseif self.movingdirection == -1 then
                 self:TryMoveLeft()
+                --SoundManager:PlaySound("Slip", 0.07)
             end
         end
     end

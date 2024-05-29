@@ -26,14 +26,29 @@ function Level:init(levelPath)
     if self.jsonTable.music == nil then
         SoundManager:PlayMusic("BG1")
     else
-        SoundManager:PlayMusic(self.jsonTable.music)
+        if self.jsonTable.music == "" then
+            SoundManager:PauseMusic()
+        else
+            SoundManager:PlayMusic(self.jsonTable.music)
+        end
     end
     
     self:ParceTileMap() 
     self:RenderTilemap()
     self:ParceProps()
     self:ParceZones()
-    
+    print("[Level] IsReplay? ", IsReplay)
+    if IsReplay then
+        if self.jsonTable.replaylevelcommand ~= nil then
+            print("[Level] Executing level replay command...")
+            TrackableManager.ProcessCommandLine(self.jsonTable.replaylevelcommand)
+        end
+    else
+        if self.jsonTable.newlevelcommand ~= nil then
+            print("[Level] Executing level new level command...")
+            TrackableManager.ProcessCommandLine(self.jsonTable.newlevelcommand)
+        end
+    end
 end
 
 TILESNAMES = 
@@ -44,7 +59,10 @@ TILESNAMES =
 	SHATRED_STONE_SLAB_TOP = 4,
 	SHATRED_STONE_SLAB_BOTTOM = 5,
 	SHATRED_STONE = 6,
+    FUNNY_BRINGE = 7,
+
     SPIKE = 302,
+
     ConveyorBeltsEdgeLeft_BOTTOM = 501,
     ConveyorBelts_BOTTOM = 502,
     ConveyorBeltsEdgeRight_BOTTOM = 503,
@@ -87,6 +105,12 @@ function Level:CreateTile(ID, X, Y)
     -- Special tiles
     if ID == TILESNAMES.SPIKE then
         Spike(WorldX, WorldY)
+    elseif ID == TILESNAMES.FUNNY_BRINGE then
+        DefaultRender = false
+        local br = FunnyBridge(WorldX, WorldY, self.imagetable:getImage(ID))
+        local UID = X.."x"..Y
+        TrackableManager.Add(br, UID)
+        print("Funny bridge "..UID)
     elseif ID == TILESNAMES.STONE_SLAB_TOP 
     or ID == TILESNAMES.STONE_SLAB_BOTTOM
     or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP 
@@ -105,6 +129,7 @@ function Level:CreateTile(ID, X, Y)
     or ID == TILESNAMES.ConveyorBeltsInversed_TOP
     or ID == TILESNAMES.ConveyorBeltsEdgeRight_TOP
     or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_TOP
+    or ID == TILESNAMES.FUNNY_BRINGE
     then
         DefaultRender = false
         local TileW = 14
@@ -211,7 +236,7 @@ function Level:CreateProp(propData)
         TrackableManager.Add(PhysicalProp(propData.x, propData.y), propData.UID)
     elseif type == "trash" then
         local trashbox = PhysicalProp(propData.x, propData.y)
-        trashbox:setImage("images/Props/Trash")
+        trashbox:setImage(AssetsLoader.LoadImage("images/Props/Trash"))
         trashbox.isTrash = true
     elseif type == "button" then
         local butt = Activator(propData.x, propData.y, propData.group, propData.timer, propData.indicatorUID)
@@ -553,6 +578,8 @@ function Level:CreateProp(propData)
     elseif type == "wasp" then
         local c = Wasp(propData.x, propData.y)
         c.enemyname = "wasp"
+        TrackableManager.Add(c, propData.UID)
+        c:SetActorAct(propData.actoraction)
     elseif type == "boxdropper" then
         local dropper = Activatable(propData.x, propData.y, propData.group, false, propData.activeType)
         local img = AssetsLoader.LoadImage("images/Props/boxdropper")
@@ -585,6 +612,8 @@ function Level:CreateProp(propData)
                 box.Dropper = dropper
             end
             if box then
+                box.velocityX = 0
+                box.velocityY = 0
                 for i = 1, 10, 1 do
                     local speadX = 8
                     local spreadY = -1*i
@@ -606,13 +635,15 @@ function Level:CreateProp(propData)
                 end
             end
         end
-        if propData.active then
+        if propData.active == 1 then
             dropper.DropBox()
+            print("DropBox propData.active")
         end
         dropper.CustomUpdate = function()
             if dropper.lastactive ~= dropper.activated then
                 if dropper.activated then
                     dropper.DropBox()
+                    print("DropBox CustomUpdate")
                 end
             end
         end
@@ -711,11 +742,42 @@ function Level:CreateZone(zoneData)
             Spawner.spawntimer = pd.frameTimer.new(zoneData.spawnperioud)
             Spawner.spawntimer.repeats = true
             Spawner.spawntimer.timerEndedCallback = function(timer)
-                local trashbox = PhysicalProp(zoneData.x, zoneData.y)
-                trashbox:setImage(AssetsLoader.LoadImage("images/Props/Trash"))
-                trashbox.isTrash = true
+                local CanSpawn = true
+                local collider = gfx.sprite.addEmptyCollisionSprite(zoneData.x, zoneData.y,15,12)
+                collider:setTag(TAG.Effect)
+                local collisions = collider:overlappingSprites(zoneData.x, zoneData.y)
+                gfx.sprite.removeSprite(collider)
+                for i=1,#collisions do
+                    local collisionObject = collisions[i]
+                    local collisionTag = collisionObject:getTag()
+                    if collisionObject.IsMipa then
+                        CanSpawn = false
+                        break
+                    end
+                end
+
+                if CanSpawn then
+                    if not Spawner.pendingBigTrash and not Spawner.pendingBigTrashKoaKola then
+                        local trashbox = PhysicalProp(zoneData.x, zoneData.y)
+                        trashbox:setImage(AssetsLoader.LoadImage("images/Props/Trash"))
+                        trashbox.isTrash = true
+                    elseif Spawner.pendingBigTrash then
+                        local BigTrash = PhysicalProp(zoneData.x, zoneData.y)
+                        BigTrash:setImage(AssetsLoader.LoadImage("images/Props/TrashBig"))
+                        BigTrash:setCollideRect(0,0,15,14)
+                        Spawner.pendingBigTrash = false
+                    elseif Spawner.pendingBigTrashKoaKola then
+                        local BigTrashKoaKola = PhysicalProp(zoneData.x, zoneData.y)
+                        BigTrashKoaKola:setImage(AssetsLoader.LoadImage("images/Props/TrashBigKoaKola"))
+                        BigTrashKoaKola:setCollideRect(0,0,15,14)
+                        BigTrashKoaKola.isTrash = true
+                        BigTrashKoaKola.isKoaKola = true
+                        Spawner.pendingBigTrashKoaKola = false
+                    end
+                end
             end
             Spawner.spawntimer:start()
+            TrackableManager.Add(Spawner, zoneData.UID)
         end
     end
 end

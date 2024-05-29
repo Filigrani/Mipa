@@ -50,6 +50,33 @@ ActiveManager.GroupIsActive = function (group)
     return false
 end
 
+ActiveManager.GetGroupImages = function (group)
+    local imgs = {}
+    for i = 1, #ActiveManager.activators, 1 do
+        local act = ActiveManager.activators[i]
+        if act then
+            local img = act:getImage()
+            local r_x, r_y, r_w, r_h = act:getBounds()
+            local rectangle = {x = r_x, y = r_y, w = r_w, h = r_h}
+            if img ~= nil then
+                table.insert(imgs, {image = img, x = act.x, y = act.y, rect = rectangle})
+            end
+        end
+    end
+    for i = 1, #ActiveManager.activatables, 1 do
+        local act = ActiveManager.activatables[i]
+        if act then
+            local img = act:getImage()
+            local r_x, r_y, r_w, r_h = act:getBounds()
+            local rectangle = {x = r_x, y = r_y, w = r_w, h = r_h}
+            if img ~= nil then
+                table.insert(imgs, {image = img, x = act.x, y = act.y, rect = rectangle})
+            end
+        end
+    end
+    return imgs
+end
+
 ActiveManager.UpdateActivatables = function ()
     for i = 1, #ActiveManager.activatables, 1 do
         local act = ActiveManager.activatables[i]

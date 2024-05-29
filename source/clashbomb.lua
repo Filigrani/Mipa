@@ -38,7 +38,10 @@ function Clashbomb:init(x, y, mirrored, mipa, parant)
         end
     end
     self.fallingdown = false
-    self.gravity = 0.35
+    self.gravity = 2
+    self.momentumX = 0
+    self.velocityX = 0
+    self.crankedFrames = 0
 end
 
 function Clashbomb:collisionResponse(other)
@@ -94,6 +97,9 @@ function Clashbomb:DestoryBlocks()
 end
 
 function Clashbomb:BeginExplosion()
+    if self.parent and self.parent.IsMipa ~= nil then
+        StopDrawCrank()
+    end
     SoundManager:PlaySound("GlitchNew")
     for i = 1, 10, 1 do
         self:DoExposionEffect()
@@ -137,28 +143,43 @@ function Clashbomb:DisarmAndFall()
 end
 
 function Clashbomb:ApplyFalling()
-    local _x, _y = self:getPosition()
-    local disiredX = _x
-    local disiredY = _y + self.gravity
-    local actualX, _, collisions, length = self:moveWithCollisions(disiredX, disiredY)
-    local onground = false
-    for i=1,length do
-        local collision = collisions[i]
-        local collisionType = collision.type
-        local collisionObject = collision.other
-        local collisionTag = collisionObject:getTag()
-        if collisionType == gfx.sprite.kCollisionTypeSlide then
-            if collision.normal.y == -1 then
-                onground = true
+    if self.fallingdown then
+        self.velocityX = 0
+        if self.momentumX > 0 then
+            self.momentumX = self.momentumX-self.gravity
+            if self.momentumX <= 0 then
+                self.momentumX = 0
+            end
+        elseif self.momentumX < 0 then
+            self.momentumX = self.momentumX+self.gravity
+            if self.momentumX >= 0 then
+                self.momentumX = 0
             end
         end
-    end
-    if onground then
-        self.fallingdown = false
+        if self.momentumX ~= 0 then
+            self.velocityX = self.velocityX+self.momentumX
+        end
+        self:moveTo(self.x+self.velocityX, self.y+self.gravity)
     end
 end
 
 function Clashbomb:update()
+    if self.parent ~= nil and self.parent.IsMipa ~= nil then
+        if CrankedThisFrame then
+            self.crankedFrames = self.crankedFrames+1
+        end
+        if self.crankedFrames > 5 then
+            self:DisarmAndFall()
+            local direction = math.random(0,100)
+            if direction < 50 then
+                self.momentumX = math.random(7,12)
+            else
+                self.momentumX = -math.random(7,12)
+            end
+            StopDrawCrank()
+        end
+    end
+    
     if self.frame == 2 then
         self.frame = 1
     else
@@ -171,6 +192,6 @@ function Clashbomb:update()
     end
 
     if self.fallingdown then
-        --self:ApplyFalling()
+        self:ApplyFalling()
     end
 end

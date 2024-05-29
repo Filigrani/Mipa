@@ -105,7 +105,10 @@ function Mipa:init(x, y)
     self.holdingbox = nil
     self.lastframonwall = false
     self.jumpoffwallmomentum = 10
-    self.dialogskipframe = 0
+    
+    self.onbridge = false
+    self.skipfalldamage = false
+
     self.IsMipa = true
 end
 
@@ -408,7 +411,7 @@ end
 
 function Mipa:SetMirrored(mirrored)
     if mirrored then
-        self.mirrored = gfx.kImageFlippedX 
+        self.mirrored = gfx.kImageFlippedX
     else
         self.mirrored = gfx.kImageUnflipped
     end
@@ -692,12 +695,18 @@ function Mipa:ApplyVelocity()
     self.onground = false
     self.pusing = false
     self.lastframonwall = false
+    self.onbridge = false
     local maytryclimb = false
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
+        
+        if collisionObject.IsFunnyBringe then
+            self.onbridge = true
+        end
+
         if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) and not self:IsDead() then
             local allowDamage = true
             if self.holdingbox ~= nil and self.damagerectangle then
@@ -711,13 +720,21 @@ function Mipa:ApplyVelocity()
                 end
             end
             if allowDamage then
-                if collisionObject.damage == 0 or collisionObject.damage == nil then
-                    self:FatalDamage()
+                if collisionObject.CustomHazardFn ~= nil then
+                    print("Mipa CustomHazardFn")
+                    collisionObject.CustomHazardFn(self)
+                    if collisionObject.destoryOnDamage then
+                        gfx.sprite.removeSprite(collisionObject)
+                    end
                 else
-                    self:Damage(collisionObject.damage)
-                end
-                if collisionObject.destoryOnDamage then
-                    gfx.sprite.removeSprite(collisionObject)
+                    if collisionObject.damage == 0 or collisionObject.damage == nil then
+                        self:FatalDamage()
+                    else
+                        self:Damage(collisionObject.damage)
+                    end
+                    if collisionObject.destoryOnDamage then
+                        gfx.sprite.removeSprite(collisionObject)
+                    end
                 end
             end
         end
@@ -757,7 +774,11 @@ function Mipa:ApplyVelocity()
                         local landvolume = freefall/154
                         if landvolume >= 0.77 then
                             landvolume = 1
-                            self:Damage(1)
+                            if not self.skipfalldamage then
+                                self:Damage(1)
+                            else
+                                self.skipfalldamage = false
+                            end
                             --if UIIsnt ~= nil then
                             --    UIIsnt:StartDialog(GetDialogDataFromString(""))
                             --end
@@ -770,14 +791,6 @@ function Mipa:ApplyVelocity()
                             gfx.sprite.removeSprite(collisionObject)
                         end
                     end                
-                end
-                if collisionObject.enemyname ~= nil and collisionObject.enemyname == "blob" then
-                    if not collisionObject.squshed then
-                        collisionObject.squshed = true
-                        collisionObject.movingdirection = 0
-                        collisionObject.thinkticks = 0
-                        SoundManager:PlaySound("Splash", 0.5)
-                    end
                 end
             elseif collision.normal.y == 1 then
                 self.velocityY = 0
@@ -807,16 +820,20 @@ function Mipa:ApplyVelocity()
                     end
                 end
                 if collision.normal.x ~= 0 then
-                    self.pusing = true
-                    if not lastground then
-                        self.lastframonwall = true
-                        if lastonwall == false and self:HasPassiveItem(PASSIVEITEMS.Honey) then
-                            SoundManager:PlaySound("Splash", 0.1)
-                        end
-                        if collision.normal.x > 0 then
-                            self:SetMirrored(true)
-                        else
-                            self:SetMirrored(false)
+                    if self.onbridge and collisionTag ~= TAG.PropPushable  then
+                        self.velocityY = -5
+                    else
+                        self.pusing = true
+                        if not lastground then
+                            self.lastframonwall = true
+                            if lastonwall == false and self:HasPassiveItem(PASSIVEITEMS.Honey) then
+                                SoundManager:PlaySound("Splash", 0.1)
+                            end
+                            if collision.normal.x > 0 then
+                                self:SetMirrored(true)
+                            else
+                                self:SetMirrored(false)
+                            end
                         end
                     end
                 end
@@ -917,6 +934,7 @@ function Mipa:Interact()
             end
         end
     end
+    --UIIsnt:ShowSpecificGroup()
 end
 function Mipa:ApplyHoldingBox()
     if self.holdingbox ~= nil then
@@ -1175,16 +1193,6 @@ function Mipa:update()
         end
         if pd.buttonJustPressed(pd.kButtonUp) then
             self:Interact()
-        end
-        if pd.buttonIsPressed(pd.kButtonUp) then
-            if self.dialogskipframe < 25 then
-                self.dialogskipframe = self.dialogskipframe+1
-            else
-                self.dialogskipframe = 0 
-                if UIIsnt then
-                    UIIsnt:CancleDialog()
-                end
-            end
         end
     end
     self:ApplyVelocity()

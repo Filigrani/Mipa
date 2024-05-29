@@ -23,7 +23,7 @@ function UI:init()
     self.currdialoglineindex = 1
     self.textwrapingindex = 0
     self.textwrapinglimit = 99
-    self.currentdialogactor = "Mipa"
+    self.currentdialogactor = "#Mipa"
     self.textwaittime = 0
     self.lastglitch = 0
     self.glitchframes = 0
@@ -31,6 +31,7 @@ function UI:init()
     self.skipflash = 0
     self.pixelfadeX = 0
     self.pixelfadeY = 0
+    self.dialogskipframe = 0
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
@@ -210,6 +211,29 @@ function UI:PauseMenuUp(type, ori)
 end
 
 function UI:Update()
+    if pd.buttonIsPressed(pd.kButtonUp) then
+        if self.dialogskipframe < 25 then
+            self.dialogskipframe = self.dialogskipframe+1
+        else
+            self.dialogskipframe = 0 
+            if CurrentLevelName == "intro" then
+                NextLevel = "menu"
+                self:SkipIntro()
+            else
+                if self:IsCutscene() and (self.scenejsonTable.linkeddialog == nil or self.scenejsonTable.linkeddialog == "") then
+                    self:CutsceneFinished()
+                else
+                    self:CancleDialog()
+                end
+            end
+        end
+    else
+        self.dialogskipframe = 0
+    end
+    if pd.buttonJustPressed(pd.kButtonUp) then
+        self:SkipDialogLine()
+    end
+    
     local hearts = 0;
     local containers = 0
     local equipment = {}
@@ -344,6 +368,18 @@ function UI:Update()
             self.startpixelfadeout = false
         end
         pd.display.setMosaic(self.pixelfadeX, self.pixelfadeY)
+    end
+    if self.CanSkipThisDialog then
+        if self.skipflash > 30 then
+            self.skipflash = 0
+            if self.dialogSkip:isVisible() then
+                self.dialogSkip:setVisible(false)
+            else
+                self.dialogSkip:setVisible(true)
+            end
+        else
+            self.skipflash = self.skipflash + 1
+        end
     end
 end
 
@@ -503,8 +539,24 @@ function UI:DialogPosUpdate()
     
 end
 
-function UI:ProcessDialog()
+
+function UI:SkipDialogLine()
     if self.currentdialogindex ~= 0 and #self.dialogdata > 0 and self.dialogbg ~= nil then
+        local currentLineData = self.dialogdata[self.currdialoglineindex]
+        local LineText = currentLineData.text
+        if self.currentdialogindex == #LineText+1 then
+            self.textwaittime = 2
+        else
+            self.currentdialogindex = #LineText+1
+            self.currenttext = LineText
+            self.textwaittime = #LineText*2
+            self:ProcessDialog(true)
+        end
+    end
+end
+
+function UI:ProcessDialog(ignoreappend)
+    if self.currentdialogindex ~= 0 and #self.dialogdata > 0 and self.dialogbg ~= nil and self.dialogdata.Key ~= "" then
         local ShowActor = true
         local ActorChanged = false
         local currentLineData = self.dialogdata[self.currdialoglineindex]
@@ -526,18 +578,6 @@ function UI:ProcessDialog()
         if not self.dialogtextsprite:isVisible() then
             self.dialogtextsprite:setVisible(true)
         end
-        if self.CanSkipThisDialog then
-            if self.skipflash > 30 then
-                self.skipflash = 0
-                if self.dialogSkip:isVisible() then
-                    self.dialogSkip:setVisible(false)
-                else
-                    self.dialogSkip:setVisible(true)
-                end
-            else
-                self.skipflash = self.skipflash + 1
-            end
-        end
         if ActorChanged then
             if ShowActor then
                 self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
@@ -545,27 +585,31 @@ function UI:ProcessDialog()
             print("[UI] Actor changed "..self.currentdialogactor)
         end
         local LineText = currentLineData.text
-        if self.currentdialogindex ~= #LineText+1 then
-            local character = string.sub(LineText, self.currentdialogindex, self.currentdialogindex)
-            self.currenttext = self.currenttext..character
-            self.currentdialogindex = self.currentdialogindex+1
-            self.textwaittime = self.currentdialogindex*2
-            --self.textwrapingindex = self.textwrapingindex+1
-            --if self.textwrapingindex >= self.textwrapinglimit then
-            --    self.textwrapingindex = 0
-            --    self.currenttext = self.currenttext.."\n"
-            --end
-            if character ~= " " and character ~= "." then
-                if self.currentdialogactor == "None" then
-                    SoundManager:PlaySound("Pap")
-                elseif self.currentdialogactor == "Mipa" then
-                    SoundManager:PlaySound("Peaw")
-                elseif self.currentdialogactor == "Wipa" then
-                    SoundManager:PlaySound("Sqeak")
-                elseif self.currentdialogactor == "Jobee" then
-                    SoundManager:PlaySound("Bzz")
-                else
-                    SoundManager:PlaySound("Pap")
+        if (self.currentdialogindex ~= #LineText+1) or ignoreappend then
+            if not ignoreappend then
+                local character = string.sub(LineText, self.currentdialogindex, self.currentdialogindex)
+                self.currenttext = self.currenttext..character
+                self.currentdialogindex = self.currentdialogindex+1
+                self.textwaittime = self.currentdialogindex*2
+                --self.textwrapingindex = self.textwrapingindex+1
+                --if self.textwrapingindex >= self.textwrapinglimit then
+                --    self.textwrapingindex = 0
+                --    self.currenttext = self.currenttext.."\n"
+                --end
+                if character ~= " " and character ~= "." then
+                    if self.currentdialogactor == "None" then
+                        SoundManager:PlaySound("Pap")
+                    elseif self.currentdialogactor == "Mipa" then
+                        SoundManager:PlaySound("Peaw")
+                    elseif self.currentdialogactor == "Wipa" then
+                        SoundManager:PlaySound("Sqeak")
+                    elseif self.currentdialogactor == "Jobee" then
+                        SoundManager:PlaySound("Bzz")
+                    elseif self.currentdialogactor == "Wasp" then
+                        SoundManager:PlaySound("BzzFast")
+                    else
+                        SoundManager:PlaySound("Pap")
+                    end
                 end
             end
             local drawingW = 300
@@ -663,19 +707,27 @@ function UI:LoadDialogUI()
     self:DialogPosUpdate()
 end
 
-function UI:CancleDialog()
+function UI:CancleDialog(skipCommand)
+    local lastkey = self.dialogdata.Key
     self.currentdialogindex = 0
     self.dialogdata = {}
     self.dialogtextimage = gfx.image.new(388, 62)
     self.dialogtextimage:clear(gfx.kColorClear)
-    if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
-        TrackableManager.ProcessCommandLine(self.ondialogfinish)
-        self.ondialogfinish = nil
-    end
     self.dialogbg:remove()
     self.dialogactor:remove()
     self.dialogtextsprite:remove()
     self.dialogSkip:remove()
+    if not skipCommand then
+        if self.scenejsonTable ~= nil and self.scenejsonTable.linkeddialog ~= nil and self.scenejsonTable.linkeddialog ~= "" then
+            if lastkey == self.scenejsonTable.linkeddialog then
+                self:CutsceneFinished()
+            end
+        end
+        if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
+            TrackableManager.ProcessCommandLine(self.ondialogfinish)
+            self.ondialogfinish = nil
+        end
+    end
 end
 
 function UI:StartDialog(data, onstart, onfinish)
@@ -685,6 +737,10 @@ function UI:StartDialog(data, onstart, onfinish)
     self.dialogtextimage = gfx.image.new(388, 62)
     self.currentdialogindex = 1
     self.currdialoglineindex = 1
+    local lastkey = ""
+    if self.dialogdata then
+        lastkey = self.dialogdata.Key
+    end
     self.dialogdata = data
     self.currenttext = ""
     self.textwrapingindex = 0
@@ -696,6 +752,11 @@ function UI:StartDialog(data, onstart, onfinish)
     self.dialogSkip:setVisible(self.CanSkipThisDialog)
     self.skipflash = 0
     if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then -- in case when we start new dialog when previous was still in process
+        --if self.scenejsonTable ~= nil and self.scenejsonTable.linkeddialog ~= nil then
+        --    if lastkey == self.scenejsonTable.linkeddialog  then
+        --        self:CutsceneFinished()
+        --    end
+        --end
         TrackableManager.ProcessCommandLine(self.ondialogfinish)
     end
     self.ondialogfinish = onfinish
@@ -728,19 +789,51 @@ function UI:DoGlitch()
     SoundManager:PlaySound("GlitchNew")
 end
 
-function UI:NextCutsceneFrame()
-    self.currentsceneimage = self.currentsceneimage+1
-    if self.currentsceneimage > self.sceneimages then
-        self.currentsceneimage = 0
-        gfx.sprite.removeSprite(self.sceneoverlay)
-        if self.scenejsonTable.onfinished then
-            TrackableManager.ProcessCommandLine(self.scenejsonTable.onfinished)
+function UI:CutsceneFinished(skipCommand)
+    local dialogmode = false
+    if self.scenejsonTable.linkeddialog ~= nil and self.scenejsonTable.linkeddialog ~= "" then
+        dialogmode = true
+    end
+    local onFinish = self.scenejsonTable.onfinished
+    self.currentsceneimage = 0
+    if not skipCommand then
+        if self.scenejsonTableMain.currentIndex == #self.scenejsonTableMain.sequences then
+            self.scenejsonTable = nil
+            self.scenejsonTableMain = nil
+            gfx.sprite.removeSprite(self.sceneoverlay)
+            print("[UI] Cutscene finished")
+        else
+            print("[UI] Cutscene Next Sequence")
+            self:StartCutsceneSequence(self.scenejsonTableMain.currentIndex+1)
         end
+    else
         self.scenejsonTable = nil
+        self.scenejsonTableMain = nil
+        gfx.sprite.removeSprite(self.sceneoverlay)
+        print("[UI] Cutscene finished")
+    end
+    if not dialogmode then
+        if onFinish then
+            TrackableManager.ProcessCommandLine(onFinish)
+        end
+    end
+end
+
+function UI:NextCutsceneFrame()
+    if self.scenejsonTable == nil then
         return
     end
+    self.currentsceneimage = self.currentsceneimage+1
+    if self.currentsceneimage > self.sceneimages then
+        if self.scenejsonTable.linkeddialog == nil or self.scenejsonTable.linkeddialog == "" then
+            self:CutsceneFinished()
+            return
+        else
+            self.currentsceneimage = 1
+        end
+    end
     local frame = self.scenejsonTable.frames[self.currentsceneimage]
-    print("[UI] Cutscene frame "..self.currentsceneimage.." image index "..frame.image.." duration "..frame.duration)
+    --print("[UI] Cutscene frame "..self.currentsceneimage.." image index "..frame.image.." duration "..frame.duration)
     self.sceneoverlay:setImage(self.sceneimagetable:getImage(frame.image))
     self.scenetimer = pd.frameTimer.new(frame.duration)
     self.scenetimer.repeats = false
@@ -764,26 +857,45 @@ function UI:IsShowingPause()
     return true
 end
 
-function UI:StartCutscene(name)
-    print("[UI] Trying to load cutscene "..name)
-    self.scenejsonTable = GetJSONData("images/UI/cutscenes/"..name..".json")
-	if self.scenejsonTable == nil then
-		print("[UI] Cutscene loading failed!")
-        return
-	end
+function UI:StartCutsceneSequence(index)
+    self.scenejsonTableMain.currentIndex = index
+    self.scenejsonTable = self.scenejsonTableMain.sequences[self.scenejsonTableMain.currentIndex]
     print("[UI] Creating cutscene...")
-    self.sceneoverlay = gfx.sprite.new()
-    self.sceneoverlay:setCenter(0, 0)
-    self.sceneoverlay:moveTo(0, 0)
-    self.sceneoverlay:setZIndex(Z_Index.UI)
-    self.sceneoverlay:add()
+    if self.sceneoverlay == nil then
+        self.sceneoverlay = gfx.sprite.new()
+        self.sceneoverlay:setCenter(0, 0)
+        self.sceneoverlay:moveTo(0, 0)
+        self.sceneoverlay:setZIndex(Z_Index.UI)
+        self.sceneoverlay:add()
+    end
     self.currentsceneimage = 0
     self.sceneimages = #self.scenejsonTable.frames
     self.sceneimagetable = AssetsLoader.LoadImageTable("images/UI/cutscenes/"..self.scenejsonTable.sheet)
+
+    if self.scenejsonTable.linkeddialog ~= nil and self.scenejsonTable.linkeddialog ~= "" then
+        self:StartDialog(GetDialogDataFromString(self.scenejsonTable.linkeddialog), "", self.scenejsonTable.onfinished)
+    end
+    --self.CanSkipThisDialog = self:CanSkipDialog("")
+    --self.dialogSkip:setVisible(self.CanSkipThisDialog)
     self:NextCutsceneFrame()
 end
 
+function UI:StartCutscene(name)
+    print("[UI] Trying to load cutscene "..name)
+    self.scenejsonTableMain = GetJSONData("images/UI/cutscenes/"..name..".json")
+	if self.scenejsonTableMain == nil then
+		print("[UI] Cutscene loading failed!")
+        return
+	end
+    self:StartCutsceneSequence(1)
+end
+
 function UI:CanSkipDialog(dialogKey)
+    if CurrentLevelName == "intro" then
+        return true
+    elseif self:IsCutscene() then
+        return true
+    end
     for i = 1, #SeenDialogs, 1 do
         if dialogKey == SeenDialogs[i] then
             return true
@@ -854,6 +966,14 @@ function UI:PixelFade()
     pd.display.setMosaic(self.pixelfadeX, self.pixelfadeY)
 end
 
+function UI:SkipIntro()
+    self:CancleDialog(true)
+    self:CutsceneFinished(true)
+    UIIsnt = nil
+    NextLevel = "menu"
+    StartGame()
+end
+
 function UI:Currupt()
     local img = playdate.graphics.getDisplayImage()
     img = img:scaledImage(0.3, 0.3):scaledImage(1.2, 1.2)
@@ -863,4 +983,30 @@ function UI:Currupt()
     test:setZIndex(Z_Index.AllAtop)
     test:add()
     test:setImage(img)
+end
+
+function UI:ShowSpecificGroup(group)
+    local img = playdate.graphics.getDisplayImage()
+    img = img:blurredImage(2, 1, gfx.image.kDitherTypeBayer8x8)
+    local test = gfx.sprite.new()
+    test:setCenter(0, 0)
+    test:moveTo(0, 0)
+    test:setZIndex(Z_Index.AllAtop)
+    test:add()
+    gfx.pushContext(img)
+    gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        local imgs = ActiveManager:GetGroupImages("A")
+        for i = 1, #imgs, 1 do
+            local imgdata = imgs[i]
+            gfx.setColor(gfx.kColorWhite)
+            gfx.fillRect(imgdata.rect.x, imgdata.rect.y, imgdata.rect.w, imgdata.rect.h)
+            imgdata.image:draw(imgdata.x, imgdata.y)
+        end
+    gfx.popContext()
+    test:setImage(img)
+    print("Found activators ",#imgs)
+end
+
+function UI:Blurout()
+
 end

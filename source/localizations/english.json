@@ -83,6 +83,18 @@
       "line": "#Mipa\nOh what is it?\nWaterfall? Lavafall? I can't see..."
     },
     {
+      "key": "WaspFreeze",
+      "line": "#Wasp\nFreeze!\n#Mipa\n???\n#Wasp\nDon't dare to move!\nYou can't enter Hive!\n#Mipa\nHive?\n#Wasp\n!!!\nEveryone knows, here is our Hive! And we not allow anyone to enter, unless Queen said so!\n#Mipa\nBut...this the only way!\nMaybe...I can just go to queen, and ask herself?\n#Wasp\nUUUGH! I said! You can't enter Hive!!!\nEnough of you!\nI will kindly show you other way!\n#Mipa\nOH! Really?"
+    },
+    {
+      "key": "WaspCombat",
+      "line": "#Wasp\nI will make sure, you understand."
+    },
+    {
+      "key": "WaspDefeat",
+      "line": "#Wasp\nOkay!\nOkay!\nYou win!"
+    },
+    {
       "key": "ExamineEquipment1",
       "line": "#Mipa\nThis is mine Magnet Hand!\nI can use this to pull objects!\n...\nI guess, I always had it...can't remember."
     },
@@ -101,6 +113,34 @@
     {
       "key": "ExaminePassive2",
       "line": "#Mipa\nJobee gave me this jar. She said this honey very sticky.\nAnd this is true!"
+    },
+    {
+      "key": "Intro1",
+      "line": "#None\nSomewhere in space..."
+    },
+    {
+      "key": "Intro2",
+      "line": "#None\nPlanet called [REDACTED], been colonized by a self-aware robots."
+    },
+    {
+      "key": "Intro3",
+      "line": "#None\nYear after year, they were harvesting essential mineral.\nThat they used to produce even more a-like self robots."
+    },
+    {
+      "key": "Intro4",
+      "line": "#None\nBut once upon a time...\nMysterious floating pyramid appeared."
+    },
+    {
+      "key": "Intro5",
+      "line": "#None\nIt's forcefield emitted strange light that interrupted process of harvesting this mineral."
+    },
+    {
+      "key": "Intro6",
+      "line": "#None\nAnd then [REDACTED], decided to send expeditioner, right inside this pyramid.\nTo find the way to disable forcefield."
+    },
+    {
+      "key": "Intro7",
+      "line": "#None\nAnd name of this expeditioner was..."
     }
   ]
 }
