@@ -17,7 +17,7 @@ function Wasp:init(x, y)
     -- Movement
     self.speed = 1.66
     self.IsWasp = true
-    self.hp = 1
+    self.hp = 3
     self.maxhp = 3
     self.damagable = true
     self.damageimuneframes = 0
@@ -143,6 +143,7 @@ function Wasp:Shoot()
     end
     local bullet = Bullet(self.x+xoff, self.y-2)
     bullet:setImage(AssetsLoader.LoadImage("images/Effects/bomb"), self.mirrored)
+    bullet.mirrored = self.mirrored
     bullet:setCollideRect(2, 1, 6, 6)
     bullet.speed = speed
     bullet.destoryOnDamage = true
@@ -153,13 +154,19 @@ function Wasp:Shoot()
     bullet.lastpushonhit = false
     bullet.OnHit = function (collision)
         SoundManager:PlaySound("Heavyland")
-        local bomb = Clashbomb(bullet.x-4, bullet.y-4, self.mirrored, self, collision.other)
+        local bomb = Clashbomb(bullet.x-4, bullet.y-4, bullet.mirrored, self, collision.other)
         bomb.dangerous = true
     end
     bullet.CustomHazardFn = function (Mipa)
         print("bullet.CustomHazardFn")
         SoundManager:PlaySound("Heavyland")
-        local bomb = Clashbomb(bullet.x-4, bullet.y-4, self.mirrored, self, Mipa)
+        local bomb = Clashbomb(Mipa.x, bullet.y, bullet.mirrored, self, Mipa)
+        if bullet.speed < 0 then -- Bullet from the right
+            bullet.parentXOffset = -4
+        else
+            bullet.parentXOffset = 4
+        end
+        bullet.parentYOffset = 0
         DrawCrank()
         bomb.dangerous = true
         bullet.OnDestory()

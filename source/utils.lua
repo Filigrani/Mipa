@@ -28,9 +28,23 @@ DebugFlags =
 	AllOpen = false,
 	NoDamage = false,
 	FPSCounter = false,
+	FrameByFrame = false,
+	ForceLikeReplay = false,
+}
+
+FONT_BUTTONS =
+{
+	A = "①",
+	B = "②",
+	UP = "③",
+	DOWN = "④",
+	LEFT = "⑤",
+	RIGHT = "⑥",
 }
 
 null = nil
+
+SUPRESSCURRENTFRAME = false
 
 GetDialogDataFromString = function (key)
 	local rawText = LocalizationManager.GetLine(key)

@@ -580,7 +580,15 @@ function UI:ProcessDialog(ignoreappend)
         end
         if ActorChanged then
             if ShowActor then
-                self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
+                if CheatsManager.MipaTrashMode then
+                    if self.currentdialogactor == "Mipa" or self.currentdialogactor == "Wipa" then
+                        self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor.."Trash"))
+                    else
+                        self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
+                    end
+                else
+                    self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
+                end
             end
             print("[UI] Actor changed "..self.currentdialogactor)
         end

@@ -205,7 +205,7 @@ DrawCrankSinus = function (change)
 end
 
 StartGame = function ()
-	IsReplay = false
+	IsReplay = DebugFlags.ForceLikeReplay
 	InvertedColorsFrames = 0
 	gfx.sprite.removeAll()
 	local timers = playdate.frameTimer.allTimers()
@@ -265,6 +265,8 @@ StartGame = function ()
 	else
 		IsReplay = true
 	end
+	--DebugFlags.FrameByFrame = true
+	--SUPRESSCURRENTFRAME = true
 	CurrentLevelName = NextLevel
 	if string.find(CurrentLevelName, "/") == nil then
 		CurrentLevel = Level("levels/"..CurrentLevelName..".json")
@@ -480,9 +482,49 @@ end
 
 loadGame()
 
+
+
+function pd.keyPressed(key)
+	if pd.isSimulator == 1 then
+		if DebugFlags.FrameByFrame then
+			if key == "u" then -- When 'U' held, game updates as normal
+				SUPRESSCURRENTFRAME = false
+			end
+		end
+	end
+end
+
+function pd.keyReleased(key)
+	if pd.isSimulator == 1 then
+		if DebugFlags.FrameByFrame then
+			if key == "i" then -- When 'I' released, processing single frame.
+				SUPRESSCURRENTFRAME = false
+			end
+		end
+		if key == "f" then -- When 'F' released, toggle FrameByFrame
+			if DebugFlags.FrameByFrame then
+				DebugFlags.FrameByFrame = false
+			else
+				DebugFlags.FrameByFrame = true
+				SUPRESSCURRENTFRAME = true
+			end
+		end
+	end
+end
+
+
 local lastTime = playdate.getCurrentTimeMilliseconds()
 
 function pd.update()
+	if pd.isSimulator == 1 then
+		if DebugFlags.FrameByFrame then
+			if SUPRESSCURRENTFRAME then
+				return
+			else
+				SUPRESSCURRENTFRAME = true
+			end
+		end
+	end
 	local currentTime = playdate.getCurrentTimeMilliseconds()
 	local deltaTime = currentTime - lastTime
 	lastTime = currentTime

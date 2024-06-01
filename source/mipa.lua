@@ -30,7 +30,6 @@ function Mipa:init(x, y)
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Player)
     self:setCollideRect(3,3,8,11)
-    self:add() -- Add to draw list
     self:setTag(TAG.Player)
     self.damagerectangle = gfx.sprite.new()
     self.damagerectangle:setCenter(0.5, 0.5)
@@ -38,7 +37,7 @@ function Mipa:init(x, y)
 
     self.damagerectangle:setTag(TAG.Effect)  
     self.damagerectangle:add()
-    self:moveTo(x, y)
+    --self:moveTo(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
@@ -110,6 +109,9 @@ function Mipa:init(x, y)
     self.skipfalldamage = false
 
     self.IsMipa = true
+    self.physichybirnateframes = 1
+
+    self:add() -- Add to draw list
 end
 
 function Mipa:Konami()
@@ -437,7 +439,12 @@ function Mipa:UpdateAnimation()
         end
     end
     if framechanged or self.IsClone or (self.lastmirrored ~= self.mirrored) then
-        self:setImage(imagetable:getImage(self.animationframe), self.mirrored)
+        if not CheatsManager.MipaTrashMode then
+            self:setImage(imagetable:getImage(self.animationframe), self.mirrored)
+        else
+            self:setImage(AssetsLoader.LoadImage("images/Props/Trash"), self.mirrored)
+        end
+        
         self.lastimage = spritePath
         self.lastmirrored = self.mirrored
     end
@@ -685,10 +692,19 @@ function Mipa:ApplyVelocity()
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
     local disiredY = _y + self.velocityY
+    --print("-----------ApplyVelocity------------- ")
+    --print("self.x ", self.x)
+    --print("self.y ", self.y)
+    --print("velocityX ", self.velocityX)
+    --print("velocityY ", self.velocityY)
+    --print("disiredX ", disiredX)
+    --print("disiredY ", disiredY)
     local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
     if self.damagerectangle then
         self.damagerectangle:moveTo(actualX-7, actualY-7)
     end
+    --print("actualX ", actualX)
+    --print("actualY ", actualY)
     local lastground = self.onground
     local lasthighestY = self.highestY
     local lastonwall = self.lastframonwall
@@ -696,7 +712,6 @@ function Mipa:ApplyVelocity()
     self.pusing = false
     self.lastframonwall = false
     self.onbridge = false
-    local maytryclimb = false
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
@@ -721,7 +736,7 @@ function Mipa:ApplyVelocity()
             end
             if allowDamage then
                 if collisionObject.CustomHazardFn ~= nil then
-                    print("Mipa CustomHazardFn")
+                    --print("Mipa CustomHazardFn")
                     collisionObject.CustomHazardFn(self)
                     if collisionObject.destoryOnDamage then
                         gfx.sprite.removeSprite(collisionObject)
@@ -739,11 +754,6 @@ function Mipa:ApplyVelocity()
             end
         end
         if collisionType == gfx.sprite.kCollisionTypeSlide then
-            if actualX ~= disiredX then
-                if self:IsOnFloor() then
-                    maytryclimb = true
-                end
-            end
             if collision.normal.y == -1 then
                 self.onground = true
                 self.canjump = true
@@ -821,7 +831,7 @@ function Mipa:ApplyVelocity()
                 end
                 if collision.normal.x ~= 0 then
                     if self.onbridge and collisionTag ~= TAG.PropPushable  then
-                        self.velocityY = -5
+                        self.velocityY = -3
                     else
                         self.pusing = true
                         if not lastground then
@@ -880,9 +890,6 @@ function Mipa:ApplyVelocity()
         else
             self.canjump = false
         end
-    end
-    if maytryclimb then
-        --self:TryClimb()
     end
 end
 
@@ -1195,14 +1202,19 @@ function Mipa:update()
             self:Interact()
         end
     end
-    self:ApplyVelocity()
+    if self.physichybirnateframes > 0 then
+        self.physichybirnateframes = self.physichybirnateframes-1
+    else
+        self:ApplyVelocity()
+    end
+    
     self:UpdateAnimation()
     if LoadNextLevel then
         if not self:IsDead() then
-            if self.x > 450 or self.x < 50 or self.y > 290 then
+            if self.x > 453 or self.x < 3 or self.y > 290 then
                 LoadNextLevel = false
                 StartGame()
-            end 
+            end
         end
     end
     if LowHpFXEnabled then

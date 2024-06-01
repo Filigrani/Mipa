@@ -2,6 +2,7 @@ local pd <const> = playdate
 CheatsManager = {}
 CheatsManager.cheats = {}
 CheatsManager.currentcombination = ""
+CheatsManager.MipaTrashMode = true
 
 CheatsManager.AddCheat = function (combination, fn)
     CheatsManager.cheats[combination] = fn
@@ -65,5 +66,14 @@ CheatsManager.RegisterCheats = function ()
     --                      1234567890
     CheatsManager.AddCheat("DURALDURAL", function ()
         DebugFlags.NoDamage = true
+    end)
+    --                      1234567890
+    --                      ④④④①②③⑥④④④
+    CheatsManager.AddCheat("DDDABURDDD", function ()
+        if CheatsManager.MipaTrashMode then
+            CheatsManager.MipaTrashMode = false
+        else
+            CheatsManager.MipaTrashMode = true
+        end
     end)
 end

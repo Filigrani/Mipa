@@ -654,6 +654,15 @@ end
 function Level:CreateZone(zoneData)
     local type = zoneData.zoneType
     if type == "spawn" then
+        --print("---SPAWNER--")
+        --print("Going to place Mipa to follwoing coordinates:")
+        --print("spawn x ", zoneData.x)
+        --print("spawn y ", zoneData.y)
+        --print("----------")
+        --local spawnVisual = Dummy(zoneData.x, zoneData.y, 14, 14)
+        --spawnVisual:setCenter(0.5, 0.5) -- My Dummy class by default has center on 0, 0 (upper left corner)
+        --spawnVisual:moveTo(zoneData.x, zoneData.y) -- Moving once again, just to make sure, after overriing of the center.
+        --spawnVisual:setImage(AssetsLoader.LoadImageTable("images/mipa"):getImage(1))
         if self.foundmipas == 0 then
             MipaInst = Mipa(zoneData.x, zoneData.y)
             self.foundmipas = self.foundmipas+1
