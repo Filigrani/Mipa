@@ -53,6 +53,15 @@ function Creature:IsMirrored()
     return self.mirrored == gfx.kImageFlippedX
 end
 
+function Creature:SetMirrored(IsMirrored)
+    if IsMirrored then
+        self.mirrored = gfx.kImageFlippedX
+    else
+        self.mirrored = gfx.kImageUnflipped
+    end
+    self:ReRender()
+end
+
 function Creature:IsFalling()
     if self.velocityY > 0 and not self:IsOnFloor() then
         return true
@@ -258,6 +267,14 @@ function Creature:AIUpdate()
     
 end
 
+function Creature:ReRender()
+    if self.imagetable then
+        local imagetable = self.imagetable
+        local img = imagetable:getImage(self.animationframe)
+        self:setImage(img, self.mirrored)
+    end
+end
+
 function Creature:UpdateAnimation()
     if self.imagetable == nil then
         return
@@ -265,9 +282,7 @@ function Creature:UpdateAnimation()
     self:PickAnimation()
     local spritePath = self.currentanimation.."/"..self.animationframe
     if self.lastimage ~= spritePath then
-        local imagetable = self.imagetable
-        local img = imagetable:getImage(self.animationframe)
-        self:setImage(img, self.mirrored) 
+        self:ReRender()
         self.lastimage = spritePath
     end
 end

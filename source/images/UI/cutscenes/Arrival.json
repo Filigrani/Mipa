@@ -1,0 +1,17 @@
+{
+  "sequences": 
+  [
+    {
+      "sheet": "Blank",
+      "linkeddialog": "Arrival",
+      "onfinished": "ReturnControl\nDialog HowToWalkGuide",
+      "frames":
+      [
+        {
+          "image": 1,
+          "duration": 300
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ DefaultSettings =
 	damageglitches = true,
 	lowhpglitches = true,
 	musicvolume = 5,
+    liquidvisualid = 800,
 }
 Settings = 
 {

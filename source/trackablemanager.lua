@@ -25,6 +25,8 @@ end
 
 TrackableManager.Add = function (obj, uid)
     TrackableManager.trackables[tostring(uid)] = obj
+    print("[TrackableManager] Added object "..uid)
+    print("[TrackableManager] Added object "..uid.." IsTrigger? ", obj.IsTrigger)
 end
 
 TrackableManager.RemoveByUID = function (uid)
@@ -49,6 +51,7 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
     if string.find(commandWithParameters, " ") then
         for l in string.gmatch(commandWithParameters, '%S+') do
             table.insert(parameters, l)
+            print("[TrackableManager] Param: "..l)
         end
         command = parameters[1]
     end
@@ -59,8 +62,38 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         end
     elseif command == "Trigger" then
         local obj = TrackableManager.GetByUID(parameters[2])
+        if obj then
+            if obj.IsTrigger then
+                obj:Trigger()
+            else
+                print("[TrackableManager][Trigger] Object "..parameters[2].." is not trigger!")
+            end
+        else
+            print("[TrackableManager][Trigger] Wasn't able to find object under ID ", parameters[2])
+        end
+    elseif command == "SoftTrigger" then
+        local obj = TrackableManager.GetByUID(parameters[2])
+        if obj and obj.IsTrigger then
+            obj:SoftTrigger()
+        end
+    elseif command == "SetActive" then
+        local obj = TrackableManager.GetByUID(parameters[2])
+        local state = parameters[3]
+
         if obj and obj.Trigger then
-            obj:Trigger()
+            if state == nil then
+                if obj.active then
+                    obj.active = false
+                else
+                    obj.active = true
+                end
+            else
+                if state == 1 or state == "1" or state == true or state == "true" or state == "TRUE" then
+                    obj.active = true
+                elseif state == 0 or state == "0" or state == false or state == "false" or state == "FALSE" then
+                    obj.active = false
+                end
+            end
         end
     elseif command == "Spawn" then
         local type = parameters[2]
@@ -88,7 +121,7 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         UIIsnt.glitchframes = tonumber(parameters[2])
     elseif command == "Dialog" then
         if UIIsnt ~= nil then
-            UIIsnt:StartDialog(GetDialogDataFromString(parameters[2]))
+            UIIsnt:StartDialog(GetDialogDataFromString(parameters[2]), parameters[3], parameters[4])
         end
     elseif command == "NoControl" then
         if MipaInst ~= nil then
@@ -139,6 +172,16 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
     elseif command == "BigTrashKoaKola" then
         local TrashSpawner = TrackableManager.GetByUID(parameters[2])
         TrashSpawner.pendingBigTrashKoaKola = true
+    elseif command == "Activate" then
+        local group = parameters[2]
+        print("Exect param 2 ", group)
+        ActiveManager.AddScripedActive("H")
+    elseif command == "Deactivate" then
+        local group = parameters[2]
+        print("Exect param 2 ", group)
+        ActiveManager.RemoveScripedActive(group)
+    elseif command == "Conversation" then
+        UIIsnt:StartConversation(parameters[2], parameters[3])
     end
 end
 

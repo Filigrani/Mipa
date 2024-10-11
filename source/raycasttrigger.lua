@@ -8,7 +8,7 @@ function RayCastTrigger:init(x, y, raydistance)
     self.lasthitdistance = raydistance
     self:moveTo(x, y)
     self:setZIndex(Z_Index.BG)
-    self:setCenter(0, 0) 
+    self:setCenter(1, 0) 
     self:setTag(TAG.Effect)
     self:setCollideRect(0,0,self.maxdistance,2)
     self:add()

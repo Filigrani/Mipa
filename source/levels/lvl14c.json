@@ -42,12 +42,13 @@
     },
     {
       "zoneType": "exit",
-      "x": 400,
+      "x": 396,
       "y": 79,
       "w": 19,
       "h": 28,
       "UID": 449,
-      "nextLevel": "lvl14b"
+      "nextLevel": "lvl14b",
+      "instant": true
     },
     {
       "zoneType": "invizcolider",

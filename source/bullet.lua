@@ -16,6 +16,7 @@ function Bullet:init(x, y)
     self.speed = 1
     self.velocityX = 0
     self.velocityY = 0
+    self.traveledX = 0
     -- Physic
     self.gravity = 0
     self.freefall = 0
@@ -26,6 +27,7 @@ function Bullet:init(x, y)
     self.lastpushonhit = false
     self.Dangerous = false
     self.IsBullet = true
+    self.trailchilds = {}
 end
 
 function Bullet:IsFalling()
@@ -76,7 +78,7 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
         local collisionType = collision.type
         local collisionObject = collision.other
         local collisionTag = collisionObject:getTag()
-        if collisionType == gfx.sprite.kCollisionTypeSlide then
+        if collisionType == gfx.sprite.kCollisionTypeSlide or (self.colideWithLiquid and collisionObject.IsLiquid) then
             if collision.normal.y == -1 then
                 self.velocityY = 0
                 self.freefall = 0
@@ -109,17 +111,31 @@ function Bullet:ProcessLastContact(collision, lastfreefall)
                     self:Destroy()
                     return
                 end                  
-            end                  
+            end                 
         end
     else
         self.OnContact(collision, lastfreefall)
     end
 end
 
+function Bullet:GetTraveled()
+    if self.traveledX < 0 then
+        return -self.traveledX
+    end
+    return self.traveledX
+end
+
+function Bullet:SetTraveled(val)
+    self.traveledX = val
+end
+
 function Bullet:ApplyVelocity()
+    local _x, _y = self:getPosition()
     self.velocityY = self.velocityY+self.gravity
     self.velocityX = self.speed
-    local _, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
+    local actualX, _, collisions, length = self:moveWithCollisions(self.x + self.velocityX, self.y + self.velocityY)
+    self.traveledX = self.traveledX+self.velocityX
+    
     local lastfreefall = self.freefall
     for i=1,length do
         local collision = collisions[i]
@@ -144,10 +160,22 @@ function Bullet:Destroy()
     if self.OnDestory then
         self.OnDestory()
     end
+    for i = 1, #self.trailchilds, 1 do
+        local trail = self.trailchilds[i]
+        if trail.OnDestory then
+            trail.OnDestory()
+        else
+            gfx.sprite.removeSprite(trail)
+        end
+    end
     gfx.sprite.removeSprite(self)
 end
 
 function Bullet:update()
+    if self.CustomUpdate ~= nil then
+        self.CustomUpdate()
+    end
+    
     if self.lifedistance > 0 then
         if distance(self.x, self.y, self.spawnX, self.spawnY) > self.lifedistance then
             self:Destroy()

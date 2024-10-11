@@ -14,6 +14,7 @@ PASSIVEITEMS =
     Honey = 2,
     AdjustableJump = 3,
     MidFallJump = 4,
+    Flippers = 5,
 }
 
 EQUIPMENT = 
@@ -22,6 +23,7 @@ EQUIPMENT =
     MagnetHand = 1,
     PowerRing = 2,
     Bomber = 3,
+    Thunder = 4,
 }
 
 function Mipa:init(x, y)
@@ -41,8 +43,16 @@ function Mipa:init(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
-    self.equipment = {EQUIPMENT.MagnetHand}
-    self.passiveitems = {}
+
+    if LIQUID_TEST then
+        self.equipment = {EQUIPMENT.Thunder}
+        self.passiveitems = {PASSIVEITEMS.Flippers}
+    else
+        self.equipment = {EQUIPMENT.MagnetHand}
+        self.passiveitems = {}
+    end
+    
+    
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
@@ -56,7 +66,12 @@ function Mipa:init(x, y)
     self.canbecontrolled = true
     -- Physic
     self.maxjumpvelocity = -10
+    self.maxjumpvelocityinliquid = -6
+    self.maxjumpvelocityjobee = -1.3
     self.gravity = 1
+    self.gravityinliquid = 0.3
+    self.gravityjobee = 1.6
+    self.gravityjobeefall = 0.1
     self.pusing = false
     self.onground = true
     self.fallspeed = 7.2
@@ -109,14 +124,17 @@ function Mipa:init(x, y)
     self.skipfalldamage = false
 
     self.IsMipa = true
-    self.physichybirnateframes = 1
+    self.physichybirnateframes = 2
+
+    self.Jobee = nil
 
     self:add() -- Add to draw list
 end
 
 function Mipa:Konami()
-    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing, EQUIPMENT.Bomber}
-    self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Honey, PASSIVEITEMS.AdjustableJump, PASSIVEITEMS.MidFallJump}
+    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing, EQUIPMENT.Bomber, EQUIPMENT.Thunder}
+    --self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Honey, PASSIVEITEMS.AdjustableJump, PASSIVEITEMS.MidFallJump}
+    self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Flippers}
 end
 
 function Mipa:AddPassiveItem(item)
@@ -125,9 +143,24 @@ function Mipa:AddPassiveItem(item)
     end
 end
 
+function Mipa:AddEquipment(item)
+    if not self:HasEquipment(item) then
+        table.insert(self.equipment, item)
+    end
+end
+
 function Mipa:HasPassiveItem(item)
     for i = 1, #self.passiveitems, 1 do
         if self.passiveitems[i] == item then
+            return true
+        end
+    end
+    return false
+end
+
+function Mipa:HasEquipment(item)
+    for i = 1, #self.equipment, 1 do
+        if self.equipment[i] == item then
             return true
         end
     end
@@ -159,7 +192,7 @@ function Mipa:IsOnFloor()
 end
 
 function Mipa:IsDown()
-    if self:IsOnFloor() and pd.buttonIsPressed(pd.kButtonDown) then
+    if self:CanControl() and self:IsOnFloor() and pd.buttonIsPressed(pd.kButtonDown) then
         return true
     end
     return false
@@ -182,7 +215,7 @@ function Mipa:IsEquipped(device)
 end
 
 function Mipa:IsPulling()
-    if self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self:IsEquipped(EQUIPMENT.MagnetHand) then
+    if self:CanControl() and self:IsOnFloor() and not self:IsDead() and not self:IsDown() and not self:IsPushing() and self:IsEquipped(EQUIPMENT.MagnetHand) then
         return pd.buttonIsPressed(pd.kButtonB) 
     end
     return false
@@ -345,6 +378,10 @@ function Mipa:PickAnimation()
     if self.holdingbox ~= nil then
         affix = "box"
     end
+    if self.Jobee ~= nil then
+        self:SetAnimation("idlebox")
+        return
+    end
     if not self:IsDead() then
         if self.shootbombtimer then
             self:SetAnimation("shootbomb")
@@ -412,6 +449,12 @@ function Mipa:SetDitherImageTable()
 end
 
 function Mipa:SetMirrored(mirrored)
+    
+    if self.Jobee then
+        self.mirrored = gfx.kImageUnflipped
+        return
+    end
+    
     if mirrored then
         self.mirrored = gfx.kImageFlippedX
     else
@@ -548,8 +591,33 @@ function Mipa:DoCloudsFX()
     cloudTimer:start()
 end
 
+function Mipa:GetMaxJumpVelocity()
+    if self:InLiquid() then
+        return self.maxjumpvelocityinliquid
+    end
+    if self.Jobee then
+        return self.maxjumpvelocityjobee
+    end
+
+    return self.maxjumpvelocity
+end
+
 
 function Mipa:TryJump()
+    
+    if self.Jobee then
+        self.velocityY = self:GetMaxJumpVelocity()
+        return true
+    end
+    
+    if self.inliquid and self:HasPassiveItem(PASSIVEITEMS.Flippers) then
+        if self.onliquidsurface then
+            self.velocityY = self:GetMaxJumpVelocity()
+        else
+            self.velocityY = self:GetMaxJumpVelocity()/2
+        end
+        return true
+    end
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
         if self:IsMirrored() then
             self.momentumX = self.jumpoffwallmomentum
@@ -564,14 +632,15 @@ function Mipa:TryJump()
     if self:IsOnFloor() or (self:IsCoyotTime() and not self:IsOnFloor()) then
         if self.canjump then
             self.canjump = false
-            self.velocityY = self.maxjumpvelocity
+            self.velocityY = self:GetMaxJumpVelocity()
             return true
         end
     end
+
     if not self:IsOnFloor() and canDoubleJump then
         self.candoublejump = false
         self.highestY = self.y
-        self.velocityY = self.maxjumpvelocity
+        self.velocityY = self:GetMaxJumpVelocity()
         self:DoCloudsFX()
         SoundManager:PlaySound("Pfff")
         return true
@@ -635,6 +704,20 @@ function Mipa:FatalDamage()
     self:Damage(self.hp, true)
 end
 
+function Mipa:InLiquid()
+    return self.inliquid
+end
+
+function Mipa:GetGravity()
+    if self:InLiquid() then
+        return self.gravityinliquid
+    end
+    if self.Jobee then
+        return self.gravityjobee
+    end
+    return self.gravity
+end
+
 function Mipa:TryClimb()
     print("Try climb")
     local _x, _y = self:getPosition()
@@ -654,7 +737,22 @@ function Mipa:TryClimb()
     return false
 end
 function Mipa:ApplyVelocity()
-    self.velocityY = self.velocityY+self.gravity
+    if self.crushed then
+        return
+    end
+
+    if self.Jobee then
+        if self.velocityY >= 0 then
+            self.velocityY = self:GetGravity()
+        else
+            self.velocityY = self.velocityY+self.gravityjobeefall
+        end
+        print("Velocity ", self.velocityY)
+    else
+        self.velocityY = self.velocityY+self:GetGravity()
+    end
+    
+
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
         if not pd.buttonIsPressed(pd.kButtonDown) then
             self.velocityY = 0.4
@@ -670,12 +768,12 @@ function Mipa:ApplyVelocity()
         end
     end
     if self.momentumX > 0 then
-        self.momentumX = self.momentumX-self.gravity
+        self.momentumX = self.momentumX-self:GetGravity()
         if self.momentumX <= 0 then
             self.momentumX = 0
         end
     elseif self.momentumX < 0 then
-        self.momentumX = self.momentumX+self.gravity
+        self.momentumX = self.momentumX+self:GetGravity()
         if self.momentumX >= 0 then
             self.momentumX = 0
         end
@@ -708,10 +806,14 @@ function Mipa:ApplyVelocity()
     local lastground = self.onground
     local lasthighestY = self.highestY
     local lastonwall = self.lastframonwall
+    local lastinliquid = self.inliquid
     self.onground = false
     self.pusing = false
     self.lastframonwall = false
     self.onbridge = false
+    self.inliquid = false
+    self.onliquidsurface = false
+    self.elevator = nil
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
@@ -721,8 +823,18 @@ function Mipa:ApplyVelocity()
         if collisionObject.IsFunnyBringe then
             self.onbridge = true
         end
+        if collisionObject.IsElevator then
+            self.elevator = collisionObject
+        end
+        if collisionObject.IsLiquid then
+            self.inliquid = true
+            self.highestY = self.y
+        end
+        if collisionObject.IsLiquidSurface then
+            self.onliquidsurface = true
+        end
 
-        if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) and not self:IsDead() then
+        if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) or (collisionObject.IsLiquid and collisionObject.IsElectrified) and not self:IsDead() then
             local allowDamage = true
             if self.holdingbox ~= nil and self.damagerectangle then
                 local colrect = collisionObject:getBoundsRect()
@@ -807,7 +919,7 @@ function Mipa:ApplyVelocity()
             end
 
             if self.holdingbox == nil then
-                if collisionTag == TAG.PropPushable and lastground then
+                if collisionTag == TAG.PropPushable and (lastground or self.inliquid) then
                     if collision.normal.x > 0 then
                         collisionObject:TryMoveLeft()
                         collisionObject:ApplyVelocity()
@@ -889,6 +1001,12 @@ function Mipa:ApplyVelocity()
             self.coyotetime = self.coyotetime+1
         else
             self.canjump = false
+        end
+    end
+    if lastinliquid ~= self.inliquid then
+        AnimEffect(_x-7, _y-7, "Effects/ground", 1, true)
+        if self.inliquid then
+            self.velocityY = self.velocityY/3
         end
     end
 end
@@ -1124,6 +1242,124 @@ function Mipa:RingAction()
     end
 end
 
+function Mipa:ThunderAction()
+    if self.lastbomb ~= nil then
+        SoundManager:PlaySound("No")
+        return
+    end
+
+    if self:InLiquid() then
+        local tile = CurrentLevel:GetLiquidTileByWorld(self.x, self.y)
+        if tile then
+            CurrentLevel:ElectrifyLiquid(tile, "SHOCK "..math.floor(math.random(1,300000)+0.5))
+            return
+        end
+    end
+    
+    if self.shootbombtimer == nil then
+        self.shootbombtimer = pd.frameTimer.new(7)
+        self.shootbombtimer.repeats = false
+        self.shootbombtimer.timerEndedCallback = function(timer)
+            self.shootbombtimer = nil
+        end
+    end
+    local bullet = Bullet(self.x, self.y-2)
+    bullet:setImage(AssetsLoader.LoadImage("images/Effects/ElecShockBullet"), self.mirrored)
+    bullet.mirrored = self.mirrored
+    bullet:setCollideRect(0, 2, 7, 9)
+    self.lastbomb = bullet
+    local starttrailoffset = 0
+    if not self:IsMirrored() then
+        bullet.speed = 7
+        starttrailoffset = -18
+    else
+        bullet.speed = -7
+        starttrailoffset = 4
+    end
+    local StartTrail = AnimEffect(-20, 0, "Effects/ElecShock", 1, false, false, bullet.mirrored)
+    StartTrail:SetFollowParent(bullet, starttrailoffset, -7)
+    StartTrail.trailIndex = 5
+    table.insert(bullet.trailchilds, StartTrail)
+    
+    StartTrail.OnDestory = function ()
+        StartTrail.removetimer = pd.frameTimer.new(StartTrail.trailIndex)
+        StartTrail.removetimer.timerEndedCallback = function(timer)
+            gfx.sprite.removeSprite(StartTrail)
+        end
+        StartTrail.removetimer.repeats = false
+        StartTrail.removetimer:start()
+    end
+    SoundManager:PlaySound("ShockShot")
+    bullet.lifedistance = 300
+    bullet.lastpushonhit = false
+    bullet.colideWithLiquid = true
+    bullet.CustomUpdate = function()
+        local t = bullet:GetTraveled()
+        if t >= 14 then
+            bullet:SetTraveled(0)
+            
+            local Trails = #bullet.trailchilds
+            if Trails < 5 then
+                local Trail = AnimEffect(-20, 0, "Effects/ElecShock", 1, false, false, bullet.mirrored)
+                Trail.trailIndex = 5-Trails
+                local xoffset = -14
+                if bullet.speed < 0 then
+                    xoffset = 14
+                end
+                Trail:SetFollowParent(bullet.trailchilds[Trails], xoffset, 0)
+                Trail.OnDestory = function ()
+                    Trail.removetimer = pd.frameTimer.new(Trail.trailIndex)
+                    Trail.removetimer.timerEndedCallback = function(timer)
+                        gfx.sprite.removeSprite(Trail)
+                    end
+                    Trail.removetimer.repeats = false
+                    Trail.removetimer:start()
+                end
+                table.insert(bullet.trailchilds, Trail)
+            end
+        end
+    end
+    ---bullet.colnResponse = function (other)
+    ---    if other.IsLiquid then
+    ---        return gfx.sprite.kCollisionTypeSlide
+    ---    else
+    ---        if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Player or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide or other:getTag() == TAG.ObstacleCastNoPlayer) then
+    ---            return gfx.sprite.kCollisionTypeOverlap
+    ---        end
+    ---    end
+    ---    return gfx.sprite.kCollisionTypeSlide
+    ---end
+    bullet.OnHit = function (collision)
+        SoundManager:PlaySound("BeamLoop")
+        local collisionType = collision.type
+        local collisionObject = collision.other
+        local collisionTag = collisionObject:getTag()
+        if collisionObject ~= nil then
+            if collisionObject.IsLiquid and not collisionObject.IsMergedCollider then
+                CurrentLevel:ElectrifyLiquid(collisionObject, "SHOCK "..math.floor(math.random(1,300000)+0.5))
+            else
+                local shock_x = bullet.x+bullet.speed
+                local shock_y = bullet.y
+                if collisionObject.IsPhysProp then
+                    shock_x = collisionObject.x
+                    shock_y = collisionObject.y+2
+                end
+                local tile = CurrentLevel:GetLiquidTileByWorld(shock_x, shock_y)
+                if tile then
+                    CurrentLevel:ElectrifyLiquid(tile, "SHOCK "..math.floor(math.random(1,300000)+0.5))
+                else
+                    print("Wasn't able to find tile by merged collider")
+                end
+            end
+        end
+    end
+    bullet.OnDestory = function()
+        if self.lastbomb == bullet then
+            self.lastbomb = nil
+        end
+    end
+end
+
 function Mipa:BomberAction()
     if self.lastbomb ~= nil then
         SoundManager:PlaySound("No")
@@ -1139,6 +1375,7 @@ function Mipa:BomberAction()
     end
     local bullet = Bullet(self.x, self.y-2)
     bullet:setImage(AssetsLoader.LoadImage("images/Effects/bomb"), self.mirrored)
+    bullet.mirrored = self.mirrored
     bullet:setCollideRect(2, 1, 6, 6)
     self.lastbomb = bullet
     if not self:IsMirrored() then
@@ -1151,7 +1388,7 @@ function Mipa:BomberAction()
     bullet.lastpushonhit = false
     bullet.OnHit = function (collision)
         SoundManager:PlaySound("Heavyland")
-        Clashbomb(bullet.x-4, bullet.y-4, self.mirrored, self)
+        Clashbomb(bullet.x-4, bullet.y-4, bullet.mirrored, self)
     end
     bullet.OnDestory = function()
         if self.lastbomb == bullet then
@@ -1168,12 +1405,12 @@ function Mipa:CanControl()
     if not self.canbecontrolled then
         return false
     end
-    return not self:IsDead() and (UIIsnt == nil or (not UIIsnt:IsCutscene() and not UIIsnt:IsShowingPause())) and not self:AnimStunLock()
+    return not self:IsDead() and (UIIsnt == nil or (not UIIsnt:IsCutscene() and not UIIsnt:IsShowingPause() and not UIIsnt:IsConversation())) and not self:AnimStunLock()
 end
 
 function Mipa:update()
     self.velocityX = 0
-    if self:CanControl() then
+    if self:CanControl() and self.physichybirnateframes == 0 then
         self:ProcessWalking()
         if pd.buttonJustPressed(pd.kButtonA) then
             local jumped = self:TryJump()
@@ -1195,6 +1432,8 @@ function Mipa:update()
                     self:RingAction()
                 elseif self:IsEquipped(EQUIPMENT.Bomber) and self:IsOnFloor() then
                     self:BomberAction()
+                elseif self:IsEquipped(EQUIPMENT.Thunder) then
+                    self:ThunderAction()
                 end
             end 
         end
@@ -1211,7 +1450,7 @@ function Mipa:update()
     self:UpdateAnimation()
     if LoadNextLevel then
         if not self:IsDead() then
-            if self.x > 453 or self.x < 3 or self.y > 290 then
+            if self.x > 453 or self.x < 3 or self.y > 290 or self.y < 35 then
                 LoadNextLevel = false
                 StartGame()
             end

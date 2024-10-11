@@ -23,6 +23,7 @@ AssetsLoader.SetAsset = function (assetpath, asset)
 end
 
 AssetsLoader.LoadImage = function (path, localizable)
+    local original_path = path
     if localizable and LocalizationManager.currentlanguage ~= "english" then
         path = path.."-"..LocalizationManager.currentlanguage
     end
@@ -35,7 +36,7 @@ AssetsLoader.LoadImage = function (path, localizable)
             print("[AssetsLoader] Can't load Image ", path)
             if localizable then
                 print("[AssetsLoader] Trying to find non localized version...")
-                return AssetsLoader.LoadImage(path, false)
+                return AssetsLoader.LoadImage(original_path, false)
             end
             return nil
         end
@@ -46,6 +47,7 @@ AssetsLoader.LoadImage = function (path, localizable)
 end
 
 AssetsLoader.LoadImageTable = function (path, localizable)
+    local original_path = path
     if localizable and LocalizationManager.currentlanguage ~= "english" then
         path = path.."-"..LocalizationManager.currentlanguage
     end
@@ -59,7 +61,7 @@ AssetsLoader.LoadImageTable = function (path, localizable)
             print("[AssetsLoader] Can't load Image Table: ", path)
             if localizable then
                 print("[AssetsLoader] Trying to find non localized version...")
-                return AssetsLoader.LoadImageTable(path, false)
+                return AssetsLoader.LoadImageTable(original_path, false)
             end
             return nil
         end

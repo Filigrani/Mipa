@@ -1,0 +1,37 @@
+{
+  "sequences": 
+  [
+    {
+      "sheet": "CrashBomber",
+      "linkeddialog": "",
+      "onfinished": "Dialog CrashBomber",
+      "frames":
+      [
+        {
+          "image": 1,
+          "duration": 15
+        },
+      {
+          "image": 2,
+          "duration": 15
+        },
+      {
+          "image": 3,
+          "duration": 15
+        },
+      {
+          "image": 4,
+          "duration": 7
+        },
+      {
+          "image": 5,
+          "duration": 7
+        },
+      {
+          "image": 6,
+          "duration": 7
+        }
+      ]
+    }
+  ]
+}

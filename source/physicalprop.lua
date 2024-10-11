@@ -19,10 +19,13 @@ function PhysicalProp:init(x, y)
     self.velocityY = 0
     -- Physic
     self.gravity = 0.35
+    self.gravityinliquid = -0.01
+    self.gravityonliquidsurface = 0.02
     self.movingflag = false
     self.onground = true
     self.freefall = 0
     self.notapplyimpulses = false
+    self.IsPhysProp = true
 end
 
 function PhysicalProp:IsFalling()
@@ -71,18 +74,34 @@ function PhysicalProp:collisionResponse(other)
     end
 end
 
+function PhysicalProp:InLiquid()
+    return self.inliquid
+end
+
+function PhysicalProp:GetGravity()
+    if self:InLiquid() then
+        if self.onliquidsurface then
+            return self.gravityonliquidsurface
+        else
+            return self.gravityinliquid
+        end
+    end
+    return self.gravity
+end
+
 function PhysicalProp:ApplyVelocity()
     if self.notapplyimpulses then
         return
     end
-    self.velocityY = self.velocityY+self.gravity
+    self.velocityY = self.velocityY+self:GetGravity()
+
     if self.momentumX > 0 then
-        self.momentumX = self.momentumX-self.gravity
+        self.momentumX = self.momentumX-self:GetGravity()
         if self.momentumX <= 0 then
             self.momentumX = 0
         end
     elseif self.momentumX < 0 then
-        self.momentumX = self.momentumX+self.gravity
+        self.momentumX = self.momentumX+self:GetGravity()
         if self.momentumX >= 0 then
             self.momentumX = 0
         end
@@ -113,8 +132,13 @@ function PhysicalProp:ApplyVelocity()
     end
     local lastground = self.onground
     local lastfreefall = self.freefall
+    local lastinliquid = self.inliquid
+    local lastonliquidsurface = self.onliquidsurface
     self.onground = false
     self.onbridge = false
+    self.inliquid = false
+    self.onliquidsurface = false
+    local hadsurfaceboost = false
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
@@ -123,6 +147,30 @@ function PhysicalProp:ApplyVelocity()
 
         if collisionObject.IsFunnyBringe then
             self.onbridge = true
+        end
+        if collisionObject.IsLiquid then
+            self.inliquid = true
+        end
+        if collisionObject.IsLiquidSurface then
+            self.onliquidsurface = true
+            if not hadsurfaceboost then
+                if collisionObject.y < _y then
+                    hadsurfaceboost = true
+                    local surfacedifference = _y-collisionObject.y
+                    if surfacedifference < 1 then
+                        surfacedifference = 1
+                    end
+
+                    --print("Surface Y ", surfacedifference)
+                    self.velocityY = -surfacedifference/14
+                    --print("Velocity ", self.velocityY)
+                end
+            end
+        end
+
+        if self.inliquid and self.onliquidsurface then
+            self.freefall = 0
+            lastfreefall = 0
         end
 
         if collisionType == gfx.sprite.kCollisionTypeSlide then
@@ -236,7 +284,7 @@ function PhysicalProp:ApplyVelocity()
             end                     
         end
         if collision.normal.x ~= 0 then
-            if self.onbridge and collisionTag ~= TAG.Default and not collisionObject.IsFunnyBringe  then
+            if (self.onbridge or self.onliquidsurface) and collisionTag == TAG.Default and not collisionObject.IsFunnyBringe  then
                 self.velocityY = -2
             end
         end
@@ -246,8 +294,14 @@ function PhysicalProp:ApplyVelocity()
         print("[PhysicalProp:ApplyVelocity()] PostForLoop -> self.x ", self.x)
     end
     if not self.onground then
-        self.freefall = self.freefall + self.gravity
-    end 
+        self.freefall = self.freefall + self:GetGravity()
+    end
+    if lastinliquid ~= self.inliquid then
+        AnimEffect(_x-7, _y-7, "Effects/ground", 1, true)
+        if self.inliquid then
+            self.velocityY = self.velocityY/3
+        end
+    end
 
     if self.velocityX ~= 0 or self.velocityY ~= 0 then
         self.movingflag = true

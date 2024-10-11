@@ -1,0 +1,361 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "8 8 0 0 8 8 8 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 8 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 8 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 8 8 601 607 8 8 8 8 8 0 8 8 0 0 8 8 8 8 0 0 8 8 8 8 8 0 8 8 612 0 8 8 8 15 0 0 8 8 8 8 8 0 8 8 10 0 0 0 0 0 0 0 8 8 8 8 8 0 8 8 10 0 0 0 0 0 0 0 8 8 8 8 8 0 8 8 611 0 8 8 8 8 16 0 8 8 8 8 8 0 8 8 0 0 8 8 8 8 8 0 0 0 0 0 0 0 8 8 0 0 8 8 8 8 8 0 8 8 8 8 8 0 8 8 0 0 8 8 8 8 8 0 8 8 8 8 8 0 8 8 0 0 8 8 8 8 15 0 8 8 8 8 8 0 8 8 0 0 8 8 8 0 0 0 0 0 0 0 0 0 8 8 0 0 8 8 8 15 0 8 8 8 8 8 8 0 8 8 0 0 8 8 601 0 608 8 8 8 8 8 8 0 8 8 0 0 8 8 0 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 0 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 0 0 0 0 0 0 0 0 0 0 8 8 0 0 8 8 0 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 0 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 0 0 0 0 0 0 0 0 0 0 8 8 0 0 8 8 0 8 8 8 8 8 8 8 8 0 8 8 0 0 8 8 0 8 8 8 8 601 0 607 8 0 8 8 0 0 8 15 0 0 0 607 8 0 16 0 8 0 8 8 0 0 8 601 0 8 0 0 15 0 8 0 8 0 8 8 0 0 8 602 608 8 602 0 0 0 8 0 0 0 8 8 0 0 8 8 8 8 8 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "button",
+      "x": 136,
+      "y": 71,
+      "UID": 396,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "D"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 11,
+      "y": 80,
+      "UID": 397,
+      "group": "A"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 45,
+      "y": 80,
+      "UID": 398,
+      "group": "B"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 74,
+      "y": 80,
+      "UID": 399,
+      "group": "C"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 89,
+      "y": 164,
+      "UID": 402,
+      "group": "L"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 103,
+      "y": 164,
+      "UID": 403,
+      "group": "L"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 346,
+      "y": 164,
+      "UID": 599,
+      "group": "A"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 353,
+      "y": 192,
+      "UID": 603,
+      "group": "B"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 348,
+      "y": 220,
+      "UID": 612,
+      "group": "C"
+    },
+    {
+      "propType": "door",
+      "x": 334,
+      "y": 113,
+      "UID": 82,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 4,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 298,
+      "y": 127,
+      "UID": 83,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "B",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 256,
+      "y": 127,
+      "UID": 84,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "A",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 186,
+      "y": 181,
+      "UID": 86,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "C",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 130,
+      "y": 169,
+      "UID": 91,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "A",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 4,
+      "y": 57,
+      "UID": 394,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 340,
+      "y": 127,
+      "UID": 395,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 188,
+      "y": 57,
+      "UID": 600,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 3,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 227,
+      "y": 57,
+      "UID": 605,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 3,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 268,
+      "y": 57,
+      "UID": 607,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 3,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 305,
+      "y": 57,
+      "UID": 609,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 3,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 186,
+      "y": 127,
+      "UID": 85,
+      "group": "H",
+      "autorespawn": 0,
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 88,
+      "y": 103,
+      "UID": 404,
+      "w": 28,
+      "a": 0,
+      "group": "L",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 327,
+      "y": 127,
+      "UID": 405,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "latterindicator",
+      "x": 329,
+      "y": 98,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 284,
+      "y": 127,
+      "frame": 2
+    },
+    {
+      "propType": "latterindicator",
+      "x": 241,
+      "y": 127,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 172,
+      "y": 177,
+      "frame": 3
+    },
+    {
+      "propType": "latterindicator",
+      "x": 116,
+      "y": 169,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 11,
+      "y": 86,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 45,
+      "y": 86,
+      "frame": 2
+    },
+    {
+      "propType": "latterindicator",
+      "x": 74,
+      "y": 86,
+      "frame": 3
+    },
+    {
+      "propType": "latterindicator",
+      "x": 183,
+      "y": 43,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 346,
+      "y": 169,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 353,
+      "y": 197,
+      "frame": 2
+    },
+    {
+      "propType": "latterindicator",
+      "x": 222,
+      "y": 43,
+      "frame": 2
+    },
+    {
+      "propType": "latterindicator",
+      "x": 263,
+      "y": 43,
+      "frame": 1
+    },
+    {
+      "propType": "latterindicator",
+      "x": 300,
+      "y": 42,
+      "frame": 3
+    },
+    {
+      "propType": "latterindicator",
+      "x": 348,
+      "y": 226,
+      "frame": 3
+    },
+    {
+      "propType": "blob",
+      "x": 372,
+      "y": 120
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "spawn",
+      "x": 35,
+      "y": 78
+    },
+    {
+      "zoneType": "exit",
+      "x": 400,
+      "y": 56,
+      "w": 19,
+      "h": 29,
+      "UID": 614,
+      "nextLevel": "lvl21",
+      "instant": true
+    }
+   ]
+  }

@@ -13,6 +13,20 @@ CrankManager.Changed = function(num)
     end
     CrankManager.Abosulte = pd.getCrankPosition()
     print("change "..num)
+
+    if MipaInst and MipaInst.elevator then
+        local _x, _y = MipaInst.elevator:getPosition()
+        local _x2, _y2 = MipaInst:getPosition()
+
+        if num > 0 then
+            MipaInst.elevator:moveWithCollisions(_x, _y+num)
+            MipaInst:moveWithCollisions(_x2, _y2+num)
+        else
+            MipaInst:moveWithCollisions(_x2, _y2+num)
+            MipaInst.elevator:moveWithCollisions(_x, _y+num)
+        end
+    end
+
     DrawCrankSinus(num)
 end
 

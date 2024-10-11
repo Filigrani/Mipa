@@ -1,6 +1,6 @@
 TAG =
 {
-	Default = 1,
+	Default = 0,
 	Player = 1,
 	Enemy = 2,
 	Prop = 3,
@@ -18,8 +18,10 @@ Z_Index =
 	Object = 3,
 	BG = 4,
 	Player = 5,
-	UI = 6,
-	AllAtop = 7,
+	PlayerAtop = 6,
+	AtopPlayerAtop = 7,
+	UI = 8,
+	AllAtop = 9,
 }
 
 DebugFlags = 

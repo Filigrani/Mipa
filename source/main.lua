@@ -4,6 +4,7 @@ import "CoreLibs/sprites"
 import "CoreLibs/timer"
 import "CoreLibs/frametimer"
 import "CoreLibs/ui"
+import "CoreLibs/qrcode"
 import "settings"
 import "savemanager"
 Settings = SaveManager.Load("settings") or DefaultSettings
@@ -36,11 +37,16 @@ import "credits"
 import "clashbomb"
 import "blob"
 import "wasp"
+import "jobee"
 import "funnybridge"
+import "drop"
 
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
+LIQUID_TEST = false
+JOBEEFLY_TEST = false
+BACKGROUND_TEST = false
 gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
 MenuInst = nil
@@ -54,13 +60,30 @@ CanStartAgain = false
 NewDeathScreen = true
 InvertedColorsFrames = 0
 IsReplay = false
-LevelsLimit = 15
+LevelsLimit = 22
 local font = gfx.font.new('font/Asheville Ayu')
 ShouldUpdatePauseMenu = false
 SeenDialogs = {}
 FoundNotes = SaveManager.Load("notes") or {}
 DrawCrankFrames = 0
 CrankedThisFrame = false
+
+--CurrentLevelName = "menu"
+--NextLevel = "lvl-1"
+
+--CurrentLevelName = "lvl14c"
+--NextLevel = "lvl14c"
+
+if LIQUID_TEST then
+	CurrentLevelName = "WaterElectricTest"
+    NextLevel = "WaterElectricTest"
+	DebugFlags.FPSCounter = true
+end
+
+if JOBEEFLY_TEST then
+	CurrentLevelName = "JobeeFly"
+    NextLevel = "JobeeFly"
+end
 
 AddFoundNote = function (noteID)
 	for i = 1, #FoundNotes, 1 do
@@ -96,7 +119,7 @@ local function OpenAddons()
 				table.insert(addonsOptions, 
 				{
 				posX = 40, posY = i*20, fn = function()
-					NextLevel = "Shared/Mipa/Levels/"..files[i]
+					NextLevel = "/Shared/Mipa/Levels/"..files[i]
 					StartGame()
 				end
 				})
@@ -109,6 +132,7 @@ local function OpenAddons()
 			posX = 40, posY = 20, fn = function()
 				MenuInst:SetMenu("start")
 				SoundManager:PlayMusic("Menu")
+				AddSystemMenuButtons()
 			end
 			})
 		end
@@ -123,34 +147,44 @@ local function OpenAddons()
 		gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 		MenuInst.addontextsprite:setImage(addontextimage)
 	end
+	AddSystemMenuButtons()
 end
 
-local function AddSystemMenuButtons()
+AddSystemMenuButtons = function ()
 	local menu = pd.getSystemMenu()
 	menu:removeAllMenuItems()
 
+	if MenuInst and MenuInst.currentmenu == "addons" then
+		local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("SystemMenuMainMenu"), function()
+			NextLevel = "menu"
+			StartGame()
+			AddSystemMenuButtons()
+		end)
+		return
+	end
+
 	if CurrentLevelName ~= "menu" and CurrentLevelName ~= "intro" then
-		local menuItem, error = menu:addMenuItem("main menu", function()
+		local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("SystemMenuMainMenu"), function()
 			NextLevel = "menu"
 			StartGame()
 		end)
 		if CurrentLevelName ~= "credits" then
-			local menuItem, error = menu:addMenuItem("Restart level", function()
+			local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("SystemMenuRestart"), function()
 				StartGame()
 			end)
-			local menuItem, error = menu:addMenuItem("items", function()
+			local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("SystemMenuItems"), function()
 				OpenItemsMenu()
 			end)
 		end
 	else
 		if CurrentLevelName == "intro" then
-			local menuItem, error = menu:addMenuItem("skip intro", function()
+			local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("SystemMenuSkip"), function()
 				if UIIsnt then
 					UIIsnt:SkipIntro()
 				end
 			end)
 		else
-			local menuItem, error = menu:addMenuItem("add-on levels", function()
+			local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("SystemMenuAddons"), function()
 				NextLevel = "menu"
 				OpenAddons()
 			end)
@@ -268,7 +302,7 @@ StartGame = function ()
 	--DebugFlags.FrameByFrame = true
 	--SUPRESSCURRENTFRAME = true
 	CurrentLevelName = NextLevel
-	if string.find(CurrentLevelName, "/") == nil then
+	if string.find(CurrentLevelName, "Shared") == nil then
 		CurrentLevel = Level("levels/"..CurrentLevelName..".json")
 	else
 		CurrentLevel = Level(CurrentLevelName)
@@ -353,7 +387,12 @@ GetPauseMenuImage = function (extended)
 		end
 		if MipaInst then
 			for i = 1, #MipaInst.equipment, 1 do
-				local overlay = AssetsLoader.LoadImage("images/UI/pause/a"..MipaInst.equipment[i])
+				local affix = ""
+				if i == 4 and MipaInst:HasEquipment(EQUIPMENT.Bomber) then
+					affix = "b"
+				end
+				
+				local overlay = AssetsLoader.LoadImage("images/UI/pause/a"..MipaInst.equipment[i]..affix)
 				if overlay then
 					overlay:draw(0,0)
 				end
@@ -363,6 +402,13 @@ GetPauseMenuImage = function (extended)
 				if overlay then
 					overlay:draw(0,0)
 				end
+			end
+		end
+
+		if CheatsManager.LegWrap then
+			local overlay = AssetsLoader.LoadImage("images/UI/pause/leggy")
+			if overlay then
+				overlay:draw(0,0)
 			end
 		end
 

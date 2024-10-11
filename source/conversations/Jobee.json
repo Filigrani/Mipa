@@ -1,0 +1,37 @@
+{
+  "sequences": 
+  [
+    {
+      "sequence": "start",
+      "options":
+	  [
+	    {
+			"text": "I am here on the mission to disable field.",
+			"dialog": "#Mipa\nI don't like current plot.\nI mean, it's kinda fine ye, but I sure it could be better.\n#Jobee\nYou mean, you would like someone other was working on the plot?\n#Mipa\nNaaa, whole point of that project, is to make game by one person.\n#Jobee\nHOWEVER! Someone still helped.\nLike, Jodie, and one guy that made hive city tileset.\n#Mipa\nYes...but...\n...\nMelons.",
+			"action": "Conversation Jobee start"
+	    },
+	    {
+			"text": "I want to know how honey pie taste like?",
+			"dialog": "#Mipa\nI am here to know how honey pie taste like!",
+			"action": "Conversation Jobee start"
+	    }	
+	  ]
+    },
+    {
+      "sequence": "ask",
+      "options":
+	  [
+	    {
+			"text": "I am here on the mission to disable field.",
+			"dialog": "#Mipa\nI don't like current plot.\nI mean, it's kinda fine ye, but I sure it could be better.\n#Jobee\nYou mean, you would like someone other was working on the plot?\n#Mipa\nNaaa, whole point of that project, is to make game by one person.\n#Jobee\nHOWEVER! Someone still helped.\nLike, Jodie, and one guy that made hive city tileset.\n#Mipa\nYes...but...\n...\nMelons.",
+			"action": "Conversation Jobee ask"
+	    },
+	    {
+			"text": "What honey pie taste like?",
+			"dialog": "#Mipa\nI am fine with this plot.\n#Jobee\nWhat do you mean?\n#Mipa\nI mean, the fact it's not yet written, makes it's more mysterious.\n#Jobee\nI guess, sometimes you just silly.",
+			"action": "Conversation Jobee ask"
+	    }	
+	  ]
+    }	
+  ]
+}

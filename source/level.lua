@@ -2,9 +2,15 @@ local pd <const> = playdate
 local gfx <const> = pd.graphics
 import "jsonloader"
 waterfallimagetable = nil
+local LiquidStarterID = SettingsManager:Get("liquidvisualid")
 class('Level').extends(playdate.graphics.sprite)
 
 function Level:init(levelPath)
+    self.InstaElecrify = false
+    LiquidStarterID = SettingsManager:Get("liquidvisualid")
+    self.LiquidTilesArray = {}
+    self.PrepareLiquidQueue = {}
+    self.animatedtiles = {}
     print("[Level] Trying to load "..levelPath)
     self.jsonTable = GetJSONData(levelPath)
 	if self.jsonTable == nil then
@@ -13,16 +19,43 @@ function Level:init(levelPath)
 	end
     print("[Level] Creating tilemap...")
     self.imagetable = AssetsLoader.LoadImageTable("images/tileset")
+    self.electrifiedtileshortcut = self.imagetable:getImage(TILESNAMES.LiquidElectrified)
 
     if self.imagetable == nil then
         print("[Level] Imagetable is null")
         return
     end
+
+    if BACKGROUND_TEST then
+        local ditheredtable = AssetsLoader.GetAsset("images/tileset_dithered")
+
+        if ditheredtable == nil then
+            ditheredtable = AssetsLoader.LoadImageTableAsNew("images/tileset", "images/tileset_dithered")
+            for i = 1, #self.imagetable, 1 do
+                local img = self.imagetable:getImage(i)
+                ditheredtable:setImage(i, img:fadedImage(0.5, gfx.image.kDitherTypeBayer2x2))
+            end
+        end
+    
+        self.imagetable_bg = ditheredtable
+    end
+
+
     self.tilemap = pd.graphics.tilemap.new()
     self.tilemap:setImageTable(self.imagetable)
-    self.tilemap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)  
-    SoundManager:StopSound("MipaGameOver")
+    self.tilemap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)
 
+    self.liquidmap = pd.graphics.tilemap.new()
+    self.liquidmap:setImageTable(self.imagetable)
+    self.liquidmap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)
+
+    if BACKGROUND_TEST then
+        self.backgroundmap = pd.graphics.tilemap.new()
+        self.backgroundmap:setImageTable(self.imagetable_bg)
+        self.backgroundmap:setSize(self.jsonTable.width_in_tile, self.jsonTable.height_in_tiles)
+    end
+
+    SoundManager:StopSound("MipaGameOver")
     if self.jsonTable.music == nil then
         SoundManager:PlayMusic("BG1")
     else
@@ -35,8 +68,10 @@ function Level:init(levelPath)
     
     self:ParceTileMap() 
     self:RenderTilemap()
-    self:ParceProps()
+    self:RenderLiquidmap()
     self:ParceZones()
+    self:ParceProps()
+    self:PrepareLiquidTiles()
     print("[Level] IsReplay? ", IsReplay)
     if IsReplay then
         if self.jsonTable.replaylevelcommand ~= nil then
@@ -49,17 +84,58 @@ function Level:init(levelPath)
             TrackableManager.ProcessCommandLine(self.jsonTable.newlevelcommand)
         end
     end
+    self.animationtimer = pd.frameTimer.new(4)
+    self.animationtimer.repeats = true
+    self.animationtimer.timerEndedCallback = function(timer)
+        self:AnimateTiles()
+    end
+    self.animationtimer:start()
 end
+
+function Level:GetLiquid1DIndex(x, y)
+    return y * self.jsonTable.width_in_tile + x;
+end
+
+function Level:GetLiquidTile(x, y)
+    local Index = self:GetLiquid1DIndex(x, y)
+    return self.LiquidTilesArray[Index]
+end
+
+function Level:GetLiquidByTile(Index)
+    return self.LiquidTilesArray[Index]
+end
+
+function Level:AddLiquidTile(Tile, x, y)
+    local Index = self:GetLiquid1DIndex(x, y)
+    self.LiquidTilesArray[Index] = Tile
+end
+
 
 TILESNAMES = 
 {
-	STONE = 1,
+	Empty = 0,
+
+    STONE = 1,
     STONE_SLAB_TOP = 2,
 	STONE_SLAB_BOTTOM = 3,
+
 	SHATRED_STONE_SLAB_TOP = 4,
 	SHATRED_STONE_SLAB_BOTTOM = 5,
 	SHATRED_STONE = 6,
+
     FUNNY_BRINGE = 7,
+
+    HiveHollow = 8,
+    HiveHollow_SLAB_BOTTOM = 9,
+    HiveHollow_SLAB_TOP = 10,
+    HiveFilled = 11,
+    HiveFilled_SLAB_BOTTOM = 12,
+    HiveFilled_SLAB_TOP = 13,
+    HiveFilled_Leaking = 14,
+    HiveFilled_LeftEdge_Leaking = 15,
+    HiveFilled_RightEdge_Leaking = 16,
+
+    CrankElevator = 114,
 
     SPIKE = 302,
 
@@ -78,6 +154,29 @@ TILESNAMES =
     ConveyorBeltsEdgeLeftInversed_TOP = 510,
     ConveyorBeltsInversed_TOP = 511,
     ConveyorBeltsEdgeRightInversed_TOP = 512,
+
+    DecorationStart = 601,
+    DecorationEnd = 700,
+
+    LiquidTileStartEternal = 701,
+    LiquidTileEndEternal = 706,
+
+    LiquidTileWavesStartEternal = 701,
+    LiquidTileWavesEndEternal = 704,
+
+    LiquidTileBackgroundStartEternal = 705,
+    LiquidTileBackgroundEndEternal = 706,
+
+    LiquidTileStart = LiquidStarterID+1,
+    LiquidTileEnd = LiquidStarterID+6,
+
+    LiquidTileWavesStart = LiquidStarterID+1,
+    LiquidTileWavesEnd = LiquidStarterID+4,
+
+    LiquidTileBackgroundStart = LiquidStarterID+5,
+    LiquidTileBackgroundEnd = LiquidStarterID+6,
+
+    LiquidElectrified = 707,
 }
 
 function Level:CreateTileCollider(x, y, w, h, image, colOffsetX, colOffsetY)
@@ -98,10 +197,169 @@ function Level:CreateTileCollider(x, y, w, h, image, colOffsetX, colOffsetY)
     return colider
 end
 
+local function CreateDropSpawner(x, y, width, mindroptime, maxdroptime)
+    if width == nil then
+        width = 14
+    end
+    if mindroptime == nil then
+        mindroptime = 60
+    end
+    if maxdroptime == nil then
+        maxdroptime = 1200
+    end
+    
+    local DropSpawner = Dummy(x, y)
+    DropSpawner.nextdrop = math.floor(math.random(mindroptime,maxdroptime)+0.5)
+    DropSpawner.CustomUpdate = function ()
+        if DropSpawner.nextdrop > 0 then
+            DropSpawner.nextdrop = DropSpawner.nextdrop-1
+            if DropSpawner.nextdrop == 0 then
+                DropSpawner.nextdrop = math.floor(math.random(mindroptime,maxdroptime)+0.5)
+                local xSpread = math.floor(math.random(1,width)+0.5)
+                local drop = Drop(DropSpawner.x+xSpread, DropSpawner.y)
+            end
+        end
+    end
+end
+
+function Level:UpdateElectrified(Tile)    
+    if Tile then
+        if not self.InstaElecrify then
+            if Tile.IsElectrified then
+                if Tile.SpreadInFrames == 0 then
+                    Tile.IsElectrified = false
+                    local _x = Tile.MyTileX
+                    local _y = Tile.MyTileY
+                    local chainUIDs = {}
+                    table.insert(chainUIDs, self:GetLiquidByTile(Tile.LiquidIndexNeighborUp)) -- Up
+                    table.insert(chainUIDs, self:GetLiquidByTile(Tile.LiquidIndexNeighborDown)) -- Down
+                    table.insert(chainUIDs, self:GetLiquidByTile(Tile.LiquidIndexNeighborLeft)) -- Left
+                    table.insert(chainUIDs, self:GetLiquidByTile(Tile.LiquidIndexNeighborRight)) -- Right
+                    for i = 1, #chainUIDs, 1 do
+                        local NearTile = chainUIDs[i]
+                        if NearTile ~= nil then
+                            self:ElectrifyLiquid(NearTile, Tile.LastShockGUID)
+                        end
+                    end
+                else
+                    Tile.SpreadInFrames = Tile.SpreadInFrames - 1
+                end
+            end
+        else
+            if Tile.IsElectrified then
+                if Tile.SpreadInFrames == 0 then
+                    Tile.IsElectrified = false
+                else
+                    Tile.SpreadInFrames = Tile.SpreadInFrames - 1
+                end
+            end  
+        end
+    end
+end
+
+function Level:GetLiquidTileByWorld(worldX, worldY)
+    local tileX = math.floor((worldX - self.jsonTable.root_x) / 14) + 1
+    local tileY = math.floor((worldY - self.jsonTable.root_y) / 14) + 1
+    print("GetLiquidTileByWorld [X] ", tileX)
+    print("GetLiquidTileByWorld [Y] ", tileY)
+    return self:GetLiquidTile(tileX, tileY)
+end
+
+function Level:ElectrifyLiquid(LiquidTile, ShockGUID)
+    if self.InstaElecrify then
+        if LiquidTile then
+            local _x = LiquidTile.MyTileX
+            local _y = LiquidTile.MyTileY
+            local chainUIDs = {}
+            table.insert(chainUIDs, self:GetLiquidByTile(LiquidTile.LiquidIndex)) -- Current
+            table.insert(chainUIDs, self:GetLiquidByTile(LiquidTile.LiquidIndexNeighborUp)) -- Up
+            table.insert(chainUIDs, self:GetLiquidByTile(LiquidTile.LiquidIndexNeighborDown)) -- Down
+            table.insert(chainUIDs, self:GetLiquidByTile(LiquidTile.LiquidIndexNeighborLeft)) -- Left
+            table.insert(chainUIDs, self:GetLiquidByTile(LiquidTile.LiquidIndexNeighborRight)) -- Right
+            for i = 1, #chainUIDs, 1 do
+                local Tile = chainUIDs[i]
+                if Tile ~= nil then
+                    if not Tile.IsElectrified then
+                        Tile.LastShockGUID = ShockGUID
+                        Tile.IsElectrified = true
+                        Tile.SpreadInFrames = 1
+                        Tile:setImage(self.electrifiedtileshortcut)
+                        if i ~= 0 then
+                            self:ElectrifyLiquid(Tile, ShockGUID)
+                        end
+                    end
+                end
+            end
+        end
+    else
+        if LiquidTile then
+            if not LiquidTile.IsMergedCollider then
+                if not LiquidTile.IsElectrified and LiquidTile.LastShockGUID ~= ShockGUID then
+                    LiquidTile.LastShockGUID = ShockGUID
+                    LiquidTile.IsElectrified = true
+                    LiquidTile.SpreadInFrames = 1
+                    LiquidTile:setImage(self.electrifiedtileshortcut)
+                    if not LiquidTile.IsLiquidSurface then
+                        LiquidTile:setCollideRect(0, 0, 14, 14)
+                    end
+                    --print("Hit and electrified ", LiquidTile.MyUID)
+                end
+            end
+        end
+    end
+end
+
+function Level:AddAnimatedTile(tile)
+    table.insert(self.animatedtiles, tile)
+end
+
+function Level:AnimateTiles()
+    for i = 1, #self.animatedtiles, 1 do
+        local tile = self.animatedtiles[i]
+        if tile.IsLiquidSurface then
+            if tile.currentIndex < TILESNAMES.LiquidTileWavesEnd then
+                tile.currentIndex = tile.currentIndex +1
+            else
+                tile.currentIndex = TILESNAMES.LiquidTileWavesStart
+            end
+            if not tile.IsElectrified then
+                tile:setImage(self.imagetable:getImage(tile.currentIndex))
+            end
+            
+            self:UpdateElectrified(tile)
+        elseif tile.IsLiquidBG then
+            self:UpdateElectrified(tile)
+            if tile.LastElectrified ~= tile.IsElectrified then
+                tile.LastElectrified = tile.IsElectrified
+                if not tile.IsElectrified then
+                    tile:setImage(nil)
+                    tile:setBounds(tile.x, tile.y, 0, 0)
+                    tile:clearCollideRect()
+                end
+            end
+        end
+    end
+end
+
+function Level:PrepareLiquidTiles()
+    
+end
+
 function Level:CreateTile(ID, X, Y)
     local WorldX = self.jsonTable.root_x+14*(X-1)
     local WorldY = self.jsonTable.root_y+14*(Y-1)
     local DefaultRender = true
+    local LiquidRender = false
+
+    if BACKGROUND_TEST then
+        if ID == TILESNAMES.Empty then
+            self.backgroundmap:setTileAtPosition(X, Y, TILESNAMES.STONE)
+            return
+        end
+    end
+
+
+
     -- Special tiles
     if ID == TILESNAMES.SPIKE then
         Spike(WorldX, WorldY)
@@ -111,6 +369,55 @@ function Level:CreateTile(ID, X, Y)
         local UID = X.."x"..Y
         TrackableManager.Add(br, UID)
         print("Funny bridge "..UID)
+    elseif ID >= TILESNAMES.LiquidTileWavesStartEternal and ID <= TILESNAMES.LiquidTileWavesEndEternal then
+        DefaultRender = false
+        local Liquid = Dummy(WorldX, WorldY)
+        local UID = X.."x"..Y
+        Liquid.MyUID = UID
+        Liquid.MyTileX = X
+        Liquid.MyTileY = Y
+        Liquid.LiquidIndex = self:GetLiquid1DIndex(X, Y)
+        Liquid.LiquidIndexNeighborUp = self:GetLiquid1DIndex(X, Y-1)
+        Liquid.LiquidIndexNeighborDown = self:GetLiquid1DIndex(X, Y+1)
+        Liquid.LiquidIndexNeighborLeft = self:GetLiquid1DIndex(X-1, Y)
+        Liquid.LiquidIndexNeighborRight = self:GetLiquid1DIndex(X+1, Y)
+        Liquid.SpreadInFrames = 0
+        Liquid.damage = 0
+        Liquid.LastElectrified = false
+        self:AddLiquidTile(Liquid, X, Y)
+        self:AddAnimatedTile(Liquid)
+        Liquid:setZIndex(Z_Index.PlayerAtop)
+        Liquid.currentIndex = TILESNAMES.LiquidTileWavesStart
+        Liquid:setTag(TAG.Effect)
+        Liquid.IsLiquid = true
+        Liquid.IsLiquidSurface = true
+        Liquid:setBounds(WorldX, WorldY, 14, 10)
+        Liquid:setCollideRect(0, 4, 14, 10)
+        Liquid:setImage(self.imagetable:getImage(Liquid.currentIndex))
+        Liquid:add()
+    elseif ID >= TILESNAMES.LiquidTileBackgroundStartEternal and ID <= TILESNAMES.LiquidTileBackgroundEndEternal then
+        DefaultRender = false
+        LiquidRender = true
+        local Liquid = Dummy(WorldX, WorldY)
+        local UID = X.."x"..Y
+        Liquid.MyUID = UID
+        Liquid.MyTileX = X
+        Liquid.MyTileY = Y
+        Liquid.LiquidIndex = self:GetLiquid1DIndex(X, Y)
+        Liquid.LiquidIndexNeighborUp = self:GetLiquid1DIndex(X, Y-1)
+        Liquid.LiquidIndexNeighborDown = self:GetLiquid1DIndex(X, Y+1)
+        Liquid.LiquidIndexNeighborLeft = self:GetLiquid1DIndex(X-1, Y)
+        Liquid.LiquidIndexNeighborRight = self:GetLiquid1DIndex(X+1, Y)
+        Liquid.SpreadInFrames = 0
+        Liquid.damage = 0
+        Liquid.LastElectrified = false
+        self:AddLiquidTile(Liquid, X, Y)
+        self:AddAnimatedTile(Liquid)
+        Liquid:setZIndex(Z_Index.AtopPlayerAtop)
+        Liquid:setTag(TAG.Effect)
+        Liquid.IsLiquid = true
+        Liquid.IsLiquidBG = true
+        Liquid:add()
     elseif ID == TILESNAMES.STONE_SLAB_TOP 
     or ID == TILESNAMES.STONE_SLAB_BOTTOM
     or ID == TILESNAMES.SHATRED_STONE_SLAB_TOP 
@@ -129,7 +436,10 @@ function Level:CreateTile(ID, X, Y)
     or ID == TILESNAMES.ConveyorBeltsInversed_TOP
     or ID == TILESNAMES.ConveyorBeltsEdgeRight_TOP
     or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_TOP
-    or ID == TILESNAMES.FUNNY_BRINGE
+    or ID == TILESNAMES.HiveHollow_SLAB_TOP
+    or ID == TILESNAMES.HiveHollow_SLAB_BOTTOM
+    or ID == TILESNAMES.HiveFilled_SLAB_TOP
+    or ID == TILESNAMES.HiveFilled_SLAB_BOTTOM
     then
         DefaultRender = false
         local TileW = 14
@@ -144,6 +454,8 @@ function Level:CreateTile(ID, X, Y)
         or ID == TILESNAMES.ConveyorBeltsEdgeLeftInversed_TOP
         or ID == TILESNAMES.ConveyorBeltsEdgeRight_TOP
         or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_TOP
+        or ID == TILESNAMES.HiveHollow_SLAB_TOP
+        or ID == TILESNAMES.HiveFilled_SLAB_TOP
         then
             TileH = 7
         end
@@ -156,6 +468,8 @@ function Level:CreateTile(ID, X, Y)
         or ID == TILESNAMES.ConveyorBeltsEdgeLeftInversed_BOTTOM
         or ID == TILESNAMES.ConveyorBeltsEdgeRight_BOTTOM
         or ID == TILESNAMES.ConveyorBeltsEdgeRightInversed_BOTTOM
+        or ID == TILESNAMES.HiveHollow_SLAB_BOTTOM
+        or ID == TILESNAMES.HiveFilled_SLAB_BOTTOM
         then
             TileH = 7
             ColisionOffsetY = 7
@@ -197,10 +511,27 @@ function Level:CreateTile(ID, X, Y)
             end
             col.animationtimer:start()
         end
+
+        if ID == TILESNAMES.HiveHollow_SLAB_TOP then
+            CreateDropSpawner(WorldX, WorldY+8)
+        end
+
+
+    elseif ID == TILESNAMES.HiveFilled_Leaking 
+        or ID == TILESNAMES.HiveFilled_LeftEdge_Leaking
+        or ID == TILESNAMES.HiveFilled_RightEdge_Leaking
+        then
+        CreateDropSpawner(WorldX, WorldY+14)
+    elseif ID == TILESNAMES.CrankElevator then
+        DefaultRender = false
+        local Vator = self:CreateTileCollider(WorldX, WorldY, 14, 7, self.imagetable:getImage(ID), 0, 0)
+        Vator.IsElevator = true
     end
 
     if DefaultRender then
         self.tilemap:setTileAtPosition(X, Y, ID)
+    elseif LiquidRender then
+        self.liquidmap:setTileAtPosition(X, Y, ID)
     end
 end
 
@@ -208,7 +539,7 @@ function Level:ParceTileMapOld()
     print("[Level] Parcing tilemap...")
     for i=1, #self.jsonTable.tiles do
         local tile = self.jsonTable.tiles[i]
-        self:CreateTile(tile.tileID, tile.x, tile.y, tile.solid)
+        self:CreateTile(tile.tileID, tile.x, tile.y)
     end
 end
 
@@ -270,7 +601,7 @@ function Level:CreateProp(propData)
                 local collisionObject = collision.other
                 local collisionTag = collisionObject:getTag()
                 if collisionType == gfx.sprite.kCollisionTypeOverlap then
-                    if collisionTag == TAG.PropPushable or collisionTag == TAG.Player then
+                    if collisionTag == TAG.PropPushable or collisionTag == TAG.Player or collisionObject.IsBlob then
                         supposedBeActive = true
                         break
                     end
@@ -303,6 +634,10 @@ function Level:CreateProp(propData)
             end
         end
         TrackableManager.Add(indi, propData.UID)
+    elseif type == "latterindicator" then
+        local indi = Dummy(propData.x, propData.y)
+        local img = AssetsLoader.LoadImageTable("images/Props/latterindicator"):getImage(propData.frame)
+        indi:setImage(img)     
     elseif type == "clockindicator" then
         local indi = Dummy(propData.x, propData.y)
         indi.imagetable = AssetsLoader.LoadImageTable("images/Props/clock")
@@ -392,8 +727,7 @@ function Level:CreateProp(propData)
                             end
                         gfx.popContext()
                         door:setImage(img)
-                        local _, _, collisions, length = door:checkCollisions(door.x, door.y+1)
-                        --print("Check Door collision", length)
+                        local _, _, collisions, length = door:checkCollisions(door.x, door.y+door.closespeed)
                         for i=1,length do
                             local collision = collisions[i]
                             local collisionType = collision.type
@@ -401,6 +735,11 @@ function Level:CreateProp(propData)
                             local collisionTag = collisionObject:getTag()
                             if collisionTag == TAG.Player then
                                 collisionObject:FatalDamage()
+                                collisionObject:clearCollideRect()
+                                collisionObject.crushed = true
+                                collisionObject.gravity = 0
+                            elseif collisionObject.IsBlob then
+                                collisionObject:Respawn()
                             end
                         end
                     else -- Horizontal
@@ -449,6 +788,11 @@ function Level:CreateProp(propData)
         end
         TrackableManager.Add(door, propData.UID)
     elseif type == "laser" then
+        local isRightSide = false
+        if propData.w < 0 then
+            isRightSide = true
+            propData.w = -propData.w
+        end
         local laser = Activatable(propData.x, propData.y, propData.group, propData.active, propData.activeType)
         laser.fx = AnimEffect(propData.x, propData.y, "Effects/reflect", 1, false, true)
         laser.raycaster = RayCastTrigger(propData.x, propData.y, propData.w)
@@ -458,6 +802,10 @@ function Level:CreateProp(propData)
         laser.lastcoliderw = laser.w
         laser.fx:moveTo(laser.lastcoliderw-14+propData.x, propData.y-8)
         laser:setCollideRect(0,0,laser.w,2)
+        if isRightSide then
+            laser:setCenter(1,0)
+        end
+        
         laser.CustomUpdate = function()
             local _x, _y = laser:getPosition()
             local RayCastChanged = false
@@ -550,6 +898,20 @@ function Level:CreateProp(propData)
         jobee:setZIndex(Z_Index.Object)
         jobee:setImage(AssetsLoader.LoadImage("images/Props/Jobee"))
         jobee:add()
+    elseif type == "namezys" then
+        local jobee = gfx.sprite.new()
+        jobee:setCenter(0, 0)
+        jobee:moveTo(propData.x, propData.y)
+        jobee:setZIndex(Z_Index.Object)
+        jobee:setImage(AssetsLoader.LoadImage("images/Props/Namezys"))
+        jobee:add()
+    elseif type == "notetable" then
+        local jobee = gfx.sprite.new()
+        jobee:setCenter(0, 0)
+        jobee:moveTo(propData.x, propData.y)
+        jobee:setZIndex(Z_Index.Object)
+        jobee:setImage(AssetsLoader.LoadImage("images/Props/NoteTable"))
+        jobee:add()       
     elseif type == "waterfall" then
         local waterfall = gfx.sprite.new()
         if waterfallimagetable == nil then
@@ -575,6 +937,9 @@ function Level:CreateProp(propData)
     elseif type == "blob" then
         local c = Blob(propData.x, propData.y)
         c.enemyname = "blob"
+    elseif type == "jobeefly" then
+        local c = Jobee(propData.x, propData.y)
+        c.enemyname = "jobee"
     elseif type == "wasp" then
         local c = Wasp(propData.x, propData.y)
         c.enemyname = "wasp"
@@ -648,6 +1013,11 @@ function Level:CreateProp(propData)
             end
         end
         TrackableManager.Add(dropper, propData.UID)
+    elseif type == "dom" then
+        local dom = Dummy(propData.x, propData.y)
+        dom:setImage(AssetsLoader.LoadImage("images/Props/Dom"))
+    elseif type == "dropspawner" then
+        CreateDropSpawner(propData.x, propData.y, propData.w, propData.spawnratemin, propData.spawnratemax)
     end
 end
 
@@ -679,7 +1049,7 @@ function Level:CreateZone(zoneData)
             w = zoneData.w
             h = zoneData.h
         end
-        local t = Trigger(zoneData.x, zoneData.y, w, h)
+        local t = Trigger(zoneData.x, zoneData.y, w, h, zoneData.active)
         local StrKey = ""
         if type == "note" then
             t:setImage(AssetsLoader.LoadImage("images/Props/Note"))
@@ -701,8 +1071,18 @@ function Level:CreateZone(zoneData)
         end
         TrackableManager.Add(t, zoneData.UID)
     elseif type == "trigger" then
-        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h, zoneData.active)
         t.ontriggercommand = zoneData.ontrigger
+        t.OnTrigger = function ()
+            TrackableManager.ProcessCommandLine(t.ontriggercommand)
+        end
+        TrackableManager.Add(t, zoneData.UID)
+    elseif type == "interact" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h, zoneData.active)
+        t.ontriggercommand = zoneData.oninteract
+        t.destoryontrigger = false
+        t.triggered = true
+        t.IsButton = true
         t.OnTrigger = function ()
             TrackableManager.ProcessCommandLine(t.ontriggercommand)
         end
@@ -721,10 +1101,17 @@ function Level:CreateZone(zoneData)
     elseif type == "exit" then
         local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h)
         t.nextlevel = zoneData.nextLevel
+        t.instant = zoneData.instant
         t.OnTrigger = function ()
             NextLevel = t.nextlevel
             LoadNextLevel = true
-            print("Going outbounds will load "..NextLevel)
+            if not t.instant then
+                print("Going outbounds will load "..NextLevel)
+            else
+                print("Instant transition, going to load "..NextLevel)
+                LoadNextLevel = false
+                StartGame()
+            end
         end
         TrackableManager.Add(t, zoneData.UID)
     elseif type == "koasoda" then
@@ -744,6 +1131,20 @@ function Level:CreateZone(zoneData)
                 end
                 MipaInst:AddPassiveItem(PASSIVEITEMS.KoaKola)
             end
+        end
+    elseif type == "crashbomber" then
+        local w = 14
+        local h = 14
+        local t = Trigger(zoneData.x, zoneData.y, w, h)
+        t:setImage(AssetsLoader.LoadImage("images/Props/CrashBomber"))
+        t.OnTrigger = function ()
+            if zoneData.cutscene == nil then
+                InvertedColorsFrames = 2
+                SoundManager:PlaySound("Warning")
+            else
+                UIIsnt:StartCutscene(zoneData.cutscene)
+            end
+            MipaInst:AddEquipment(EQUIPMENT.Bomber)
         end
     elseif type == "trashspawner" then
         local Spawner = Dummy(zoneData.x, zoneData.y)
@@ -814,14 +1215,25 @@ end
 function Level:RenderTilemap()
     local tilemap = self.tilemap
 
+    if BACKGROUND_TEST then
+        local layerBackground = gfx.sprite.new()
+        layerBackground:setTilemap(self.backgroundmap)
+        layerBackground:moveTo(self.jsonTable.root_x, self.jsonTable.root_y)
+        layerBackground:setCenter(0, 0)
+        layerBackground:setZIndex(Z_Index.TotalBumer)
+        layerBackground:add()
+    end
+
     local layerSprite = gfx.sprite.new()
     layerSprite:setTilemap(tilemap)
     layerSprite:moveTo(self.jsonTable.root_x, self.jsonTable.root_y)
     layerSprite:setCenter(0, 0)
     layerSprite:setZIndex(Z_Index.BG)
+
     layerSprite:add()
     
-    gfx.sprite.addWallSprites(tilemap,  {
+
+    local tilemapExeptions = {
         TILESNAMES.STONE_SLAB_TOP,
         TILESNAMES.STONE_SLAB_BOTTOM,
         TILESNAMES.SHATRED_STONE_SLAB_TOP,
@@ -840,5 +1252,37 @@ function Level:RenderTilemap()
         TILESNAMES.ConveyorBeltsEdgeLeftInversed_BOTTOM,
         TILESNAMES.ConveyorBeltsEdgeRight_BOTTOM,
         TILESNAMES.ConveyorBeltsEdgeRightInversed_BOTTOM
-    } , self.jsonTable.root_x, self.jsonTable.root_y)
+    }
+    
+    for i = TILESNAMES.DecorationStart, TILESNAMES.DecorationEnd, 1 do
+        table.insert(tilemapExeptions, i)
+    end
+    for i = TILESNAMES.LiquidTileStart, TILESNAMES.LiquidTileEnd, 1 do
+        table.insert(tilemapExeptions, i)
+    end
+    
+    gfx.sprite.addWallSprites(tilemap,  tilemapExeptions, self.jsonTable.root_x, self.jsonTable.root_y)
+end
+
+function Level:RenderLiquidmap()
+    local tilemap = self.liquidmap
+
+    local layerSprite = gfx.sprite.new()
+    layerSprite:setTilemap(tilemap)
+    layerSprite:moveTo(self.jsonTable.root_x, self.jsonTable.root_y)
+    layerSprite:setCenter(0, 0)
+    layerSprite:setZIndex(Z_Index.PlayerAtop)
+    layerSprite:add()
+
+    local tilemapExeptions = {
+
+    }
+
+    local colliders = gfx.sprite.addWallSprites(tilemap,  nil, self.jsonTable.root_x, self.jsonTable.root_y)
+    for i = 1, #colliders, 1 do
+        local colider = colliders[i]
+        colider:setTag(TAG.Effect)
+        colider.IsLiquid = true
+        colider.IsMergedCollider = true
+    end
 end

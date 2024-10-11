@@ -91,7 +91,9 @@ AddSound("Pfff", nil, true)
 AddSound("Wooop", nil, true)
 AddSound("Crip", nil, true)
 AddSound("Dzip", 1, true)
+AddSound("ShockShot")
 AddSound("BossFight")
+AddSound("Commander",2)
 
 function SoundManager:PlayMusic(name, smooth)
     if smooth == nil then

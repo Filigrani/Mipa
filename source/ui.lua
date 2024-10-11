@@ -23,7 +23,10 @@ function UI:init()
     self.currdialoglineindex = 1
     self.textwrapingindex = 0
     self.textwrapinglimit = 99
-    self.currentdialogactor = "#Mipa"
+    self.currentdialogactor = {}
+    self.currentdialogactor.name = "None"
+    self.currentdialogactor.arguments = {"1"}
+    self.currentdialogactor.rawtext = "None"
     self.textwaittime = 0
     self.lastglitch = 0
     self.glitchframes = 0
@@ -232,6 +235,28 @@ function UI:Update()
     end
     if pd.buttonJustPressed(pd.kButtonUp) then
         self:SkipDialogLine()
+    end
+
+    if self.conversationTable ~= nil then
+        if pd.buttonJustPressed(pd.kButtonUp) then
+            if self.conversationTable.index == 1 then
+                self.conversationTable.index = #self.conversationTable.options
+            else
+                self.conversationTable.index = self.conversationTable.index-1
+            end
+            self:SetConversationSelector(self.conversationTable.index)
+        end
+        if pd.buttonJustPressed(pd.kButtonDown) then
+            if self.conversationTable.index < #self.conversationTable.options then
+                self.conversationTable.index = self.conversationTable.index+1
+            else
+                self.conversationTable.index = 1
+            end
+            self:SetConversationSelector(self.conversationTable.index)
+        end
+        if pd.buttonJustPressed(pd.kButtonA) then
+            self:SelectConversationOption(self.conversationTable.index)
+        end
     end
     
     local hearts = 0;
@@ -523,13 +548,17 @@ function UI:RemoveEquipment(ispassive)
 end
 
 function UI:DialogPosUpdate()
-    if self.currentdialogactor ~= "None" then
-        if self.currentdialogactor == "Mipa" then
-            self.dialogtextsprite:moveTo(91, self.dialogYroot)
-            self.dialogactor:moveTo(7, self.dialogYroot-5)
+    if self.currentdialogactor.arguments[1] ~= "0" then
+        if self.currentdialogactor.name ~= "None" then
+            if self.currentdialogactor.name == "Mipa" then
+                self.dialogtextsprite:moveTo(91, self.dialogYroot)
+                self.dialogactor:moveTo(7, self.dialogYroot-5)
+            else
+                self.dialogtextsprite:moveTo(7, self.dialogYroot)
+                self.dialogactor:moveTo(323, self.dialogYroot-5)
+            end
         else
             self.dialogtextsprite:moveTo(7, self.dialogYroot)
-            self.dialogactor:moveTo(323, self.dialogYroot-5)
         end
     else
         self.dialogtextsprite:moveTo(7, self.dialogYroot)
@@ -560,11 +589,23 @@ function UI:ProcessDialog(ignoreappend)
         local ShowActor = true
         local ActorChanged = false
         local currentLineData = self.dialogdata[self.currdialoglineindex]
-        if self.currentdialogactor ~= currentLineData.actor then
-            self.currentdialogactor = currentLineData.actor
+        if self.currentdialogactor.rawtext ~= currentLineData.actor then
+            self.currentdialogactor.rawtext = currentLineData.actor
+            self.currentdialogactor.arguments = {"1"}
+            self.currentdialogactor.name = currentLineData.actor
+
+            if string.find(self.currentdialogactor.rawtext, "_") then
+                local ActorArguments = {}
+                for l in string.gmatch(self.currentdialogactor.rawtext, '([^_]+)') do
+                    table.insert(ActorArguments, l)
+                end
+                self.currentdialogactor.name = ActorArguments[1]
+                table.remove(ActorArguments, 1)
+                self.currentdialogactor.arguments = ActorArguments
+            end
             ActorChanged = true
         end
-        if self.currentdialogactor == "None" then
+        if self.currentdialogactor.name == "None" or self.currentdialogactor.arguments[1] == "0" then
             ShowActor = false
         end
         if not self.dialogbg:isVisible() then
@@ -579,18 +620,23 @@ function UI:ProcessDialog(ignoreappend)
             self.dialogtextsprite:setVisible(true)
         end
         if ActorChanged then
+            local ActorName = self.currentdialogactor.name
+            local ActorExpression = tonumber(self.currentdialogactor.arguments[1])
             if ShowActor then
                 if CheatsManager.MipaTrashMode then
-                    if self.currentdialogactor == "Mipa" or self.currentdialogactor == "Wipa" then
-                        self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor.."Trash"))
-                    else
-                        self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
+                    if ActorName == "Mipa" or ActorName == "Wipa" then
+                        ActorName = ActorName.."Trash"
                     end
+                end
+
+                local ActorTable = AssetsLoader.LoadImageTable("images/UI/DialogActors/"..ActorName)
+                if ActorTable ~= nil then
+                    self.dialogactor:setImage(ActorTable:getImage(ActorExpression))
                 else
-                    self.dialogactor:setImage(AssetsLoader.LoadImage("images/UI/Dialog"..self.currentdialogactor))
+                    self.dialogactor:setImage(nil)
                 end
             end
-            print("[UI] Actor changed "..self.currentdialogactor)
+            print("[UI] Actor changed "..ActorName.." expression "..ActorExpression)
         end
         local LineText = currentLineData.text
         if (self.currentdialogindex ~= #LineText+1) or ignoreappend then
@@ -605,18 +651,20 @@ function UI:ProcessDialog(ignoreappend)
                 --    self.currenttext = self.currenttext.."\n"
                 --end
                 if character ~= " " and character ~= "." then
-                    if self.currentdialogactor == "None" then
-                        SoundManager:PlaySound("Pap")
-                    elseif self.currentdialogactor == "Mipa" then
-                        SoundManager:PlaySound("Peaw")
-                    elseif self.currentdialogactor == "Wipa" then
-                        SoundManager:PlaySound("Sqeak")
-                    elseif self.currentdialogactor == "Jobee" then
-                        SoundManager:PlaySound("Bzz")
-                    elseif self.currentdialogactor == "Wasp" then
-                        SoundManager:PlaySound("BzzFast")
+                    if self.currentdialogactor.name == "None" then
+                        SoundManager:PlaySound("Pap", 1, false)
+                    elseif self.currentdialogactor.name == "Mipa" then
+                        SoundManager:PlaySound("Peaw", 1, false)
+                    elseif self.currentdialogactor.name == "Wipa" then
+                        SoundManager:PlaySound("Sqeak", 1, false)
+                    elseif self.currentdialogactor.name == "Jobee" then
+                        SoundManager:PlaySound("Bzz", 1, false)
+                    elseif self.currentdialogactor.name == "Wasp" then
+                        SoundManager:PlaySound("BzzFast", 1, false)
+                    elseif self.currentdialogactor.name == "Commander" then
+                        SoundManager:PlaySound("Commander", 1, false)                        
                     else
-                        SoundManager:PlaySound("Pap")
+                        SoundManager:PlaySound("Pap", 1, false)
                     end
                 end
             end
@@ -652,10 +700,9 @@ function UI:ProcessDialog(ignoreappend)
             end
         end
         local disiredYRoot = self.dialogYroot
-        if (self:IsShowingPause() and self.pauseoverlay.type ~= 3) or dialogMode == "fixeddown" then
+        if (self:IsShowingPause() and self.pauseoverlay.type ~= 3) or dialogMode == "fixeddown" or self:IsCutscene() then
             disiredYRoot = 175
         else
-            
             if (self:IsShowingPause() and self.pauseoverlay.type == 3) or dialogMode == "fixedup" then
                 disiredYRoot = 2
             else
@@ -690,9 +737,7 @@ function UI:LoadDialogUI()
     BG:setCenter(0, 0)
     BG:moveTo(0, 170)
     BG:setZIndex(Z_Index.UI)
-    local Actorimg = AssetsLoader.LoadImage("images/UI/DialogMipa")
     local Actor = gfx.sprite.new()
-    Actor:setImage(Actorimg)
     Actor:setCenter(0, 0)
     Actor:moveTo(0, 170)
     Actor:setZIndex(Z_Index.UI)
@@ -716,6 +761,7 @@ function UI:LoadDialogUI()
 end
 
 function UI:CancleDialog(skipCommand)
+    --print("[UI] CancleDialog")
     local lastkey = self.dialogdata.Key
     self.currentdialogindex = 0
     self.dialogdata = {}
@@ -726,14 +772,14 @@ function UI:CancleDialog(skipCommand)
     self.dialogtextsprite:remove()
     self.dialogSkip:remove()
     if not skipCommand then
+        if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
+            TrackableManager.ProcessCommandLine(self.ondialogfinish)
+            self.ondialogfinish = nil
+        end
         if self.scenejsonTable ~= nil and self.scenejsonTable.linkeddialog ~= nil and self.scenejsonTable.linkeddialog ~= "" then
             if lastkey == self.scenejsonTable.linkeddialog then
                 self:CutsceneFinished()
             end
-        end
-        if self.ondialogfinish ~= nil and self.ondialogfinish ~= "" then
-            TrackableManager.ProcessCommandLine(self.ondialogfinish)
-            self.ondialogfinish = nil
         end
     end
 end
@@ -821,6 +867,7 @@ function UI:CutsceneFinished(skipCommand)
         print("[UI] Cutscene finished")
     end
     if not dialogmode then
+        --print("[UI] None dialog mode OnFinish")
         if onFinish then
             TrackableManager.ProcessCommandLine(onFinish)
         end
@@ -868,7 +915,7 @@ end
 function UI:StartCutsceneSequence(index)
     self.scenejsonTableMain.currentIndex = index
     self.scenejsonTable = self.scenejsonTableMain.sequences[self.scenejsonTableMain.currentIndex]
-    print("[UI] Creating cutscene...")
+    print("[UI] Creating cutscene sequences ", index)
     if self.sceneoverlay == nil then
         self.sceneoverlay = gfx.sprite.new()
         self.sceneoverlay:setCenter(0, 0)
@@ -1017,4 +1064,139 @@ end
 
 function UI:Blurout()
 
+end
+
+function UI:IsConversation()
+    if self.conversationTable == nil then
+        return false
+    end
+    return true
+end
+
+function UI:SetConversationSelector(index)
+    if self.selector_conv then
+        self.selector_conv:moveTo(6, 152+index*19)
+    end
+end
+
+function UI:SelectConversationOption(index)
+    if self.converstationbg then
+        self.converstationbg:setVisible(false)
+    end
+    if self.selector_conv then
+        self.selector_conv:setVisible(false)
+    end
+
+    local dialog = self.conversationTable.options[index].dialog
+    local action = self.conversationTable.options[index].action
+
+    self:StartDialog(GetDialogDataFromString(dialog), "NoControl", "ReturnControl\n"..action)
+
+    self.conversationTable = nil
+
+end
+
+function UI:LoadConversationUI()
+    local drawingW = 388
+    local darwingH = 62
+
+    local WholeText = ""
+
+    local BGimg = gfx.image.new("images/UI/dialog")
+
+    if self.conversationTable ~= nil then
+        for i = 1, #self.conversationTable.options, 1 do
+            local opTxt = LocalizationManager.GetLine(self.conversationTable.options[i].text)
+            if WholeText == "" then
+                WholeText = opTxt
+            else
+                WholeText = WholeText.."\n"..opTxt
+            end
+        end
+	end
+
+    self.conversationTable.index = 1
+
+    gfx.setImageDrawMode(gfx.kDrawModeCopy)
+    gfx.pushContext(BGimg)
+        gfx.drawTextInRect(WholeText, 27, 5, drawingW, darwingH, nil, "")
+    gfx.popContext()
+
+    if self.converstationbg == nil then
+        local BG = gfx.sprite.new()
+        BG:setImage(BGimg)
+        BG:setCenter(0, 0)
+        BG:moveTo(0, 170)
+        BG:setZIndex(Z_Index.UI)
+    
+        self.converstationbg = BG
+        self.converstationbg:add()
+    else
+        self.converstationbg:setImage(BGimg)
+
+        self.converstationbg:setVisible(true)
+    end
+
+    if self.selector_conv == nil then
+        self.selector_conv = gfx.sprite.new()
+        self.selector_conv.table = AssetsLoader.LoadImageTable("images/Ui/selector-tiny")
+        self.selector_conv:setCenter(0, 0)
+        self.selector_conv:moveTo(6, 171)
+        self.selector_conv:setZIndex(Z_Index.AllAtop)
+        self.selector_conv:setImage(self.selector_conv.table:getImage(1))
+        self.selector_conv:add()
+
+        self.selector_conv.animtimer = pd.frameTimer.new(7)
+        self.selector_conv.animtimer.timerEndedCallback = function(timer)
+            if self.selector_conv.index == 1 then
+                self.selector_conv.index = 2
+            else
+                self.selector_conv.index = 1
+            end
+            self.selector_conv:setImage(self.selector_conv.table:getImage(self.selector_conv.index))
+        end
+        self.selector_conv.animtimer.repeats = true
+        self.selector_conv.animtimer:start()
+    else
+        self.selector_conv:setVisible(true)
+    end
+
+    self.selector_conv.index = 1
+
+    self:SetConversationSelector(1)
+end
+
+function UI:StartConversation(name, sequence)
+    if sequence == nil then
+        sequence = "start"
+    end
+    
+    print("[UI] Trying to load conversation "..name)
+    local JSONDATA = GetJSONData("conversations/"..name..".json")
+	if JSONDATA == nil then
+		print("[UI] Conversation loading failed!")
+        return
+	end
+
+    for i = 1, #JSONDATA.sequences, 1 do
+        local Data = JSONDATA.sequences[i]
+        if Data.sequence == sequence then
+            self.conversationTable = Data
+            break
+        end
+    end
+
+    if self.conversationTable == nil then
+        print("[UI] Sequence "..sequence.." not found in conversation "..name)
+        return
+    end
+
+    --for i = 1, #self.conversationTable.options, 1 do
+    --    print("[UI] Sequence Option #"..i)
+    --    print("text "..self.conversationTable.options[i].text)
+    --    print("dialog "..self.conversationTable.options[i].dialog)
+    --    print("action "..self.conversationTable.options[i].action)
+    --end
+
+    self:LoadConversationUI()
 end

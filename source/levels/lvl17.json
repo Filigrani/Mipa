@@ -1,0 +1,189 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 30,
+  "tiles": "8 8 8 8 8 8 8 0 0 8 8 8 8 8 8 0 8 8 8 8 8 8 601 0 0 607 8 8 8 8 15 0 8 8 8 11 8 14 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 14 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 14 0 0 14 0 0 0 0 0 0 0 8 11 8 8 8 601 0 0 0 0 0 0 608 16 602 0 8 8 8 8 14 0 0 14 0 0 0 0 8 8 16 0 8 8 8 8 601 0 0 0 0 0 0 608 8 8 8 0 8 8 8 14 0 0 0 0 0 0 610 8 8 11 8 0 8 8 8 14 0 0 0 14 0 0 12 8 8 8 8 0 8 8 8 10 0 0 0 0 0 0 609 8 0 8 8 0 8 8 8 601 0 608 16 602 0 0 0 8 0 8 8 0 8 8 14 0 0 8 8 14 0 0 0 8 0 701 11 0 8 8 14 0 0 11 14 0 0 0 0 8 0 701 8 0 8 8 14 0 0 8 8 14 0 0 0 8 8 705 8 0 8 8 14 0 0 8 8 14 0 0 0 8 11 705 8 0 8 8 601 0 0 11 14 0 0 0 0 701 8 705 8 0 8 14 0 0 0 8 8 16 602 0 0 701 705 705 8 0 8 14 0 0 0 607 11 8 16 6 6 701 705 705 8 0 8 0 0 0 0 0 8 8 15 6 6 701 705 705 8 0 8 14 0 0 0 0 8 15 601 0 0 701 705 8 8 0 8 8 10 0 0 0 0 0 0 0 0 701 705 8 8 0 8 8 10 0 0 0 0 0 0 0 0 701 8 8 8 0 8 8 16 602 0 0 12 10 0 0 0 8 8 8 8 0 8 11 8 8 14 0 609 10 0 0 608 8 8 8 8 0 8 8 8 8 14 0 0 0 0 0 8 8 8 8 8 0 8 11 11 8 8 402 0 0 0 608 8 8 8 8 11 0 8 8 8 8 8 405 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "namezys",
+      "x": 178,
+      "y": 164,
+      "UID": 534
+    },
+    {
+      "propType": "button",
+      "x": 186,
+      "y": 86,
+      "UID": 542,
+      "timer": 1,
+      "indicatorUID": 0,
+      "group": "C"
+    },
+    {
+      "propType": "button",
+      "x": 18,
+      "y": 156,
+      "UID": 551,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "E"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 153,
+      "y": 179,
+      "UID": 544,
+      "group": "A"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 330,
+      "y": 179,
+      "UID": 546,
+      "group": "B"
+    },
+    {
+      "propType": "door",
+      "x": 32,
+      "y": 217,
+      "UID": 532,
+      "h": 42,
+      "a": 269,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "K",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 7,
+      "y": 127,
+      "UID": 538,
+      "h": 29,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "K",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 160,
+      "y": 75,
+      "UID": 543,
+      "h": 39,
+      "a": 0,
+      "openPixels": 10,
+      "closeSpeed": 1,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 392,
+      "y": 114,
+      "UID": 540,
+      "h": 42,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 166,
+      "y": 198,
+      "UID": 549,
+      "h": 14,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "E",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "boxdropper",
+      "x": 270,
+      "y": 44,
+      "UID": 547,
+      "group": "C",
+      "autorespawn": 0,
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 155,
+      "y": 62,
+      "UID": 545,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 161,
+      "y": 211,
+      "UID": 550,
+      "group": "E",
+      "active": 0,
+      "activeType": "Every"
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "dialog",
+      "x": 158,
+      "y": 139,
+      "w": 64,
+      "h": 44,
+      "UID": 537,
+      "dialogstart": "",
+      "dialogfinish": "",
+      "text": "Namezys"
+    },
+    {
+      "zoneType": "crashbomber",
+      "x": 144,
+      "y": 198,
+      "UID": 548
+    },
+    {
+      "zoneType": "spawn",
+      "x": 49,
+      "y": 205
+    },
+    {
+      "zoneType": "exit",
+      "x": 398,
+      "y": 113,
+      "w": 19,
+      "h": 42,
+      "UID": 539,
+      "nextLevel": "lvl18"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 155,
+      "w": 14,
+      "h": 14
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 396,
+      "y": 99,
+      "w": 14,
+      "h": 14
+    }
+   ]
+  }

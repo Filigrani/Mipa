@@ -1,0 +1,233 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 103 0 0 0 0 0 0 0 0 0 0 0 0 103 103 103 1 0 0 0 0 0 0 0 0 0 0 0 0 103 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 3 1 1 0 0 1 1 1 1 0 0 0 0 0 0 3 1 1 2 0 0 1 1 1 1 0 0 0 0 0 3 1 1 1 2 0 0 1 1 1 1 0 0 0 0 3 1 1 1 2 0 0 0 1 1 1 1 0 0 0 3 1 1 1 1 2 0 0 0 1 1 1 1 0 0 3 1 1 1 1 2 0 0 0 0 1 1 1 1 0 3 1 1 1 1 1 2 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 1 1 1 1 1 2 0 0 0 0 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "music": "GhostlyRain",
+  "newlevelcommand": "NoControl\nCutscene Arrival",
+  "replaylevelcommand": "",
+  "props":
+   [
+    {
+      "propType": "dom",
+      "x": 4,
+      "y": 28
+    },
+    {
+      "propType": "dropspawner",
+      "x": 4,
+      "y": 28,
+      "w": 87,
+      "spawnratemin": 1,
+      "spawnratemax": 3
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "spawn",
+      "x": 35,
+      "y": 174
+    },
+    {
+      "zoneType": "exit",
+      "x": 398,
+      "y": 105,
+      "w": 14,
+      "h": 77,
+      "UID": 623,
+      "nextLevel": "lvl0",
+      "instant": true
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 1,
+      "y": 127,
+      "w": 2,
+      "h": 55
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 7,
+      "y": 122,
+      "w": 14,
+      "h": 5
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 10,
+      "y": 118,
+      "w": 9,
+      "h": 5
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 12,
+      "y": 114,
+      "w": 9,
+      "h": 4
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 15,
+      "y": 110,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 20,
+      "y": 104,
+      "w": 9,
+      "h": 5
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 23,
+      "y": 99,
+      "w": 12,
+      "h": 5
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 27,
+      "y": 95,
+      "w": 12,
+      "h": 4
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 30,
+      "y": 91,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 33,
+      "y": 87,
+      "w": 14,
+      "h": 4
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 35,
+      "y": 83,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 41,
+      "y": 78,
+      "w": 9,
+      "h": 4
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 45,
+      "y": 74,
+      "w": 10,
+      "h": 4
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 49,
+      "y": 70,
+      "w": 10,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 51,
+      "y": 67,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 55,
+      "y": 63,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 58,
+      "y": 59,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 62,
+      "y": 55,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 66,
+      "y": 51,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 70,
+      "y": 47,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 74,
+      "y": 44,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 78,
+      "y": 40,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 83,
+      "y": 36,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 87,
+      "y": 33,
+      "w": 14,
+      "h": 3
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 91,
+      "y": 28,
+      "w": 14,
+      "h": 4
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 4,
+      "y": 124,
+      "w": 3,
+      "h": 18
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 7,
+      "y": 128,
+      "w": 5,
+      "h": 7
+    }
+   ]
+  }

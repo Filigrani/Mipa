@@ -1,0 +1,26 @@
+{
+  "sequences": 
+  [
+    {
+      "sequence": "start",
+      "options":
+	  [
+	    {
+			"text": "PokeyConversationOptionStart1",
+			"dialog": "PokeyConversationDialogStart1",
+			"action": "Conversation Pokey start"
+	    },
+	    {
+			"text": "PokeyConversationOptionStart2",
+			"dialog": "PokeyConversationDialogStart2",
+			"action": "Conversation Pokey start"
+	    },	
+	    {
+			"text": "PokeyConversationOptionStart3",
+			"dialog": "PokeyConversationDialogStart3",
+			"action": ""
+	    }		
+	  ]
+    }	
+  ]
+}

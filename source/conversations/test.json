@@ -1,0 +1,42 @@
+{
+  "sequences": 
+  [
+    {
+      "sequence": "start",
+      "options":
+	  [
+	    {
+			"text": "How are you?",
+			"dialog": "#Mipa\nHow are you?\n#Jobee\nWell this is test conversation, if it works, then I am fine.",
+			"action": "Conversation test start"
+	    },
+	    {
+			"text": "What are you doing?",
+			"dialog": "#Mipa\nWhat are you doing?\n#Jobee\nJust existing for purpose of this conversation test.",
+			"action": "Conversation test start"
+	    },	
+	    {
+			"text": "I think, I love you.",
+			"dialog": "#Mipa\nI think, I love you.\n#Jobee\nAre you awared that this part of plot not yet written?\n#Mipa\nYes, I know, but this test required 3rd option, that switch conversation topic.",
+			"action": "Conversation test plot"
+	    }		
+	  ]
+    },
+    {
+      "sequence": "plot",
+      "options":
+	  [
+	    {
+			"text": "I don't like current plot.",
+			"dialog": "#Mipa\nI don't like current plot.\nI mean, it's kinda fine ye, but I sure it could be better.\n#Jobee\nYou mean, you would like someone other was working on the plot?\n#Mipa\nNaaa, whole point of that project, is to make game by one person.\n#Jobee\nHOWEVER! Someone still helped.\nLike, Jodie, and one guy that made hive city tileset.\n#Mipa\nYes...but...\n...\nMelons.",
+			"action": "Conversation test plot"
+	    },
+	    {
+			"text": "I am fine with this plot.",
+			"dialog": "#Mipa\nI am fine with this plot.\n#Jobee\nWhat do you mean?\n#Mipa\nI mean, the fact it's not yet written, makes it's more mysterious.\n#Jobee\nI guess, sometimes you just silly.",
+			"action": ""
+	    }	
+	  ]
+    }	
+  ]
+}

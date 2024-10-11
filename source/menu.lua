@@ -125,7 +125,7 @@ function Menu:init()
         if pd.buttonJustPressed(pd.kButtonB) then
             self:SetMenu("start")
             SoundManager:PlaySound("Pap")
-        end               
+        end
     end)
 
     -- Options menu

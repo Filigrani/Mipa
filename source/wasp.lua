@@ -27,7 +27,7 @@ end
 
 function Creature:collisionResponse(other)
     
-    if self.escape then
+    if self.escape or self.escape2 or self.nocolide then
         return gfx.sprite.kCollisionTypeOverlap
     end
     
@@ -65,6 +65,16 @@ end
 
 function Wasp:update()
     self:CommonUpdates()
+
+    if self.LookAtMipa then
+        if MipaInst then
+            if self.x < MipaInst.x then
+                self.mirrored = gfx.kImageUnflipped
+            else
+                self.mirrored = gfx.kImageFlippedX
+            end
+        end
+    end
 end
 
 function Wasp:Death()
@@ -179,20 +189,59 @@ function Wasp:Shoot()
 end
 
 function Wasp:SetActorAct(command)
-    if command ~= nil and command ~= "" then
-        print("[Wasp] SetActorAct "..command)
-        if command == "JustStand" then
-            self.noAIUpdates = true
-            self.mirrored = gfx.kImageFlippedX
-        elseif command == "STOCK" then
-            self.noAIUpdates = false
-        elseif command == "Escape" then
-            self.escape = true
-            self.maxjumpvelocity = -40
-            self.gravity = 0
-            self:setTag(TAG.Effect)
-        end
+    
+    if command == nil or command == "" then
+        command = "STOCK"
     end
+
+    if command == "Escape" or command == "Escape2" or command == "JustStand3" then
+        self.gravity = 0
+    else
+        self.gravity = 1
+    end
+
+    if command == "Escape" then
+        self.maxjumpvelocity = -40
+    else
+        self.maxjumpvelocity = -10
+    end
+
+    if command == "Escape2" then
+        self.speed = 1.1
+    else
+        self.speed = 1.66
+    end
+
+    if command == "JustStand" or command == "Escape" or command == "Escape2" or command == "JustStand3" then
+        self:setTag(TAG.Effect)
+    else
+        self:setTag(TAG.Enemy)
+    end
+    
+    self.escape = command == "Escape"
+    self.escape2 = command == "Escape2"
+    self.nocolide = command == "JustStand3"
+    self.noAIUpdates = command == "Stuned" or command == "JustStand" or command == "JustStand2" or command == "JustStand3" or command == "JustStand4"
+    self.LookAtMipa = command == "JustStand" or command == "JustStand2" or command == "Stuned" or command == "JustStand3"
+    self.pain = command == "Stuned"
+
+    if command == "JustStand4" then
+        self:SetMirrored(false)
+    elseif command == "JustStand2" then
+        self:SetMirrored(true)
+    end
+
+    print("[Wasp] SetActorAct ", command)
+    print("[Wasp] escape ", self.escape)
+    print("[Wasp] escape2 ", self.escape2)
+    print("[Wasp] noAIUpdates ", self.noAIUpdates)
+    print("[Wasp] LookAtMipa ", self.LookAtMipa)
+    print("[Wasp] pain ", self.pain)
+    print("[Wasp] setTag ", self:getTag())
+    print("[Wasp] speed ", self.speed)
+    print("[Wasp] maxjumpvelocity ", self.maxjumpvelocity)
+    print("[Wasp] gravity ", self.gravity)
+    print("[Wasp] nocolide ", self.nocolide)
 end
 
 function Wasp:AIUpdate()
@@ -213,6 +262,14 @@ function Wasp:AIUpdate()
             gfx.sprite.removeSprite(self)
         end
         
+        return
+    end
+    if self.escape2 then
+        if self.x > 3 then
+            self:TryMoveLeft()
+        else
+            gfx.sprite.removeSprite(self)
+        end
         return
     end
     
@@ -296,7 +353,7 @@ function Wasp:PickAnimation()
         self:SetAnimation("shoot")
         return
     end
-    if self.paintimer or (self.defeated and not self.escape) then
+    if self.paintimer or (self.defeated and not self.escape and not self.escape2) or self.pain then
         self:SetAnimation("pain")
         return
     end

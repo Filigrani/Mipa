@@ -39,10 +39,27 @@ function AnimEffect:init(x, y, tablename, speed, oneshot, randomstartoffset, mir
         self:setImage(self.imagetable:getImage(self.currentindex), mirrored)
     end
     self.animtimer:start()
+    self.followparent = nil
+    self.followparentxoffset = 0
+    self.followparentyoffset = 0
+end
+
+function AnimEffect:SetFollowParent(parent, xoffset, yoffset)
+    self.followparent = parent
+    self.followparentxoffset = xoffset
+    self.followparentyoffset = yoffset
+end
+
+function AnimEffect:ProcessFollow()
+    local p_x, p_y = self.followparent:getPosition()
+    self:moveTo(p_x+self.followparentxoffset, p_y+self.followparentyoffset)
 end
 
 function AnimEffect:update()
     if self.CustomUpdate then
         self.CustomUpdate()
+    end
+    if self.followparent then
+        self:ProcessFollow()
     end
 end

@@ -4,11 +4,12 @@ ActiveManager = {}
 ActiveManager.activatables = {}
 ActiveManager.activators = {}
 ActiveManager.activegroups = {}
+ActiveManager.scripedactivegroups = {}
 
 ActiveManager.Reset = function ()
     ActiveManager.activatables = {}
     ActiveManager.activators = {}
-    ActiveManager.activegroups = {}  
+    ActiveManager.activegroups = {}
 end
 
 ActiveManager.AddActivatable = function (obj)
@@ -24,6 +25,24 @@ ActiveManager.AddActivator = function (obj)
     print("[ActiveManager] Added activator that triggers groups:")
     for i = 1, #obj.activegroup, 1 do
         print(obj.activegroup[i])
+    end
+end
+
+ActiveManager.AddScripedActive = function (group)
+    for i = 1, #ActiveManager.scripedactivegroups, 1 do
+        if ActiveManager.scripedactivegroups[i] == group then
+            return
+        end
+    end
+    table.insert(ActiveManager.scripedactivegroups, group)
+end
+
+ActiveManager.RemoveScripedActive = function (group)
+    for i = 1, #ActiveManager.scripedactivegroups, 1 do
+        if ActiveManager.scripedactivegroups[i] == group then
+            table.remove(ActiveManager.scripedactivegroups, i)
+            return
+        end
     end
 end
 
@@ -44,6 +63,11 @@ end
 ActiveManager.GroupIsActive = function (group)
     for i = 1, #ActiveManager.activegroups, 1 do
         if ActiveManager.activegroups[i] == group then
+            return true
+        end
+    end
+    for i = 1, #ActiveManager.scripedactivegroups, 1 do
+        if ActiveManager.scripedactivegroups[i] == group then
             return true
         end
     end

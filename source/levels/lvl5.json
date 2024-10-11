@@ -1,257 +1,256 @@
 {
-"music": "LaserMayhem",
-"width_in_tile": 28,
-"height_in_tiles": 15,
-"root_x": 4,
-"root_y": 29,
-"tiles": "1 1 1 1 1 1 1 201 0 0 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 0 0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 0 0 0 0 1 1 1 1 1 0 1 1 1 1 2 0 0 0 0 1 1 1 1 1 1 0 1 1 1 2 0 0 0 0 1 1 1 1 1 1 1 0 1 1 1 2 0 0 0 0 0 1 0 1 1 1 1 0 1 1 1 2 0 0 0 0 0 1 0 2 0 0 1 0 1 1 1 2 0 0 301 0 0 1 0 0 0 0 1 0 1 1 1 2 0 0 1 0 0 1 0 0 0 0 1 0 1 1 1 1 0 0 1 0 0 101 101 2 0 0 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 1 0 1 1 1 0 0 0 1 2 0 0 0 0 0 0 1 0 1 1 1 0 0 0 101 1 0 0 0 2 0 0 1 0 1 1 1 2 0 0 0 101 1 1 1 1 0 0 1 0 1 1 1 1 0 0 0 0 1 1 1 0 0 0 1 0 1 2 0 2 0 0 0 0 0 0 1 0 0 1 1 0 1 2 0 1 2 0 0 2 0 0 1 402 1 1 1 0 0 0 0 0 0 0 0 0 0 0 1 403 1 1 1 0 1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 2 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 0 0 1 1 1 1 1 0 1 2 0 0 2 0 0 0 2 0 1 1 1 1 1 0 1 2 0 1 1 2 0 0 0 0 1 1 1 1 1 0 1 0 0 0 1 2 0 0 101 101 1 1 1 1 1 0 1 0 0 0 1 1 2 0 0 0 1 1 1 1 1 0 1 0 0 0 1 1 2 0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
-"props":
- [
-  {
-    "propType": "box",
-    "x": 128,
-    "y": 106,
-    "UID": 57
-  },
-  {
-    "propType": "box",
-    "x": 263,
-    "y": 35,
-    "UID": 79
-  },
-  {
-    "propType": "button",
-    "x": 229,
-    "y": 55,
-    "UID": 59,
-    "timer": 0,
-    "indicatorUID": 0,
-    "group": "C"
-  },
-  {
-    "propType": "button",
-    "x": 186,
-    "y": 168,
-    "UID": 67,
-    "timer": 0,
-    "indicatorUID": 0,
-    "group": "A"
-  },
-  {
-    "propType": "button",
-    "x": 367,
-    "y": 69,
-    "UID": 74,
-    "timer": 0,
-    "indicatorUID": 0,
-    "group": "B"
-  },
-  {
-    "propType": "button",
-    "x": 367,
-    "y": 154,
-    "UID": 80,
-    "timer": 0,
-    "indicatorUID": 0,
-    "group": "D"
-  },
-  {
-    "propType": "button",
-    "x": 312,
-    "y": 154,
-    "UID": 151,
-    "timer": 0,
-    "indicatorUID": 0,
-    "group": "F"
-  },
-  {
-    "propType": "button",
-    "x": 227,
-    "y": 196,
-    "UID": 152,
-    "timer": 0,
-    "indicatorUID": 0,
-    "group": "L"
-  },
-  {
-    "propType": "door",
-    "x": 149,
-    "y": 85,
-    "UID": 69,
-    "h": 28,
-    "a": 0,
-    "openPixels": 3,
-    "closeSpeed": 1,
-    "group": "A",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "door",
-    "x": 256,
-    "y": 46,
-    "UID": 72,
-    "h": 14,
-    "a": 269,
-    "openPixels": 0,
-    "closeSpeed": 1,
-    "group": "D",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "door",
-    "x": 8,
-    "y": 140,
-    "UID": 73,
-    "h": 28,
-    "a": 0,
-    "openPixels": 3,
-    "closeSpeed": 1,
-    "group": "H",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "door",
-    "x": 158,
-    "y": 183,
-    "UID": 148,
-    "h": 28,
-    "a": 269,
-    "openPixels": 0,
-    "closeSpeed": 1,
-    "group": "F",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "door",
-    "x": 149,
-    "y": 189,
-    "UID": 150,
-    "h": 36,
-    "a": 0,
-    "openPixels": 3,
-    "closeSpeed": 1,
-    "group": "L",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "laser",
-    "x": 88,
-    "y": 146,
-    "UID": 76,
-    "w": 111,
-    "a": 0,
-    "group": "F",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "laser",
-    "x": 214,
-    "y": 135,
-    "UID": 47,
-    "w": 168,
-    "a": 0,
-    "group": "B",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "laser",
-    "x": 228,
-    "y": 150,
-    "UID": 77,
-    "w": 112,
-    "a": 0,
-    "group": "C",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "laser",
-    "x": 228,
-    "y": 163,
-    "UID": 78,
-    "w": 112,
-    "a": 0,
-    "group": "H",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "laser",
-    "x": 102,
-    "y": 217,
-    "UID": 149,
-    "w": 127,
-    "a": 0,
-    "group": "H",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "indicator",
-    "x": 241,
-    "y": 36,
-    "UID": 65,
-    "group": "D",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "indicator",
-    "x": 214,
-    "y": 141,
-    "UID": 66,
-    "group": "C",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "indicator",
-    "x": 200,
-    "y": 127,
-    "UID": 71,
-    "group": "B",
-    "active": 0,
-    "activeType": "Every"
-  },
-  {
-    "propType": "indicator",
-    "x": 144,
-    "y": 71,
-    "UID": 75,
-    "group": "A",
-    "active": 0,
-    "activeType": "Every"
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "1 1 1 1 1 1 1 201 0 0 1 1 1 1 1 0 1 1 1 1 1 1 1 0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 0 0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 0 0 0 0 1 1 1 1 1 0 1 1 1 1 2 0 0 0 0 1 1 1 1 1 1 0 1 1 1 2 0 0 0 0 1 1 1 1 1 1 1 0 1 1 1 2 0 0 0 0 0 1 0 1 1 1 1 0 1 1 1 2 0 0 0 0 0 1 0 2 0 0 1 0 1 1 1 2 0 0 301 0 0 1 0 0 0 0 1 0 1 1 1 2 0 0 1 0 0 1 0 0 0 0 1 0 1 1 1 1 0 0 1 0 0 101 101 2 0 0 1 0 1 1 1 0 0 0 1 0 0 0 0 0 0 0 1 0 1 1 1 0 0 0 1 2 0 0 0 0 0 0 1 0 1 1 1 0 0 0 101 1 0 0 0 2 0 0 1 0 1 1 1 2 0 0 0 101 1 1 1 1 0 0 1 0 1 1 1 1 0 0 0 0 1 1 1 0 0 0 1 0 1 2 0 2 0 0 0 0 0 0 1 0 0 1 1 0 1 2 0 1 2 0 0 2 0 0 1 402 1 1 1 0 0 0 0 0 0 0 0 0 0 0 1 403 1 1 1 0 1 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 2 0 0 0 0 0 0 0 0 0 1 2 0 0 0 0 0 0 0 0 1 1 1 1 1 0 1 2 0 0 2 0 0 0 2 0 1 1 1 1 1 0 1 2 0 1 1 2 0 0 0 0 1 1 1 1 1 0 1 0 0 0 1 2 0 0 101 101 1 1 1 1 1 0 1 0 0 0 1 1 2 0 0 0 1 1 1 1 1 0 1 0 0 0 1 1 2 0 0 0 1 1 1 1 1 0 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "box",
+      "x": 128,
+      "y": 106,
+      "UID": 57
+    },
+    {
+      "propType": "box",
+      "x": 263,
+      "y": 35,
+      "UID": 79
+    },
+    {
+      "propType": "button",
+      "x": 229,
+      "y": 55,
+      "UID": 59,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "C"
+    },
+    {
+      "propType": "button",
+      "x": 186,
+      "y": 168,
+      "UID": 67,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "A"
+    },
+    {
+      "propType": "button",
+      "x": 367,
+      "y": 69,
+      "UID": 74,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "B"
+    },
+    {
+      "propType": "button",
+      "x": 367,
+      "y": 154,
+      "UID": 80,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "D"
+    },
+    {
+      "propType": "button",
+      "x": 312,
+      "y": 154,
+      "UID": 151,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "F"
+    },
+    {
+      "propType": "button",
+      "x": 227,
+      "y": 196,
+      "UID": 152,
+      "timer": 0,
+      "indicatorUID": 0,
+      "group": "L"
+    },
+    {
+      "propType": "door",
+      "x": 149,
+      "y": 85,
+      "UID": 69,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 256,
+      "y": 46,
+      "UID": 72,
+      "h": 14,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 8,
+      "y": 140,
+      "UID": 73,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 158,
+      "y": 183,
+      "UID": 148,
+      "h": 28,
+      "a": 269,
+      "openPixels": 10,
+      "closeSpeed": 1,
+      "group": "F",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 149,
+      "y": 189,
+      "UID": 150,
+      "h": 36,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "L",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 88,
+      "y": 146,
+      "UID": 76,
+      "w": 111,
+      "a": 0,
+      "group": "F",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 214,
+      "y": 135,
+      "UID": 47,
+      "w": 168,
+      "a": 0,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 228,
+      "y": 150,
+      "UID": 77,
+      "w": 112,
+      "a": 0,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 228,
+      "y": 163,
+      "UID": 78,
+      "w": 112,
+      "a": 0,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "laser",
+      "x": 102,
+      "y": 217,
+      "UID": 149,
+      "w": 127,
+      "a": 0,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 241,
+      "y": 36,
+      "UID": 65,
+      "group": "D",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 214,
+      "y": 141,
+      "UID": 66,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 200,
+      "y": 127,
+      "UID": 71,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 144,
+      "y": 71,
+      "UID": 75,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "note",
+      "x": 88,
+      "y": 169,
+      "UID": 153,
+      "noteID": 1
+    },
+    {
+      "zoneType": "spawn",
+      "x": 22,
+      "y": 161
+    },
+    {
+      "zoneType": "exit",
+      "x": 270,
+      "y": 211,
+      "w": 28,
+      "h": 28,
+      "UID": 68,
+      "nextLevel": "lvl6"
+    }
+   ]
   }
- ],
-"zones":
- [
-  {
-    "zoneType": "note",
-    "x": 88,
-    "y": 169,
-    "UID": 153,
-    "noteID": 1
-  },
-  {
-    "zoneType": "spawn",
-    "x": 22,
-    "y": 161
-  },
-  {
-    "zoneType": "exit",
-    "x": 270,
-    "y": 211,
-    "w": 28,
-    "h": 28,
-    "UID": 68,
-    "nextLevel": "lvl6"
-  }
- ]
-}

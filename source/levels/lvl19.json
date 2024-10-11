@@ -1,0 +1,139 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 30,
+  "tiles": "8 8 8 8 8 15 0 0 8 8 8 8 8 8 8 0 8 601 607 8 8 14 0 0 607 8 8 705 705 705 8 0 8 0 0 8 8 14 0 0 0 8 8 705 8 705 8 0 8 0 0 8 15 601 0 0 0 8 8 705 705 705 8 0 8 0 0 15 601 0 0 0 0 701 705 705 705 8 8 0 8 0 0 0 0 0 0 0 0 701 705 705 8 8 8 0 8 0 0 0 0 9 8 10 0 8 705 705 8 8 8 0 8 0 0 0 0 0 0 0 0 701 705 705 8 8 8 0 8 0 0 0 14 0 0 0 0 701 705 8 8 8 8 0 8 0 0 608 16 602 0 0 0 701 8 8 8 8 8 0 8 0 0 8 8 16 602 0 0 8 8 8 8 8 8 0 8 602 608 8 8 8 8 6 6 8 8 8 8 8 8 0 8 8 8 8 8 15 601 0 0 8 8 8 8 8 8 0 8 8 8 8 15 601 0 0 0 8 8 8 8 8 8 0 8 601 607 8 10 0 0 0 0 8 8 8 8 8 8 0 8 0 0 8 10 0 0 0 0 8 8 8 8 8 8 0 8 0 0 8 16 0 0 0 608 8 8 8 8 8 8 0 8 0 0 8 8 0 0 0 8 8 8 8 8 8 8 0 8 602 0 607 15 0 0 0 8 8 8 8 8 8 8 0 8 16 602 0 0 0 0 0 0 0 607 8 8 8 8 0 8 8 8 8 8 14 0 0 0 0 0 8 8 8 8 0 8 15 601 0 0 0 0 0 0 0 0 8 8 8 8 0 8 10 0 0 0 0 0 0 0 0 608 8 8 8 8 0 8 16 0 0 8 8 6 6 8 8 8 8 8 8 8 0 8 8 0 0 8 8 6 6 8 8 8 8 8 8 8 0 8 8 0 0 8 8 0 0 8 8 8 8 8 8 8 0 8 8 0 0 8 8 602 608 8 8 8 8 8 8 8 0 8 8 0 0 8 8 8 8 8 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "newlevelcommand": "",
+  "replaylevelcommand": "Remove 555\nRemove 553",
+  "props":
+   [
+    {
+      "propType": "box",
+      "x": 53,
+      "y": 192,
+      "UID": 585
+    },
+    {
+      "propType": "box",
+      "x": 160,
+      "y": 66,
+      "UID": 594
+    },
+    {
+      "propType": "button",
+      "x": 209,
+      "y": 58,
+      "UID": 588,
+      "timer": 5,
+      "indicatorUID": 590,
+      "group": "A"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 182,
+      "y": 151,
+      "UID": 591,
+      "group": "B"
+    },
+    {
+      "propType": "boxbutton",
+      "x": 216,
+      "y": 151,
+      "UID": 593,
+      "group": "C"
+    },
+    {
+      "propType": "door",
+      "x": 6,
+      "y": 114,
+      "UID": 586,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 245,
+      "y": 100,
+      "UID": 595,
+      "h": 41,
+      "a": 0,
+      "openPixels": 0,
+      "closeSpeed": 4,
+      "group": "B,C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 298,
+      "y": 103,
+      "UID": 587,
+      "h": 28,
+      "a": 269,
+      "openPixels": 0,
+      "closeSpeed": 1,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 235,
+      "y": 86,
+      "UID": 596,
+      "group": "B",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "indicator",
+      "x": 246,
+      "y": 86,
+      "UID": 597,
+      "group": "C",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "clockindicator",
+      "x": 285,
+      "y": 98,
+      "UID": 590
+    },
+    {
+      "propType": "blob",
+      "x": 370,
+      "y": 135
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "crashbomber",
+      "x": 24,
+      "y": 53,
+      "UID": 598
+    },
+    {
+      "zoneType": "spawn",
+      "x": 38,
+      "y": 149
+    },
+    {
+      "zoneType": "exit",
+      "x": 400,
+      "y": 57,
+      "w": 19,
+      "h": 29,
+      "UID": 610,
+      "nextLevel": "lvl20",
+      "instant": true
+    }
+   ]
+  }

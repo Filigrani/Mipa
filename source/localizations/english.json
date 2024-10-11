@@ -3,6 +3,30 @@
   "lines":
   [
     {
+      "key": "SystemMenuSkip",
+      "line": "skip intro"
+    },
+    {
+      "key": "SystemMenuAddons",
+      "line": "add-on levels"
+    },
+    {
+      "key": "SystemMenuMainMenu",
+      "line": "main menu"
+    },
+    {
+      "key": "SystemMenuRestart",
+      "line": "restart level"
+    },
+    {
+      "key": "SystemMenuItems",
+      "line": "items"
+    },
+    {
+      "key": "HowToWalkGuide",
+      "line": "#None\nPress ⑤ and ⑥ to walk."
+    },   
+    {
       "key": "HowToJumpGuide",
       "line": "#Mipa\nOh! Pretty high wall!\nBut, I am can hop enough to get there!\n#None\nPress ① button to jump."
     },
@@ -12,11 +36,11 @@
     },
     {
       "key": "HowToInteract",
-      "line": "#Mipa\nOH! Button!\nWhat does it do?\nThere only one way to check this out!\n#None\nPress ③ to interact with buttons and switches."
+      "line": "#Mipa_4\nOH! Button!\n#Mipa\nWhat does it do?\nThere only one way to check this out!\n#None\nPress ③ to interact with buttons and switches."
     },
     {
       "key": "LVL0DoorIsLocked",
-      "line": "#Mipa\nThis door is locked...\n#Mipa\nShould be the way to open it!"
+      "line": "#Mipa\nThis door is locked...\n#Mipa_3\nShould be the way to open it!"
     },
     {
       "key": "HowToPull",
@@ -24,7 +48,7 @@
     },
     {
       "key": "TwoIndicators",
-      "line": "#Mipa\nThere is two indicators above this door...\n...\nLooks like more than one button need to be pressed to open the door."
+      "line": "#Mipa\nThere is two indicators above this door...\n#Mipa_3\n...\nLooks like more than one button need to be pressed to open the door."
     },
     {
       "key": "BadLasers",
@@ -32,7 +56,7 @@
     },
     {
       "key": "LVL4Tricky",
-      "line": "#Mipa\nWooh...That was tricky."
+      "line": "#Mipa_4\nWooh...That was tricky."
     },
     {
       "key": "Note0",
@@ -40,7 +64,7 @@
     },
     {
       "key": "Note1",
-      "line": "#Note\nExpedition Log Number 1.\nThese rays, or more accurately lasers, have odd structure.\nTheir power is high enough to destroy metal. But nevertheless, walls and boxes block radiation.\nWall and boxes materials cannot be defined.\n#Mipa\nOh...\nWell, at least I already know that lasers are bad, and boxes are good!"
+      "line": "#Note\nExpedition Log Number 1.\nThese rays, or more accurately lasers, have odd structure.\nTheir power is high enough to destroy metal. But nevertheless, walls and boxes block radiation.\nWall and boxes materials cannot be defined.\n#Mipa\nOh...\n#Mipa_4\nWell, at least I already know that lasers are bad, and boxes are good!"
     },   
     {
       "key": "Note2",
@@ -48,11 +72,47 @@
     },  
     {
       "key": "Note3",
-      "line": "#Note\nTrash disposal area. Unknown, if that compressed trash, will be burned or recycled.\nLooks like it's just stacked here for some reason.\n#None\nCheat that let you play as trash cube: ④④④①②③⑥④④④"
+      "line": "#Note\nExpedition Log Number 3.\nTrash disposal area. Unknown, if that compressed trash, will be burned or recycled.\nLooks like it's just stacked here for some reason.\n#None\nCheat that let you play as trash cube: ④④④①②③⑥④④④"
+    }, 
+    {
+      "key": "Note4",
+      "line": "#Note\nExpedition Log Number 4.\nCrashbomber this is a device that been created mainly for industrial purposes.\nTo easier mining process and cleaning out collapses, and other places, where will small radius charge would be useful.\nHowever this is facinatic, because this tehnologie used here to clear out compressed trash."
     }, 
     {
       "key": "PokeyWaterFall",
-      "line": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa\nOH! Sorry, my visors seeing everything in monochrome...\n#Poky\nDon't jump on bridge! It's flimsy."
+      "line": "#Mipa\nHello?\n..........\n#Poky\nSsshhhhhhhh!\n..........\nLet me enjoy sound of azure waterfall\n#Mipa\nIs it really azure?\n#Poky\nOf course it is!\nHow can not you see it?\n#Mipa_4\nOH! Sorry, my visors seeing everything in monochrome...\n#Poky\nDon't jump on bridge! It's flimsy."
+    },
+    {
+      "key": "PokeyWaterFallFall",
+      "line": "#Poky\nI told you."
+    },    
+    {
+      "key": "PokeyWaterFallInteract",
+      "line": "#Poky\nAgain you? What do you need?"
+    },
+    {
+      "key": "PokeyConversationOptionStart1",
+      "line": "How to disable Field?"
+    },
+    {
+      "key": "PokeyConversationOptionStart2",
+      "line": "Bridge is flimsy?"
+    },
+    {
+      "key": "PokeyConversationOptionStart3",
+      "line": "Sorry for disturbing."
+    },
+    {
+      "key": "PokeyConversationDialogStart1",
+      "line": "#Mipa_4\nExcuse me for ruining silence, but, I am here to find the way to disable field.\n#Mipa\nMaybe you know where I can do this?\n#Poky\nI don't know myself. But I am almost sure, Queen of the Hive knows.\n#Mipa_3\nHive? How can I get to the Hive?\n#Poky\nJust go straigt by the rooms, you will not miss it.\n#Mipa_4\nThank you!"
+    },
+    {
+      "key": "PokeyConversationDialogStart2",
+      "line": "#Mipa\nWhat do you mean bridge is flimsy?\n#Poky\nLook!\nSome of the tiles has more cracks than others, it means, jumping on them more dangerous.\n#Mipa_3\nHmmm..."
+    },
+    {
+      "key": "PokeyConversationDialogStart3",
+      "line": "#Mipa\nSorry for disturbing.\n#None\nWhen you done talking with someone, sometimes you can begin conversation with them again.\nPress ③ near with someone to begin conversation once if you missed something."
     },
     {
       "key": "JobeeTest",
@@ -63,8 +123,12 @@
       "line": "#Mipa\nCheater!"
     },
     {
+      "key": "BlobSecret",
+      "line": "#Mipa_2\n..."
+    },
+    {
       "key": "BoxButton",
-      "line": "#Mipa\nHm...When this button down, door is open.\nI need to find something to keep this button pressed."
+      "line": "#Mipa\nHm...When this button down, door is open.\n#Mipa_3\nI need to find something to keep this button pressed."
     },
     {
       "key": "KoaKola",
@@ -88,15 +152,55 @@
     },
     {
       "key": "WaspFreeze",
-      "line": "#Wasp\nFreeze!\n#Mipa\n???\n#Wasp\nDon't dare to move!\nYou can't enter Hive!\n#Mipa\nHive?\n#Wasp\n!!!\nEveryone knows, here is our Hive! And we not allow anyone to enter, unless Queen said so!\n#Mipa\nBut...this the only way!\nMaybe...I can just go to queen, and ask herself?\n#Wasp\nUUUGH! I said! You can't enter Hive!!!\nEnough of you!\nI will kindly show you other way!\n#Mipa\nOH! Really?"
+      "line": "#Wasp_2\nFreeze!\n#Mipa\n???\n#Wasp_2\nDon't dare to move!\nYou can't enter Hive!\n#Mipa\nOH! Hive is here?\n#Wasp_2\n!!!\nEveryone knows, here is our Hive! And we not allow anyone to enter, unless Queen said so!\n#Mipa\nBut...I really need to...\nMaybe...I can just go to queen, and ask herself?\n#Wasp_2\nUUUGH! I said! You can't enter Hive!!!\nEnough of you!\nI will kindly show you other way!\n#Mipa\nOH! Really?"
     },
     {
       "key": "WaspCombat",
-      "line": "#Wasp\nI will make sure, you understand."
+      "line": "#Wasp_2\nI will make sure, you understand."
     },
     {
       "key": "WaspDefeat",
-      "line": "#Wasp\nOkay!\nOkay!\nYou win!"
+      "line": "#Wasp_3\nOkay!\nOkay!\nYou win!"
+    },
+    {
+      "key": "WaspAfterTalk",
+      "line": "#Wasp_3\nUgh...\nForget about this.\n#Mipa\nIn the room from where I came, there is a lost bee that cannot get home.\nThat bee is sobing.\n#Wasp\nAlright, I will help them."
+    },
+    {
+      "key": "WaspLeft",
+      "line": "#Mipa\nUh....\nActually...I was need to ask that Wasp how to pass this area.\n...\nWhy good ideas always comes so late?"
+    },
+    {
+      "key": "WaspQueenTalk",
+      "line": "#Wasp\nYour Majesty!\nLet me notice you, someone is about to visit you!\n#Jobee\nI am already aware."
+    },
+    {
+      "key": "WaspLeavesQueen",
+      "line": "#Wasp_3\nUgh...\nMy apologies..."
+    },
+    {
+      "key": "BeesNote",
+      "line": "#Note\nWe are left to eat honey pie! Will back soon!\nif you are come to visit Queen, please stay in the line.                                  *Sincerely, The Royal Guard*\n#Mipa\nThat explains why there no any guards are here.\nI don't see any line... I guess, I can just come in?"
+    },
+    {
+      "key": "JobeeWelcome",
+      "line": "#Jobee\nI wasn't expecting visitors.\nWho are you?"
+    },   
+    {
+      "key": "JobeeWelcomeAgain",
+      "line": "#Jobee\nAlright, once again.\nWho are you?\n#Mipa_4\nMy name is Mipa!\n#Mipa\nWasp told me that I need permission of the Queen to visit her.\nI deciced, that I can ask permission of the Queen while I visiting her.\n#Jobee\nThat not make any sense you know?\n#Mipa\n!?\n#Jobee\nHowever, you already here, what you need?"
+    },  
+    {
+      "key": "CrashBomber",
+      "line": "#None\nYou got Crashbomber equipment item!\nTo cycle through your equipment items, hold ④ and then press ② button."
+    },
+    {
+      "key": "BlobHello",
+      "line": "#Mipa\nDon't worrie creature! I will make you out of there!\n#None\nBlobs can be used to boost Mipa's jump height.\nExperiment with it."
+    },
+    {
+      "key": "Namezys",
+      "line": "#Mipa\nHello? Can I ask how to get to Queen, please?\n#Namezys\n*Sob* *Sob* It's on the right.\n#Mipa\nWhy are you crying?\n#Namezys\nPassage is blocked, and I can't get home.\n#Mipa\nDon't worrie, we will find the way!"
     },
     {
       "key": "ExamineEquipment1",
@@ -118,6 +222,10 @@
       "key": "ExaminePassive2",
       "line": "#Mipa\nJobee gave me this jar. She said this honey very sticky.\nAnd this is true!"
     },
+    {
+      "key": "Arrival",
+      "line": "#Commander\nGet ready to enter!\nRemember! Once you inside the field, we will not be able to contact you.\nGood luck, and be careful.\n#Mipa_0\nAffirmative!"
+    }, 
     {
       "key": "Intro1",
       "line": "#None\nSomewhere in space..."

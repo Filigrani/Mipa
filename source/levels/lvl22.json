@@ -1,0 +1,92 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "8 8 8 8 8 8 0 0 0 8 8 8 8 8 8 0 8 8 8 8 8 15 0 0 0 8 8 8 8 8 8 0 8 8 8 8 15 601 0 0 0 8 8 8 8 8 8 0 8 8 8 8 14 0 0 0 0 8 8 8 8 8 8 0 8 8 8 8 14 0 0 0 0 8 8 8 8 8 8 0 8 8 8 15 601 0 0 0 0 8 8 8 8 8 8 0 8 8 8 14 0 0 0 0 0 8 8 8 8 8 8 0 8 8 8 14 0 0 0 0 0 8 8 8 8 8 8 0 8 8 15 601 0 0 0 0 0 8 8 8 8 8 8 0 8 8 603 0 0 0 0 0 0 8 8 8 8 8 8 0 8 15 611 0 0 0 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 8 8 8 8 8 8 0 8 16 612 0 0 0 0 0 0 8 8 8 8 8 8 0 8 15 611 0 0 0 0 0 608 8 8 8 8 8 8 0 8 603 0 0 0 0 0 608 8 8 8 8 8 8 8 0 8 16 602 0 0 0 0 8 8 8 8 8 8 8 8 0 8 8 14 0 0 0 0 8 8 8 8 8 8 8 8 0 8 8 14 0 0 0 0 8 8 8 8 8 8 8 8 0 8 8 16 612 0 0 0 8 8 8 8 8 8 8 8 0 8 8 8 14 0 0 0 8 8 8 8 8 8 8 8 0 8 8 8 14 0 0 0 8 8 8 8 8 8 8 8 0 8 8 8 16 602 0 0 607 8 8 8 8 8 8 8 0 8 8 8 8 16 612 0 0 8 8 8 8 8 8 8 0 8 8 8 8 8 611 0 0 607 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "props":
+   [
+    {
+      "propType": "jobee",
+      "x": 288,
+      "y": 100,
+      "UID": 686
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "dialog",
+      "x": 32,
+      "y": 123,
+      "w": 41,
+      "h": 32,
+      "UID": 691,
+      "dialogstart": "NoControl",
+      "dialogfinish": "Trigger 696",
+      "text": "JobeeWelcome",
+      "active": true
+    },
+    {
+      "zoneType": "dialog",
+      "x": 31,
+      "y": 33,
+      "w": 19,
+      "h": 19,
+      "UID": 694,
+      "dialogstart": "",
+      "dialogfinish": "ChangeActor 194 JustStand2\nDelay 30\nChangeActor 194 JustStand4\nDelay 30\nChangeActor 194 JustStand2\nDelay 15\nChangeActor 194 JustStand4\nDelay 15\nChangeActor 194 JustStand2\nDelay 10\nChangeActor 194 JustStand4\nTrigger 697",
+      "text": "WaspQueenTalk",
+      "active": true
+    },
+    {
+      "zoneType": "dialog",
+      "x": 55,
+      "y": 33,
+      "w": 19,
+      "h": 19,
+      "UID": 697,
+      "dialogstart": "",
+      "dialogfinish": "ChangeActor 194 Escape2\nDelay 15\nTrigger 698",
+      "text": "WaspLeavesQueen",
+      "active": true
+    },
+    {
+      "zoneType": "dialog",
+      "x": 78,
+      "y": 33,
+      "w": 19,
+      "h": 19,
+      "UID": 698,
+      "dialogstart": "",
+      "dialogfinish": "Conversation Jobee start",
+      "text": "JobeeWelcomeAgain",
+      "active": true
+    },
+    {
+      "zoneType": "trigger",
+      "x": 5,
+      "y": 32,
+      "w": 20,
+      "h": 19,
+      "UID": 696,
+      "ontrigger": "Spawn wasp 194 37 JustStand4 194\nDelay 30\nTrigger 694",
+      "active": true
+    },
+    {
+      "zoneType": "spawn",
+      "x": 49,
+      "y": 148
+    },
+    {
+      "zoneType": "exit",
+      "x": 400,
+      "y": 153,
+      "w": 19,
+      "h": 29,
+      "UID": 690,
+      "nextLevel": "lvl22",
+      "instant": true
+    }
+   ]
+  }

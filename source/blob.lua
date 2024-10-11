@@ -15,6 +15,8 @@ function Blob:init(x, y)
     self:setTag(TAG.Enemy)
     self.IsGrabbable = true
     self.Mipa = nil
+    self.IsBlob = true
+    self.secretready = true
 end
 
 function Blob:collisionResponse(other)
@@ -63,24 +65,36 @@ function Blob:ApplyVelocity()
                     self.squshed = true
                     SoundManager:PlaySound("Splash")
                 end
+                if self.Mipa:IsDown() then
+                    if self.secretready then
+                        if UIIsnt ~= nil then
+                            UIIsnt:StartDialog(GetDialogDataFromString("BlobSecret"))
+                        end
+                        self.secretready = false
+                    end
+                end
             end
         end
     end
 
     if self.y > 400 then
-        if self.homeX == 0 and self.homeY == 0 then
-            gfx.sprite.removeSprite(self)
-        else
-            self.thinkticks = 50
-            self.movingdirection = 0
-            self:moveTo(self.homeX, self.homeY)
-            self:SetAnimation("spawn")
-        end
+        self:Respawn()
     end
 end
 
 function Blob:update()
     self:CommonUpdates()
+end
+
+function Blob:Respawn()
+    if self.homeX == 0 and self.homeY == 0 then
+        gfx.sprite.removeSprite(self)
+    else
+        self.thinkticks = 50
+        self.movingdirection = 0
+        self:moveTo(self.homeX, self.homeY)
+        self:SetAnimation("spawn")
+    end
 end
 
 function Blob:AIUpdate()
@@ -123,6 +137,7 @@ function Blob:AIUpdate()
             end
             self.thinkticks = 85
             self.squshed = false
+            self.secretready = true
             self:setCollideRect(2,7,10,7)
         end
     else        
