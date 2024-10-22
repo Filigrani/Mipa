@@ -1,0 +1,130 @@
+{
+  "width_in_tile": 28,
+  "height_in_tiles": 15,
+  "root_x": 4,
+  "root_y": 29,
+  "tiles": "8 15 0 0 8 8 8 8 8 8 8 8 8 8 8 0 8 14 0 0 8 8 8 603 0 0 0 0 0 607 15 0 8 14 0 0 8 8 8 16 612 0 0 16 612 0 0 0 8 14 0 0 607 8 8 8 8 0 0 8 8 8 8 0 8 16 612 0 0 607 8 8 14 0 0 8 8 8 8 0 11 8 14 0 0 0 607 8 14 0 0 8 8 8 8 0 8 15 601 0 0 0 0 607 14 0 0 8 8 8 8 0 8 14 0 0 0 0 0 0 0 0 0 8 8 8 8 0 8 14 0 0 0 0 0 0 0 0 0 8 8 8 8 0 8 14 0 0 0 0 0 0 0 0 0 8 8 8 8 0 8 14 0 0 0 0 0 0 0 0 0 8 8 8 8 0 8 14 0 0 0 0 0 0 0 0 0 8 8 8 8 0 15 601 0 0 0 0 0 0 0 0 0 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 8 8 8 8 0 8 16 602 0 0 0 0 0 0 0 0 8 8 8 8 0 8 8 10 0 0 0 0 0 0 0 0 8 8 8 8 0 8 8 14 0 0 0 0 0 0 0 608 8 8 8 8 0 8 8 16 602 0 0 0 0 0 0 8 8 8 8 8 0 8 8 8 8 16 602 0 0 0 0 8 8 8 8 8 0 8 8 8 8 8 14 0 0 0 608 8 8 8 8 8 0 8 8 8 8 15 601 0 0 0 8 8 8 8 8 8 0 8 8 8 8 14 0 0 0 0 8 8 8 8 8 8 0 8 8 8 8 14 0 0 0 0 8 8 8 8 8 8 0 8 8 8 8 16 602 0 0 0 8 8 8 8 8 8 0 8 8 8 8 8 16 0 0 0 8 8 8 8 8 8 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0",
+  "newlevelcommand": "Trigger 711",
+  "replaylevelcommand": "Trigger 711",
+  "props":
+   [
+    {
+      "propType": "notetable",
+      "x": 198,
+      "y": 166,
+      "UID": 708
+    },
+    {
+      "propType": "door",
+      "x": 4,
+      "y": 57,
+      "UID": 705,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 1,
+      "group": "H",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 51,
+      "y": 155,
+      "UID": 707,
+      "h": 28,
+      "a": 0,
+      "openPixels": 3,
+      "closeSpeed": 5,
+      "group": "A",
+      "active": 0,
+      "activeType": "Every"
+    },
+    {
+      "propType": "door",
+      "x": 392,
+      "y": 113,
+      "UID": 710,
+      "h": 42,
+      "a": 0,
+      "openPixels": 1,
+      "closeSpeed": 1,
+      "group": "L",
+      "active": 1,
+      "activeType": "Every"
+    },
+    {
+      "propType": "wasp",
+      "x": 107,
+      "y": 174,
+      "UID": 712,
+      "actoraction": "PointLeft"
+    }
+   ],
+  "zones":
+   [
+    {
+      "zoneType": "dialog",
+      "x": 221,
+      "y": 113,
+      "w": 34,
+      "h": 70,
+      "UID": 713,
+      "dialogstart": "",
+      "dialogfinish": "",
+      "text": "WaspThisWay",
+      "active": true
+    },
+    {
+      "zoneType": "trigger",
+      "x": 2,
+      "y": -22,
+      "w": 15,
+      "h": 15,
+      "UID": 711,
+      "ontrigger": "Activate L\nActivate A\nMipaSetMirrored true",
+      "active": true
+    },
+    {
+      "zoneType": "trigger",
+      "x": 18,
+      "y": 168,
+      "w": 15,
+      "h": 15,
+      "UID": 714,
+      "ontrigger": "Dialog WaspGoodLuck\nDelay 60\nChangeActor 712 Escape",
+      "active": true
+    },
+    {
+      "zoneType": "trigger",
+      "x": 74,
+      "y": 152,
+      "w": 15,
+      "h": 31,
+      "UID": 715,
+      "ontrigger": "ChangeActor 712 JustStand3",
+      "active": true
+    },
+    {
+      "zoneType": "spawn",
+      "x": 380,
+      "y": 148
+    },
+    {
+      "zoneType": "exit",
+      "x": 32,
+      "y": 225,
+      "w": 14,
+      "h": 11,
+      "UID": 706,
+      "nextLevel": "menu"
+    },
+    {
+      "zoneType": "invizcolider",
+      "x": 391,
+      "y": 113,
+      "w": 3,
+      "h": 42
+    }
+   ]
+  }

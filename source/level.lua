@@ -3,6 +3,9 @@ local gfx <const> = pd.graphics
 import "jsonloader"
 waterfallimagetable = nil
 local LiquidStarterID = SettingsManager:Get("liquidvisualid")
+
+
+
 class('Level').extends(playdate.graphics.sprite)
 
 function Level:init(levelPath)
@@ -346,6 +349,20 @@ function Level:PrepareLiquidTiles()
 end
 
 function Level:CreateTile(ID, X, Y)
+    if ID == nil then
+        print("[Level] ERROR, can't create tile! ID is null")
+        return
+    end
+    if X == nil then
+        print("[Level] ERROR, can't create tile! X is null")
+        
+        return
+    end
+    if Y == nil then
+        print("[Level] ERROR, can't create tile! Y is null")
+        return
+    end
+    
     local WorldX = self.jsonTable.root_x+14*(X-1)
     local WorldY = self.jsonTable.root_y+14*(Y-1)
     local DefaultRender = true
@@ -535,6 +552,22 @@ function Level:CreateTile(ID, X, Y)
     end
 end
 
+function Level:SetLevelBounderies()
+    LeftEdge = self.jsonTable.root_x-4
+    RightEdge = LeftEdge + (self.jsonTable.width_in_tile*14)+8
+
+    print("[Level] Level bounderis is from "..LeftEdge.." to "..RightEdge)
+
+    if self.jsonTable.blockscrolling then
+        print("[Level] Can scroll? false. Scrolling is blocked on this level")
+    else
+        CanScroll = self.jsonTable.width_in_tile > 29
+        CameraXMaxScroll = RightEdge - displayWidth
+        CameraXMinScroll = LeftEdge
+        print("[Level] Can scroll? ", CanScroll)
+    end
+end
+
 function Level:ParceTileMapOld()
     print("[Level] Parcing tilemap...")
     for i=1, #self.jsonTable.tiles do
@@ -548,10 +581,16 @@ function Level:ParceTileMap()
     local rawtiles = self.jsonTable.tiles
     local w = self.jsonTable.width_in_tile+1
     local h = self.jsonTable.height_in_tiles+1
+    print("[Level] width_in_tile ", w)
+    print("[Level] height_in_tiles", h)
+
+    self:SetLevelBounderies()
+
     local tiles = {}
     for tile in string.gmatch(rawtiles, "%S+") do
         table.insert(tiles, tile)
     end
+    print("[Level] Found "..#tiles.." tiles")
     local TileIndex = 1
     for x=1, w do
         for y=1, h do
@@ -892,12 +931,9 @@ function Level:CreateProp(propData)
         pokey:setImage(AssetsLoader.LoadImage("images/Props/Poky"))
         pokey:add()
     elseif type == "jobee" then
-        local jobee = gfx.sprite.new()
-        jobee:setCenter(0, 0)
-        jobee:moveTo(propData.x, propData.y)
-        jobee:setZIndex(Z_Index.Object)
-        jobee:setImage(AssetsLoader.LoadImage("images/Props/Jobee"))
-        jobee:add()
+        local c = Jobee(propData.x, propData.y, false)
+        c.enemyname = "jobee"
+        TrackableManager.Add(c, propData.UID)
     elseif type == "namezys" then
         local jobee = gfx.sprite.new()
         jobee:setCenter(0, 0)
@@ -938,8 +974,10 @@ function Level:CreateProp(propData)
         local c = Blob(propData.x, propData.y)
         c.enemyname = "blob"
     elseif type == "jobeefly" then
-        local c = Jobee(propData.x, propData.y)
+        local c = Jobee(propData.x, propData.y, true)
         c.enemyname = "jobee"
+        c.DoCrankControl = true
+        --DrawCrank()
     elseif type == "wasp" then
         local c = Wasp(propData.x, propData.y)
         c.enemyname = "wasp"
@@ -948,6 +986,7 @@ function Level:CreateProp(propData)
     elseif type == "boxdropper" then
         local dropper = Activatable(propData.x, propData.y, propData.group, false, propData.activeType)
         local img = AssetsLoader.LoadImage("images/Props/boxdropper")
+        dropper:setZIndex(Z_Index.ObjectAtop)
         dropper:setImage(img)
         dropper.DropBox = function ()
             AnimEffect(dropper.x+5, dropper.y+12, "Effects/BigCloud", 1, true, false)
@@ -1067,7 +1106,9 @@ function Level:CreateZone(zoneData)
                 SoundManager:PlaySound("Note")
                 AddFoundNote(zoneData.noteID)
             end
-            UIIsnt:StartDialog(t.dialogdata, t.ondialogstart, t.ondialogfinish)
+            if UIIsnt then
+                UIIsnt:StartDialog(t.dialogdata, t.ondialogstart, t.ondialogfinish)
+            end
         end
         TrackableManager.Add(t, zoneData.UID)
     elseif type == "trigger" then
@@ -1075,6 +1116,18 @@ function Level:CreateZone(zoneData)
         t.ontriggercommand = zoneData.ontrigger
         t.OnTrigger = function ()
             TrackableManager.ProcessCommandLine(t.ontriggercommand)
+        end
+        TrackableManager.Add(t, zoneData.UID)
+    elseif type == "scrollinglimiter" then
+        local t = Trigger(zoneData.x, zoneData.y, zoneData.w, zoneData.h, zoneData.active)
+        t.CameraXMin = tonumber(zoneData.cameraxmin)
+        t.CameraXMax = tonumber(zoneData.cameraxmax)
+        t.destoryontrigger = false
+        t.triggeronce = false
+        t.OnTrigger = function ()
+            CanScroll = true
+            CameraXMinScroll = t.CameraXMin
+            CameraXMaxScroll = t.CameraXMax - displayWidth
         end
         TrackableManager.Add(t, zoneData.UID)
     elseif type == "interact" then
@@ -1225,10 +1278,10 @@ function Level:RenderTilemap()
     end
 
     local layerSprite = gfx.sprite.new()
-    layerSprite:setTilemap(tilemap)
+    layerSprite:setZIndex(Z_Index.BG)
     layerSprite:moveTo(self.jsonTable.root_x, self.jsonTable.root_y)
     layerSprite:setCenter(0, 0)
-    layerSprite:setZIndex(Z_Index.BG)
+    layerSprite:setTilemap(tilemap)
 
     layerSprite:add()
     

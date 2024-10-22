@@ -188,8 +188,28 @@
     },   
     {
       "key": "JobeeWelcomeAgain",
-      "line": "#Jobee\nAlright, once again.\nWho are you?\n#Mipa_4\nMy name is Mipa!\n#Mipa\nWasp told me that I need permission of the Queen to visit her.\nI deciced, that I can ask permission of the Queen while I visiting her.\n#Jobee\nThat not make any sense you know?\n#Mipa\n!?\n#Jobee\nHowever, you already here, what you need?"
-    },  
+      "line": "#Jobee\nAlright, once again.\nWho are you?\n#Mipa_4\nMy name is Mipa!\n#Mipa\nWasp told me that I need permission of the Queen to visit her.\nI deciced, that I can ask permission of the Queen while I visiting her.\n#Jobee\nThat not make any sense you know?\n#Mipa\n!?\n#Jobee\nHowever, you already here, what you need?\n#Mipa\nI am here on the mission to disable field.\n#Jobee\nField? I aware about field, but, honestly, I not really sure what it serve for.\nBut, I may know where one of the Operators are, so you may ask her.\n#Mipa\nWho is Operators?\n#Jobee\nThe Operators are a group of followers of the Great Operator who originally ran this ark.\nIn any case, I can tell you where one of the followers is supposedly located.\nBut keep in mind, don't expect a warm welcome.\n#Mipa_3\n...\n#Mipa_4\nI sure, I will find the way to smooth it out!\n#Mipa\nSo how can I get to Operator?\n#Jobee\nYou need to get to the watery caves.\nThere two ways to get there:\nThrough the cave of dripstones.\nAnd through soil drift.\nSoil drift is longer and more dangerous route, because there is a lot of quicksand.\nDripstones cave is fastest route, but it's flooded. You won't get through there unless you able to fly.\n#Mipa_3\nHm..."
+    },
+    {
+      "key": "JobeeCallsWasp",
+      "line": "#Jobee\nBeepa, come here!\n#None\n... ... ...\n#Jobee\nI know you're here, eavesdropping on our conversation."
+    },
+    {
+      "key": "JobeeGrab",
+      "line": "#Jobee\nGatch ya!\nGet ready! I am not used to carry someone!\n#Mipa_2\n...\n#Jobee\nFrom Hive and beyond!"
+    },
+    {
+      "key": "JobeeAskWaspEscordMipa",
+      "line": "#Jobee\nPlease, escort my guest to transport tube.\n#Wasp\n...\nFine follow me."
+    },
+    {
+      "key": "WaspThisWay",
+      "line": "#Wasp\nThis way!"
+    },
+    {
+      "key": "WaspGoodLuck",
+      "line": "#Wasp\n...\nGood luck there."
+    },
     {
       "key": "CrashBomber",
       "line": "#None\nYou got Crashbomber equipment item!\nTo cycle through your equipment items, hold ④ and then press ② button."

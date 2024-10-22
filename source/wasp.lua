@@ -17,7 +17,7 @@ function Wasp:init(x, y)
     -- Movement
     self.speed = 1.66
     self.IsWasp = true
-    self.hp = 3
+    self.hp = 1
     self.maxhp = 3
     self.damagable = true
     self.damageimuneframes = 0
@@ -82,8 +82,8 @@ function Wasp:Death()
     if UIIsnt ~= nil then
         --UIIsnt:StartDialog(GetDialogDataFromString("Okay\nOkay....\nYou finished that build.\nIn fact that boss was unfinished.\nAswell as cutscene that leads to that level missing.\nSo all I can say, is thanks for testing.\n#Mipa\nYes! Thank you!\nYou can press round button to quit to menu.\nOh wait, this breaking narrative.\n#None\nThat way better. So you just press round button and it opens pause menu and you press MAIN MENU\nThat simple, yes."))
         local dialog = GetDialogDataFromString("WaspDefeat")
-        UIIsnt:StartDialog(dialog, nil, "ChangeActor 387 Escape\nMusic None\nBigTrashKoaKola 383")
-        NextLevel = "lvl14b"
+        UIIsnt:StartDialog(dialog, nil, "ChangeActor 387 Escape\nMusic None\nBigTrashKoaKola 383\nBigTrashKoaKola 736")
+        --NextLevel = "lvl14b"
     end
     self.defeated = true
 end
@@ -190,11 +190,23 @@ end
 
 function Wasp:SetActorAct(command)
     
+    if command == "JustStand4" or command == "PointRight" then
+        self:SetMirrored(false)
+    elseif command == "JustStand2" or command == "PointLeft" then
+        self:SetMirrored(true)
+    end
+
+    self.point = command == "PointLeft" or command == "PointRight"
+
+    if self.point then
+        command = "Point"
+    end
+    
     if command == nil or command == "" then
         command = "STOCK"
     end
 
-    if command == "Escape" or command == "Escape2" or command == "JustStand3" then
+    if command == "Escape" or command == "Escape2" or command == "JustStand3" or command == "Point" then
         self.gravity = 0
     else
         self.gravity = 1
@@ -212,7 +224,7 @@ function Wasp:SetActorAct(command)
         self.speed = 1.66
     end
 
-    if command == "JustStand" or command == "Escape" or command == "Escape2" or command == "JustStand3" then
+    if command == "JustStand" or command == "Escape" or command == "Escape2" or command == "JustStand3" or command == "Point" then
         self:setTag(TAG.Effect)
     else
         self:setTag(TAG.Enemy)
@@ -220,16 +232,10 @@ function Wasp:SetActorAct(command)
     
     self.escape = command == "Escape"
     self.escape2 = command == "Escape2"
-    self.nocolide = command == "JustStand3"
-    self.noAIUpdates = command == "Stuned" or command == "JustStand" or command == "JustStand2" or command == "JustStand3" or command == "JustStand4"
+    self.nocolide = command == "JustStand3" or command == "Point"
+    self.noAIUpdates = command == "Stuned" or command == "JustStand" or command == "JustStand2" or command == "JustStand3" or command == "JustStand4" or command == "Point"
     self.LookAtMipa = command == "JustStand" or command == "JustStand2" or command == "Stuned" or command == "JustStand3"
     self.pain = command == "Stuned"
-
-    if command == "JustStand4" then
-        self:SetMirrored(false)
-    elseif command == "JustStand2" then
-        self:SetMirrored(true)
-    end
 
     print("[Wasp] SetActorAct ", command)
     print("[Wasp] escape ", self.escape)
@@ -346,6 +352,7 @@ function Wasp:RegisterAnimations()
     self:AddAnimation("shoot", {6})
     self:AddAnimation("fly", {7})
     self:AddAnimation("pain", {8, 9}, 10)
+    self:AddAnimation("point", {10, 11, 10, 11, 10, 11, 10, 11, 5, 3, 5, 3, 5}, 10)
 end
 
 function Wasp:PickAnimation()
@@ -355,6 +362,11 @@ function Wasp:PickAnimation()
     end
     if self.paintimer or (self.defeated and not self.escape and not self.escape2) or self.pain then
         self:SetAnimation("pain")
+        return
+    end
+
+    if self.point then
+        self:SetAnimation("point")
         return
     end
     

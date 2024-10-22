@@ -6,14 +6,14 @@
       "options":
 	  [
 	    {
-			"text": "I am here on the mission to disable field.",
-			"dialog": "#Mipa\nI don't like current plot.\nI mean, it's kinda fine ye, but I sure it could be better.\n#Jobee\nYou mean, you would like someone other was working on the plot?\n#Mipa\nNaaa, whole point of that project, is to make game by one person.\n#Jobee\nHOWEVER! Someone still helped.\nLike, Jodie, and one guy that made hive city tileset.\n#Mipa\nYes...but...\n...\nMelons.",
-			"action": "Conversation Jobee start"
+			"text": "I actually not able to fly.",
+			"dialog": "#Mipa\nSadly, you are right, I am not able to fly.\nI think soil drift is only option for me.",
+			"action": "Trigger 699"
 	    },
 	    {
-			"text": "I want to know how honey pie taste like?",
-			"dialog": "#Mipa\nI am here to know how honey pie taste like!",
-			"action": "Conversation Jobee start"
+			"text": "If only I were a pretty bee like you, then I would be able to!",
+			"dialog": "#Mipa_2\nIf only I were a pretty bee like you...\nI would be able to!\n#Jobee\n!?\nA..uh...Well I am appreciate your compliment.\nAnything more you would like to ask?",
+			"action": "Conversation Jobee ask"
 	    }	
 	  ]
     },
@@ -21,17 +21,33 @@
       "sequence": "ask",
       "options":
 	  [
-	    {
-			"text": "I am here on the mission to disable field.",
-			"dialog": "#Mipa\nI don't like current plot.\nI mean, it's kinda fine ye, but I sure it could be better.\n#Jobee\nYou mean, you would like someone other was working on the plot?\n#Mipa\nNaaa, whole point of that project, is to make game by one person.\n#Jobee\nHOWEVER! Someone still helped.\nLike, Jodie, and one guy that made hive city tileset.\n#Mipa\nYes...but...\n...\nMelons.",
-			"action": "Conversation Jobee ask"
+		{
+			"text": "No, I am ready to head out to soil drift!",
+			"dialog": "#Mipa_4\nNo, I am ready to head out to soil drift!",
+			"action": "Trigger 699"
 	    },
-	    {
+		{
 			"text": "What honey pie taste like?",
-			"dialog": "#Mipa\nI am fine with this plot.\n#Jobee\nWhat do you mean?\n#Mipa\nI mean, the fact it's not yet written, makes it's more mysterious.\n#Jobee\nI guess, sometimes you just silly.",
-			"action": "Conversation Jobee ask"
-	    }	
+			"dialog": "#Mipa\nWhat honey pie taste like?\n#Jobee\nI am surprised that this is the thing you actually ask.\n#Jobee\nWell it's sweet and doughy, but not sweet as sugar..\nWait why you even ask?\n#Mipa_3\nJust curious.",
+			"action": "Conversation Jobee ask2"
+	    }
 	  ]
-    }	
+    },
+    {
+      "sequence": "ask2",
+      "options":
+	  [
+		{
+			"text": "I guess, it's time for me to move to soil drift.",
+			"dialog": "#Mipa_4\nIt's was nice to talk to you.\n#Mipa\nBut It's time for me to move to soil drift.\n#Jobee\nAlright then.",
+			"action": "Trigger 699"
+	    },
+		{
+			"text": "Are all bee queens are such tall and fluffy as you are?",
+			"dialog": "#Mipa\nAre all bee queens are such tall and fluffy as you are?\n#Jobee\nOh, Mipa, I glad that you noticed, but I guess, each bee queen looks that way, it's just ordinary.\nBy the way just call me Jobee, not the queen.\n#Mipa_4\nOkay, Jobee.\n#Mipa\nBut anyway...\n#Mipa_2\nI Think you look good.\n#Jobee\nMummh, stop it.\n#Mipa\nOkay, Jobee it's was nice to talk to you, but I think it's time for me to go to soil drift.\n#Jobee\nUmmm... wait!\n#Mipa\n?!\n#Jobee\nI think, I can help you to fly through the drippers cave.\n#Mipa\n!!!??\n#Mipa\nBut how?\n#Jobee\nJust come closer.",
+			"action": "Trigger 717"
+	    }
+	  ]
+    }
   ]
 }

@@ -8,9 +8,16 @@ import "jsonloader"
 local dialogMode = SettingsManager:Get("dialogboxmode")
 function UI:init()
     UI.super.init(self)
-    self.heartsimagetable = AssetsLoader.LoadImageTable("images/ui/hp")
+    self.heartstilemap = pd.graphics.tilemap.new()
+    self.heartstilemap:setImageTable(AssetsLoader.LoadImageTable("images/ui/hp"))
+
+    self.heartsui = gfx.sprite.new()
+    self.heartsui:setIgnoresDrawOffset(true)
+    self.heartsui:setTilemap(self.heartstilemap)
+    self.heartsui:setCenter(0, 0)
+    self.heartsui:add()
+
     self:add() -- Add to draw list
-    self.hearts = {}
     self.equipment = {}
     self.passiveitems = {}
     self.lasthearts = 0
@@ -38,23 +45,6 @@ function UI:init()
     self:LoadDialogUI()
     print("[UI] Init...")
     return self
-end
-
-function UI:PopulateHearts(containers)
-    local ExistenHearts = #self.hearts
-    if containers > ExistenHearts then
-        local needToAdd = containers-ExistenHearts
-        print("[UI] Adding "..needToAdd.." heart(s)")
-        for i=1, needToAdd do
-            self:AddHeart(1)
-        end
-    elseif containers < ExistenHearts then
-        local needToRemove = ExistenHearts-containers
-        print("[UI] Removing "..needToRemove.." heart(s)")
-        for i=1, needToRemove do
-            self:RemoveHeart()
-        end
-    end
 end
 
 function UI:PopulateEquipment(equipment, passive)
@@ -88,36 +78,90 @@ function UI:PopulateEquipment(equipment, passive)
     end
 end
 
+function UI:UpdateHeartFlash(hearts)
+    if self.slice == nil and not self.disableflashingheart then
+        local slice = gfx.sprite.new()
+        slice:moveTo(0, 0)
+        slice:setCenter(0, 0)
+        slice:add()
+        slice:setIgnoresDrawOffset(true)
+        slice:setImage(AssetsLoader.LoadImageTable("images/ui/heartslice"):getImage(1))
+
+        slice.imgindex = 1
+        slice.direction = 1
+        slice.nextupdate = 2
+
+        self.slice = slice
+    end
+
+    if hearts == 0.5 and not self.disableflashingheart then
+        if not self.slice:isVisible() then
+            self.slice:setVisible(true)
+        end
+        if self.slice.nextupdate <= 0 then
+			self.slice.nextupdate = 3
+			if self.slice.imgindex >= 6 then
+				self.slice.direction = -1
+			elseif self.slice.imgindex == 1 then
+				self.slice.direction = 1
+			end
+			self.slice.imgindex = self.slice.imgindex+self.slice.direction
+			self.slice:setImage(AssetsLoader.LoadImageTable("images/ui/heartslice"):getImage(self.slice.imgindex))
+		else
+			self.slice.nextupdate = self.slice.nextupdate-1
+		end
+    else
+        if self.slice and self.slice:isVisible() then
+            self.slice:setVisible(false)
+        end
+    end
+end
+
 function UI:UpdateHP(hearts, containers)
-    for i=1, #self.hearts do
-        local heart = self.hearts[i]
-        local style = -1
+    print("[UI] UpdateHP: Hearts "..hearts.." containers "..containers)
+    local data, _ = self.heartstilemap:getTiles()
+
+    if #data ~= containers then
+        if containers < 1 then
+            self.heartstilemap:setSize(1, 1)
+        else
+            self.heartstilemap:setSize(containers, 1)
+        end
+        print("[UI] Updated hearts containers, now there is "..containers.." hearts")
+    end
+
+    for i=1, math.ceil(containers) do
+        local style = 0
+
+        if MipaInst then
+            if MipaInst.Jobee or MipaInst.JobeeCrank then
+                self.disableflashingheart = true
+                if hearts > 0 then
+                    style = 7
+                else
+                    style = 8
+                end
+            else
+                self.disableflashingheart = false
+            end
+        end
+
         if i <= containers then
             if i-0.5 == hearts then
                 style = 3
             elseif i <= hearts then
                 style = 2
             elseif i > hearts then
-                style = 1                   
-            end        
+                style = 1
+            end
         end
 
-        if style == -1 then
-            if heart:isVisible() then
-                heart:setVisible(false)
-            end
-        else        
-            if not heart:isVisible() then
-                heart:setVisible(true)
-            end
-            if heart.style ~= style then
-                print("[UI] Heart "..i.." updated to style "..style)
-                heart.style  = style
-                if heart.myIndex == 1 and style == 3 then
-                    style = 1
-                end
-                heart:setImage(self.heartsimagetable:getImage(style))
-            end
+        if data[i] ~= style then
+            self.heartstilemap:setTileAtPosition(i, 1, style)
+            self.heartsui:setTilemap(self.heartstilemap)
+            print("[UI] Heart "..i.." updated to style "..style)
+        else
+            --print("[UI] Heart "..i.." still remains to have style "..style)
         end
     end
 end
@@ -213,6 +257,11 @@ function UI:PauseMenuUp(type, ori)
     self:PauseSelector()
 end
 
+function UI:ForceUpdateHP(hp, maxhp)
+    self:UpdateHP(hp/2, maxhp/2)
+    self.lasthearts = hp/2
+end
+
 function UI:Update()
     if pd.buttonIsPressed(pd.kButtonUp) then
         if self.dialogskipframe < 25 then
@@ -274,10 +323,6 @@ function UI:Update()
         passive = MipaInst.passiveitems
     end
 
-    if self.lastcontainers ~= containers then
-        self:PopulateHearts(containers)
-    end
-
     if #self.equipment ~= #equipment or #self.passiveitems ~= #passive then
         self:PopulateEquipment(equipment, passive)
         self:UpdateEquipment(equipment, selectedequipment, passive)
@@ -287,6 +332,8 @@ function UI:Update()
         self:UpdateHP(hearts, containers)
         self.lasthearts = hearts
     end
+    self:UpdateHeartFlash(self.lasthearts)
+
     self:ProcessDialog()
     if self.glitchframes > 0 then
         self.glitchframes = self.glitchframes-1
@@ -408,68 +455,6 @@ function UI:Update()
     end
 end
 
-function UI:RemoveHeart()
-    local lastindex = #self.hearts
-    if lastindex > 0 then
-        local heart = self.hearts[lastindex]
-        if heart then
-            table.remove(self.hearts, lastindex)
-            gfx.sprite.removeSprite(heart)
-        end
-    end
-end
-
-function UI:AddHeart(style)
-    local heart = gfx.sprite.new()
-    heart:setCenter(0, 0)
-    heart:moveTo(2+30*#self.hearts, 2)
-    heart:add()
-    heart.style = style
-    self.hearts[#self.hearts+1] = heart
-    heart.myIndex = #self.hearts
-    heart.fadded = false
-    heart.fadealpha = 1
-    heart.slice = nil
-    if heart.myIndex == 1 then
-        local slice = gfx.sprite.new()
-        slice:setImage(self.heartsimagetable:getImage(6))
-        slice:setCenter(0, 0)
-        slice:moveTo(heart.x, heart.y)
-        slice:setVisible(false)
-        slice:add()
-        heart.slice = slice  
-        heart.heartbittimer = pd.frameTimer.new(2)
-        heart.heartbittimer.timerEndedCallback = function(timer)     
-            if MipaInst and MipaInst.hp == 1 then
-                if not heart.slice:isVisible() then
-                    heart.slice:setVisible(true)
-                end                   
-                local Ditherimg = self.heartsimagetable:getImage(6)
-                if heart.fadded then
-                    heart.fadealpha = heart.fadealpha+0.1
-                    if heart.fadealpha >= 1 then
-                        heart.fadded = false
-                        heart.fadealpha = 1               
-                    end
-                else
-                    heart.fadealpha = heart.fadealpha-0.1
-                    if heart.fadealpha <= 0.5 then
-                        heart.fadded = true
-                        heart.fadealpha = 0.5                              
-                    end
-                end
-                Ditherimg = Ditherimg:fadedImage(heart.fadealpha, gfx.image.kDitherTypeBayer8x8)
-                heart.slice:setImage(Ditherimg) 
-            else
-                if heart.slice:isVisible() then
-                    heart.slice:setVisible(false)
-                end   
-            end
-        end  
-        heart.heartbittimer.repeats = true     
-    end
-end
-
 function UI:Death()
     if self.deathtriggered then
         return
@@ -477,6 +462,7 @@ function UI:Death()
     self.deathtriggered = true
     
     local overlay = gfx.sprite.new()
+    overlay:setIgnoresDrawOffset(true)
     overlay:setCenter(0, 0)
     overlay:add()
     overlay:setZIndex(Z_Index.AllAtop)
@@ -498,6 +484,7 @@ end
 
 function UI:AddEquipment(style, ispassive)
     local eq = gfx.sprite.new()
+    eq:setIgnoresDrawOffset(true)
     eq:setCenter(0, 0)
     if not ispassive then
         eq:setImage(AssetsLoader.LoadImage("images/UI/equip_slot"))
@@ -515,6 +502,7 @@ function UI:AddEquipment(style, ispassive)
         self.passiveitems[#self.passiveitems+1] = eq
     end
     eq.icon = gfx.sprite.new()
+    eq.icon:setIgnoresDrawOffset(true)
     eq.icon.style = 0
     local imgSlice = AssetsLoader.LoadImage("images/UI/equip0")
     eq.icon:setImage(imgSlice)
@@ -733,20 +721,24 @@ end
 function UI:LoadDialogUI()
     local BGimg = AssetsLoader.LoadImage("images/UI/dialog")
     local BG = gfx.sprite.new()
+    BG:setIgnoresDrawOffset(true)
     BG:setImage(BGimg)
     BG:setCenter(0, 0)
     BG:moveTo(0, 170)
     BG:setZIndex(Z_Index.UI)
     local Actor = gfx.sprite.new()
+    Actor:setIgnoresDrawOffset(true)
     Actor:setCenter(0, 0)
     Actor:moveTo(0, 170)
     Actor:setZIndex(Z_Index.UI)
     local DialogTextSprite = gfx.sprite.new()
+    DialogTextSprite:setIgnoresDrawOffset(true)
     DialogTextSprite:setCenter(0, 0)
     DialogTextSprite:moveTo(91, 175)
     DialogTextSprite:setZIndex(Z_Index.UI)
 
     local DialogSkip = gfx.sprite.new()
+    DialogSkip:setIgnoresDrawOffset(true)
     DialogSkip:setCenter(0, 0)
     DialogSkip:moveTo(343, 218)
     DialogSkip:setZIndex(Z_Index.UI)
@@ -824,6 +816,7 @@ end
 function UI:DoGlitch()
     if self.glitchoverlay == nil then
         local glitchSP = gfx.sprite.new()
+        glitchSP:setIgnoresDrawOffset(true)
         glitchSP:setCenter(0, 0)
         glitchSP:moveTo(0, 0)
         glitchSP:setZIndex(Z_Index.UI)
@@ -918,6 +911,7 @@ function UI:StartCutsceneSequence(index)
     print("[UI] Creating cutscene sequences ", index)
     if self.sceneoverlay == nil then
         self.sceneoverlay = gfx.sprite.new()
+        self.sceneoverlay:setIgnoresDrawOffset(true)
         self.sceneoverlay:setCenter(0, 0)
         self.sceneoverlay:moveTo(0, 0)
         self.sceneoverlay:setZIndex(Z_Index.UI)
@@ -998,6 +992,7 @@ function UI:ShowPauseMenu()
     local img = GetPauseMenuImage(true)
     img:setInverted(true)
     self.pauseoverlay = gfx.sprite.new()
+    self.pauseoverlay:setIgnoresDrawOffset(true)
     self.pauseoverlay:setCenter(0, 0)
     self.pauseoverlay:moveTo(0, 0)
     self.pauseoverlay:setZIndex(Z_Index.UI)
@@ -1007,6 +1002,7 @@ function UI:ShowPauseMenu()
     self.pauseoverlay.type = 1
 
     self.pauseoverlay.selector = gfx.sprite.new()
+    self.pauseoverlay.selector:setIgnoresDrawOffset(true)
     self.pauseoverlay.selector:setCenter(0, 0)
     self.pauseoverlay.selector:moveTo(0, 0)
     self.pauseoverlay.selector:setZIndex(Z_Index.UI)
@@ -1097,7 +1093,7 @@ function UI:SelectConversationOption(index)
 end
 
 function UI:LoadConversationUI()
-    local drawingW = 388
+    local drawingW = 368
     local darwingH = 62
 
     local WholeText = ""
@@ -1124,6 +1120,7 @@ function UI:LoadConversationUI()
 
     if self.converstationbg == nil then
         local BG = gfx.sprite.new()
+        BG:setIgnoresDrawOffset(true)
         BG:setImage(BGimg)
         BG:setCenter(0, 0)
         BG:moveTo(0, 170)
@@ -1139,6 +1136,7 @@ function UI:LoadConversationUI()
 
     if self.selector_conv == nil then
         self.selector_conv = gfx.sprite.new()
+        self.selector_conv:setIgnoresDrawOffset(true)
         self.selector_conv.table = AssetsLoader.LoadImageTable("images/Ui/selector-tiny")
         self.selector_conv:setCenter(0, 0)
         self.selector_conv:moveTo(6, 171)

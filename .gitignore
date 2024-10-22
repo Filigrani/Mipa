@@ -1,9 +1,5 @@
-.sentry-native/114898df-2b62-49dd-d940-60d906cbbae8.run.lock
-.sentry-native/114898df-2b62-49dd-d940-60d906cbbae8.run/__sentry-breadcrumb1
-.sentry-native/114898df-2b62-49dd-d940-60d906cbbae8.run/__sentry-breadcrumb2
-.sentry-native/114898df-2b62-49dd-d940-60d906cbbae8.run/__sentry-event
-.sentry-native/114898df-2b62-49dd-d940-60d906cbbae8.run/session.json
-.sentry-native/841e2563-2f7a-46c7-ad09-ecb26f2fd818.run/__sentry-breadcrumb1
-.sentry-native/841e2563-2f7a-46c7-ad09-ecb26f2fd818.run/__sentry-breadcrumb2
-.sentry-native/841e2563-2f7a-46c7-ad09-ecb26f2fd818.run/__sentry-event
+.sentry-native
+__sentry-breadcrumb1
+__sentry-breadcrumb2
+__sentry-event
 Mipa.pdx

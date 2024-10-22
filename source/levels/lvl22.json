@@ -8,8 +8,8 @@
    [
     {
       "propType": "jobee",
-      "x": 288,
-      "y": 100,
+      "x": 297,
+      "y": 114,
       "UID": 686
     }
    ],
@@ -64,6 +64,42 @@
       "active": true
     },
     {
+      "zoneType": "dialog",
+      "x": 5,
+      "y": 53,
+      "w": 19,
+      "h": 19,
+      "UID": 699,
+      "dialogstart": "NoControl",
+      "dialogfinish": "Spawn wasp 18 146 JustStand3 194\nDelay 15\nTrigger 700",
+      "text": "JobeeCallsWasp",
+      "active": true
+    },
+    {
+      "zoneType": "dialog",
+      "x": 31,
+      "y": 53,
+      "w": 19,
+      "h": 19,
+      "UID": 700,
+      "dialogstart": "",
+      "dialogfinish": "ChangeActor 194 Escape2\nDelay 5\nMipaMoveToX -10",
+      "text": "JobeeAskWaspEscordMipa",
+      "active": true
+    },
+    {
+      "zoneType": "dialog",
+      "x": 31,
+      "y": 75,
+      "w": 19,
+      "h": 19,
+      "UID": 716,
+      "dialogstart": "",
+      "dialogfinish": "ChangeActor 686 Flink",
+      "text": "JobeeGrab",
+      "active": true
+    },
+    {
       "zoneType": "trigger",
       "x": 5,
       "y": 32,
@@ -71,6 +107,16 @@
       "h": 19,
       "UID": 696,
       "ontrigger": "Spawn wasp 194 37 JustStand4 194\nDelay 30\nTrigger 694",
+      "active": true
+    },
+    {
+      "zoneType": "trigger",
+      "x": 5,
+      "y": 75,
+      "w": 20,
+      "h": 19,
+      "UID": 717,
+      "ontrigger": "NoControl\nMipaMoveToX 187\nDelay 90\nChangeActor 686 Grab\nDelay 30\nTrigger 716",
       "active": true
     },
     {
@@ -86,6 +132,26 @@
       "h": 29,
       "UID": 690,
       "nextLevel": "lvl22",
+      "instant": true
+    },
+    {
+      "zoneType": "exit",
+      "x": -15,
+      "y": 113,
+      "w": 15,
+      "h": 42,
+      "UID": 701,
+      "nextLevel": "lvl21b",
+      "instant": true
+    },
+    {
+      "zoneType": "exit",
+      "x": 158,
+      "y": 29,
+      "w": 70,
+      "h": 4,
+      "UID": 718,
+      "nextLevel": "menu",
       "instant": true
     }
    ]

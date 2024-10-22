@@ -117,6 +117,13 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
             end
             CurrentLevel:CreateProp(data)
         end
+        if type == "jobeefly" then
+            local data = {}
+            data.propType = "jobeefly"
+            data.x = tonumber(parameters[3])
+            data.y = tonumber(parameters[4])
+            CurrentLevel:CreateProp(data)
+        end
     elseif command == "Glitch" then
         UIIsnt.glitchframes = tonumber(parameters[2])
     elseif command == "Dialog" then
@@ -161,6 +168,19 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         if MipaInst then
             MipaInst:moveTo(parameters[2], parameters[3])
         end
+    elseif command == "MipaMoveToX" then
+        if MipaInst then
+            MipaInst.scriptedMoveToX = tonumber(parameters[2])
+        end
+    elseif command == "MipaSetMirrored" then
+        if MipaInst then
+            local state = parameters[2]
+            if state == 1 or state == "1" or state == true or state == "true" or state == "TRUE" then
+                MipaInst:SetMirrored(true)
+            elseif state == 0 or state == "0" or state == false or state == "false" or state == "FALSE" then
+                MipaInst:SetMirrored(false)
+            end
+        end
     elseif command == "Cutscene" then
         UIIsnt:StartCutscene(parameters[2])
     elseif command == "Level" then
@@ -168,17 +188,23 @@ TrackableManager.ExecuteCommand = function (commandWithParameters)
         StartGame()
     elseif command == "BigTrash" then
         local TrashSpawner = TrackableManager.GetByUID(parameters[2])
-        TrashSpawner.pendingBigTrash = true
+        if TrashSpawner then
+            TrashSpawner.pendingBigTrash = true
+        else
+            print("[TrackableManager][BigTrash] Can't find spawner with UID "..parameters[2])
+        end
     elseif command == "BigTrashKoaKola" then
         local TrashSpawner = TrackableManager.GetByUID(parameters[2])
-        TrashSpawner.pendingBigTrashKoaKola = true
+        if TrashSpawner then
+            TrashSpawner.pendingBigTrashKoaKola = true
+        else
+            print("[TrackableManager][BigTrashKoaKola] Can't find spawner with UID "..parameters[2])
+        end
     elseif command == "Activate" then
         local group = parameters[2]
-        print("Exect param 2 ", group)
-        ActiveManager.AddScripedActive("H")
+        ActiveManager.AddScripedActive(group)
     elseif command == "Deactivate" then
         local group = parameters[2]
-        print("Exect param 2 ", group)
         ActiveManager.RemoveScripedActive(group)
     elseif command == "Conversation" then
         UIIsnt:StartConversation(parameters[2], parameters[3])

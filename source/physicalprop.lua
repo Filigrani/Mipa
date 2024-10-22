@@ -308,11 +308,14 @@ function PhysicalProp:ApplyVelocity()
     else
         self.movingflag = false
     end
-    if self.y > 250 or self.x > 397 or self.x < 0 then
-        if self.Dropper then
-            self.Dropper:DropBox()
-        else
-            gfx.sprite.removeSprite(self)
+
+    if not self.pendingBigTrashKoaKola then
+        if self.y > 250 or self.x > RightEdge or self.x < LeftEdge then
+            if self.Dropper then
+                self.Dropper:DropBox()
+            else
+                gfx.sprite.removeSprite(self)
+            end
         end
     end
 end

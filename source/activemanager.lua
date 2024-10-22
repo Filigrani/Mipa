@@ -34,12 +34,14 @@ ActiveManager.AddScripedActive = function (group)
             return
         end
     end
+    print("[ActiveManager] Added scripted activation for group ", group)
     table.insert(ActiveManager.scripedactivegroups, group)
 end
 
 ActiveManager.RemoveScripedActive = function (group)
     for i = 1, #ActiveManager.scripedactivegroups, 1 do
         if ActiveManager.scripedactivegroups[i] == group then
+            print("[ActiveManager] Removed scripted activation for group ", group)
             table.remove(ActiveManager.scripedactivegroups, i)
             return
         end

@@ -31,6 +31,7 @@ function Mipa:init(x, y)
     self.mipaimagedithered = nil
     self:moveTo(x, y)
     self:setZIndex(Z_Index.Player)
+    self.JobeeColisionApplied = false
     self:setCollideRect(3,3,8,11)
     self:setTag(TAG.Player)
     self.damagerectangle = gfx.sprite.new()
@@ -129,6 +130,7 @@ function Mipa:init(x, y)
     self.Jobee = nil
 
     self:add() -- Add to draw list
+    CrankManager:AddCrankables(self)
 end
 
 function Mipa:Konami()
@@ -277,6 +279,7 @@ function Mipa:RegisterAnimations()
     self:AddAnimation("downbox", {38})
     self:AddAnimation("sliping", {39, 40, 41}, 6)
     self:AddAnimation("shootbomb", {42})
+    self:AddAnimation("jobeeflyidle", {44, 45, 46}, 7)
 end
 
 function Mipa:SetAnimation(anim)
@@ -379,7 +382,7 @@ function Mipa:PickAnimation()
         affix = "box"
     end
     if self.Jobee ~= nil then
-        self:SetAnimation("idlebox")
+        self:SetAnimation("jobeeflyidle")
         return
     end
     if not self:IsDead() then
@@ -466,10 +469,16 @@ function Mipa:IsMirrored()
     return self.mirrored == gfx.kImageFlippedX
 end
 
-function Mipa:UpdateAnimation()
-    self:PickAnimation()
-    local spritePath = self.currentanimation.."/"..self.animationframe
-    local framechanged = self.lastimage ~= spritePath
+function Mipa:SetMirrored(IsMirrored)
+    if IsMirrored then
+        self.mirrored = gfx.kImageFlippedX
+    else
+        self.mirrored = gfx.kImageUnflipped
+    end
+    self:ReRender()
+end
+
+function Mipa:ReRender()
     local imagetable = self.mipaimages
     if self.IsClone then
         if self.mipaimagedithered == nil then
@@ -481,13 +490,20 @@ function Mipa:UpdateAnimation()
             imagetable = self.mipaimages
         end
     end
+    if not CheatsManager.MipaTrashMode then
+        self:setImage(imagetable:getImage(self.animationframe), self.mirrored)
+    else
+        self:setImage(AssetsLoader.LoadImage("images/Props/Trash"), self.mirrored)
+    end
+end
+
+function Mipa:UpdateAnimation()
+    self:PickAnimation()
+    local spritePath = self.currentanimation.."/"..self.animationframe
+    local framechanged = self.lastimage ~= spritePath
+
     if framechanged or self.IsClone or (self.lastmirrored ~= self.mirrored) then
-        if not CheatsManager.MipaTrashMode then
-            self:setImage(imagetable:getImage(self.animationframe), self.mirrored)
-        else
-            self:setImage(AssetsLoader.LoadImage("images/Props/Trash"), self.mirrored)
-        end
-        
+        self:ReRender()
         self.lastimage = spritePath
         self.lastmirrored = self.mirrored
     end
@@ -525,7 +541,7 @@ function Mipa:TryMoveRight()
     if self.momentumX ~= 0 then
         return false
     end
-    if not self:IsDead() and (not self:IsPulling() and not self:IsPulling())then -- So when push her body she not facing to motion direction
+    if not self:IsDead() and (not self:IsPulling() and not self:IsPulling()) and not (self.Jobee and self.JobeeCrank) then -- So when push her body she not facing to motion direction
         self:SetMirrored(false)
     end
     if not self:IsDown() then
@@ -539,7 +555,7 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
     if self.momentumX ~= 0 then
         return false
     end
-    if not self:IsDead() and (not self:IsPulling() and not self:IsPulling()) then
+    if not self:IsDead() and (not self:IsPulling() and not self:IsPulling()) and not (self.Jobee and self.JobeeCrank) then
         self:SetMirrored(true)
     end
     if not self:IsDown() then
@@ -596,9 +612,13 @@ function Mipa:GetMaxJumpVelocity()
         return self.maxjumpvelocityinliquid
     end
     if self.Jobee then
-        return self.maxjumpvelocityjobee
+        
+        if self.JobeeCrank then
+            return 0
+        else
+            return self.maxjumpvelocityjobee
+        end
     end
-
     return self.maxjumpvelocity
 end
 
@@ -606,8 +626,13 @@ end
 function Mipa:TryJump()
     
     if self.Jobee then
-        self.velocityY = self:GetMaxJumpVelocity()
-        return true
+        if self.JobeeCrank then
+            self.velocityY = 0
+            return false
+        else
+            self.velocityY = self:GetMaxJumpVelocity()
+            return true
+        end
     end
     
     if self.inliquid and self:HasPassiveItem(PASSIVEITEMS.Flippers) then
@@ -676,7 +701,7 @@ function Mipa:Damage(damage, ignoreimmune)
     else
         self.hp = self.hp-damage
         
-        if DamageGlitchesEnabled then
+        if DamageGlitchesEnabled and self.Jobee == nil then
             if UIIsnt ~= nil then
                 UIIsnt.glitchframes = 3
                 InvertedColorsFrames = InvertedColorsFrames+1
@@ -713,7 +738,11 @@ function Mipa:GetGravity()
         return self.gravityinliquid
     end
     if self.Jobee then
-        return self.gravityjobee
+        if self.JobeeCrank then
+            return 0
+        else
+            return self.gravityjobee
+        end
     end
     return self.gravity
 end
@@ -736,18 +765,30 @@ function Mipa:TryClimb()
     end
     return false
 end
+
+function Mipa:CrankChanged(change, absolute)
+    if self.Jobee and self.JobeeCrank then
+        self.velocityY = change
+    end
+end
+
 function Mipa:ApplyVelocity()
     if self.crushed then
         return
     end
 
     if self.Jobee then
-        if self.velocityY >= 0 then
-            self.velocityY = self:GetGravity()
+        
+        if self.JobeeCrank then
+            self.velocityX = 2.99
         else
-            self.velocityY = self.velocityY+self.gravityjobeefall
+            if self.velocityY >= 0 then
+                self.velocityY = self:GetGravity()
+            else
+                self.velocityY = self.velocityY+self.gravityjobeefall
+            end
+            --print("Velocity ", self.velocityY)
         end
-        print("Velocity ", self.velocityY)
     else
         self.velocityY = self.velocityY+self:GetGravity()
     end
@@ -800,6 +841,20 @@ function Mipa:ApplyVelocity()
     local actualX, actualY, collisions, length = self:moveWithCollisions(disiredX, disiredY)
     if self.damagerectangle then
         self.damagerectangle:moveTo(actualX-7, actualY-7)
+    end
+    if disiredX ~= actualX then
+        if self.Jobee and self.JobeeCrank then
+            self.Jobee:setCollideRect(3,6,8,11)
+            --gfx.sprite.removeSprite(self.Jobee)
+            self.Jobee.death = true
+            self.Jobee.gravity = 0.53
+            self.Jobee.momentumX = -8
+            self.Jobee = nil
+            self.momentumX = -9
+            self:setCollideRect(3,3,8,11)
+            --self.JobeeCrank = false
+            self:FatalDamage()
+        end
     end
     --print("actualX ", actualX)
     --print("actualY ", actualY)
@@ -896,7 +951,7 @@ function Mipa:ApplyVelocity()
                         local landvolume = freefall/154
                         if landvolume >= 0.77 then
                             landvolume = 1
-                            if not self.skipfalldamage then
+                            if not self.skipfalldamage or self.Jobee then
                                 self:Damage(1)
                             else
                                 self.skipfalldamage = false
@@ -1008,6 +1063,9 @@ function Mipa:ApplyVelocity()
         if self.inliquid then
             self.velocityY = self.velocityY/3
         end
+    end
+    if self.JobeeCrank and self.Jobee then
+        self.velocityY = 0
     end
 end
 
@@ -1440,6 +1498,27 @@ function Mipa:update()
         if pd.buttonJustPressed(pd.kButtonUp) then
             self:Interact()
         end
+    else
+        if self.scriptedMoveToX ~= nil then
+            local _x, _y = self:getPosition()
+            if self.scriptedMoveToX < _x then
+                local dist = _x-self.scriptedMoveToX
+                if dist <= 1.1 then
+                    self.scriptedMoveToX = nil
+                else
+                    self:TryMoveLeft()
+                end
+            elseif self.scriptedMoveToX > _x then
+                local dist = self.scriptedMoveToX-_x
+                if dist <= 1.1 then
+                    self.scriptedMoveToX = nil
+                else
+                    self:TryMoveRight()
+                end
+            else
+                self.scriptedMoveToX = nil
+            end
+        end
     end
     if self.physichybirnateframes > 0 then
         self.physichybirnateframes = self.physichybirnateframes-1
@@ -1450,13 +1529,13 @@ function Mipa:update()
     self:UpdateAnimation()
     if LoadNextLevel then
         if not self:IsDead() then
-            if self.x > 453 or self.x < 3 or self.y > 290 or self.y < 35 then
+            if self.x > RightEdge or self.x < LeftEdge or self.y > 290 or self.y < 35 then
                 LoadNextLevel = false
                 StartGame()
             end
         end
     end
-    if LowHpFXEnabled then
+    if LowHpFXEnabled and not self.Jobee then
         if not self:IsDead() and self.hp == 1 and not self.IsClone then
             if UIIsnt ~= nil then
                 if math.random(0,100) <= 0.002 then
@@ -1466,4 +1545,19 @@ function Mipa:update()
         end
     end
     self:ApplyHoldingBox()
+
+    if self.Jobee then
+        local _x, _y = self:getPosition()
+        self.Jobee:moveTo(_x+5, _y-13)
+        if not self.JobeeColisionApplied then
+            self.JobeeColisionApplied = true
+            self:setCollideRect(3,-14,8,27)
+            self.hpmax = 1
+            self.hp = 1
+            if UIIsnt then
+                UIIsnt:ForceUpdateHP(self.hp, self.hpmax)
+                --print("[Mipa] force to update Hearts")
+            end
+        end
+    end
 end

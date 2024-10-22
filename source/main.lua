@@ -5,6 +5,7 @@ import "CoreLibs/timer"
 import "CoreLibs/frametimer"
 import "CoreLibs/ui"
 import "CoreLibs/qrcode"
+import "CoreLibs/math"
 import "settings"
 import "savemanager"
 Settings = SaveManager.Load("settings") or DefaultSettings
@@ -45,7 +46,7 @@ local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
 LIQUID_TEST = false
-JOBEEFLY_TEST = false
+JOBEEFLY_TEST = true
 BACKGROUND_TEST = false
 gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
@@ -62,11 +63,25 @@ InvertedColorsFrames = 0
 IsReplay = false
 LevelsLimit = 22
 local font = gfx.font.new('font/Asheville Ayu')
+
+displayWidth, displayHeight = playdate.display.getSize()
+halfDisplayWidth = displayWidth / 2
+
 ShouldUpdatePauseMenu = false
 SeenDialogs = {}
 FoundNotes = SaveManager.Load("notes") or {}
 DrawCrankFrames = 0
 CrankedThisFrame = false
+CameraX = 0
+CameraXMaxScroll = 392 - displayWidth
+CameraXMinScroll = 0
+
+LeftEdge = 0
+RightEdge = 400
+
+CanScroll = false
+
+LastDeltaTime = 0
 
 --CurrentLevelName = "menu"
 --NextLevel = "lvl-1"
@@ -83,6 +98,58 @@ end
 if JOBEEFLY_TEST then
 	CurrentLevelName = "JobeeFly"
     NextLevel = "JobeeFly"
+end
+
+ScrollingMode = 2
+
+ScrollingSmoothRate = 4
+
+InterpolateScrolling = function (current, goal)
+	local result = goal
+	if current < goal then
+		result = current+ScrollingSmoothRate
+		if result > goal then
+			return goal
+		else
+			return result
+		end
+	elseif current > goal then
+		result = current-ScrollingSmoothRate
+		if result < goal then
+			return goal
+		else
+			return result
+		end
+	end
+end
+
+UpdateCameraPosition = function (MipaX, force)
+	local newX = math.floor(math.max(math.min(MipaX - halfDisplayWidth + 60, CameraXMaxScroll), CameraXMinScroll))
+	if newX ~= -CameraX or force then
+		if not force then
+			local interpolated = InterpolateScrolling(CameraX, -newX)
+			--print("[UpdateCameraPosition] Going to Interpolate "..CameraX.." to "..newX.." result "..interpolated)
+
+			newX = -interpolated
+		end
+		if ScrollingMode == 1 then
+			CameraX = -newX
+			gfx.setDrawOffset(CameraX,0)
+			gfx.sprite.addDirtyRect(newX, 0, displayWidth, displayHeight)
+		elseif ScrollingMode == 2 then
+			local d = newX + CameraX
+			CameraX = -newX
+			gfx.setDrawOffset(CameraX,0)
+			gfx.getDisplayImage():draw(newX,0)
+	
+			if d > 0 then
+				playdate.graphics.sprite.addDirtyRect(newX + displayWidth - d, 0, d, displayHeight)
+			else
+				playdate.graphics.sprite.addDirtyRect(newX, 0, -d, displayHeight)
+			end
+		end
+		print("[UpdateCameraPosition] Scroll X "..newX.." bounds: "..LeftEdge.." "..RightEdge)
+	end
 end
 
 AddFoundNote = function (noteID)
@@ -239,6 +306,13 @@ DrawCrankSinus = function (change)
 end
 
 StartGame = function ()
+	CameraX = 0
+	CameraXMaxScroll = 392 - displayWidth
+	CameraXMinScroll = 0
+	CanScroll = false
+	LeftEdge = 0
+    RightEdge = 400
+	UpdateCameraPosition(0, true)
 	IsReplay = DebugFlags.ForceLikeReplay
 	InvertedColorsFrames = 0
 	gfx.sprite.removeAll()
@@ -253,6 +327,7 @@ StartGame = function ()
 
 	ActiveManager.Reset()
 	TrackableManager.Reset()
+	CrankManager.Reset()
 	MenuInst = nil
 	CreditsInst = nil
 	if NextLevel == "sintest" or debugsin then
@@ -311,13 +386,13 @@ StartGame = function ()
 	
 	
 	UIIsnt = UI()
-	--CrankDisk(100, 200, {CrankManager.NewPlatform(0,0,0)})
 	AddSystemMenuButtons()
 end
 
 DeathTrigger = function ()
 	CanStartAgain = true
 	local again = gfx.sprite.new()
+	again:setIgnoresDrawOffset(true)
 	again:setCenter(0, 0)
 	again:setImage(deathimagetable:getImage(18))
 	again:add()
@@ -337,6 +412,7 @@ DeathTrigger = function ()
 	again.anim:start()
 	if not NewDeathScreen then
 		local overlay = gfx.sprite.new()
+		overlay:setIgnoresDrawOffset(true)
 		overlay:setCenter(0, 0)
 		overlay:setImage(deathimagetable:getImage(17))
 		overlay:add()
@@ -495,8 +571,13 @@ local function updateGame()
 		pd.display.setInverted(true)
 	end
 
+	if MipaInst then
+		if CanScroll then
+			UpdateCameraPosition(MipaInst.x)
+		end
+	end
+
 	CheatsManager.HandleInputs()
-	
 	ActiveManager.Update()
 	gfx.sprite.update()
 	pd.frameTimer.updateTimers()
@@ -561,6 +642,16 @@ end
 
 local lastTime = playdate.getCurrentTimeMilliseconds()
 
+function pd.debugDraw()
+	if pd.isSimulator == 1 and DebugFlags.DrawSpriteBounds then
+		local debugdrawfunction = function (sp)
+			local x, y, width, height = sp:getBounds()
+			gfx.drawRect(x, y, width, height)
+		end
+		gfx.sprite.performOnAllSprites(debugdrawfunction)
+	end
+end
+
 function pd.update()
 	if pd.isSimulator == 1 then
 		if DebugFlags.FrameByFrame then
@@ -572,7 +663,7 @@ function pd.update()
 		end
 	end
 	local currentTime = playdate.getCurrentTimeMilliseconds()
-	local deltaTime = currentTime - lastTime
+	LastDeltaTime = currentTime - lastTime
 	lastTime = currentTime
 	gameTicks = gameTicks+1
 	updateGame()

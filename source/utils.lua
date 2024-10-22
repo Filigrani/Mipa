@@ -14,14 +14,15 @@ TAG =
 Z_Index = 
 {
 	TotalBumer = -1,
-	Enemy = 2,
-	Object = 3,
-	BG = 4,
-	Player = 5,
-	PlayerAtop = 6,
-	AtopPlayerAtop = 7,
-	UI = 8,
-	AllAtop = 9,
+	BG = 0,
+	Object = 1,
+	ObjectAtop = 2,
+	Enemy = 3,
+	Player = 4,
+	PlayerAtop = 5,
+	AtopPlayerAtop = 6,
+	UI = 7,
+	AllAtop = 8,
 }
 
 DebugFlags = 
@@ -32,6 +33,7 @@ DebugFlags =
 	FPSCounter = false,
 	FrameByFrame = false,
 	ForceLikeReplay = false,
+	DrawSpriteBounds = false,
 }
 
 FONT_BUTTONS =
