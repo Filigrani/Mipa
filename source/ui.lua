@@ -17,12 +17,36 @@ function UI:init()
     self.heartsui:setCenter(0, 0)
     self.heartsui:add()
 
+    self.equipmenttable = AssetsLoader.LoadImageTable("images/ui/equipment")
+    self.equipmentsui = gfx.sprite.new()
+    self.equipmentsui:setIgnoresDrawOffset(true)
+    self.equipmentsui:setCenter(1, 0)
+    self.equipmentsui:moveTo(398, 2)
+    self.equipmentsui:add()
+    self.equipmentpositionlookups = {}
+
+    self.passivetable = AssetsLoader.LoadImageTable("images/ui/passive")
+    self.passivesui = gfx.sprite.new()
+    self.passivesui:setIgnoresDrawOffset(true)
+    self.passivesui:setCenter(1, 0)
+    self.passivesui:moveTo(0, 2)
+    self.passivesui:add()
+
+    self.selectorreachx = 0
+
+    self.equipment_selectorsui = gfx.sprite.new()
+    self.equipment_selectorsui:setIgnoresDrawOffset(true)
+    self.equipment_selectorsui:setCenter(0, 0)
+    self.equipment_selectorsui:moveTo(0, 0)
+    self.equipment_selectorsui:setImage(AssetsLoader.LoadImage("images/ui/equip_slot_active"))
+    self.equipment_selectorsui:add()
+    self.equipment_selectorsui:setVisible(false)
+
     self:add() -- Add to draw list
-    self.equipment = {}
-    self.passiveitems = {}
+
     self.lasthearts = 0
     self.lastcontainers = 0
-    self.lastequipment = 0
+
     self.deathtriggered = false
     self.dialogdata = {}
     self.currentdialogindex = 0
@@ -44,38 +68,14 @@ function UI:init()
     self.dialogskipframe = 0
     self:LoadDialogUI()
     print("[UI] Init...")
-    return self
-end
 
-function UI:PopulateEquipment(equipment, passive)
-    local ExistenEQ = #self.equipment
-    local ExistenPI = #self.passiveitems
-    if #equipment > ExistenEQ then
-        local needToAdd = #equipment-ExistenEQ
-        print("[UI] Adding "..needToAdd.." equipment(s)")
-        for i=1, needToAdd do
-            self:AddEquipment(1, false)
-        end
-    elseif #equipment < ExistenEQ then
-        local needToRemove = ExistenEQ-#equipment
-        print("[UI] Removing "..needToRemove.." equipment(s)")
-        for i=1, needToRemove do
-            self:RemoveEquipment(false)
-        end
+    if MipaInst then
+        self:UpdateEquipment(MipaInst.equipment)
+        self:UpdateEquipmentSelector(MipaInst.selectedequipment, true)
+        self:UpdatePassiveEquipment(MipaInst.passiveitems)
     end
-    if #passive > ExistenPI then
-        local needToAdd = #passive-ExistenPI
-        print("[UI] Adding "..needToAdd.." passive item(s)")
-        for i=1, needToAdd do
-            self:AddEquipment(1, true)
-        end
-    elseif #passive < ExistenPI then
-        local needToRemove = ExistenPI-#passive
-        print("[UI] Removing "..needToRemove.." passive item(s)")
-        for i=1, needToRemove do
-            self:RemoveEquipment(true)
-        end
-    end
+
+    return self
 end
 
 function UI:UpdateHeartFlash(hearts)
@@ -166,39 +166,116 @@ function UI:UpdateHP(hearts, containers)
     end
 end
 
-function UI:UpdateEquipment(equipment, selectedIndex, passiveitems)
-    for i=1, #self.equipment do
-        local eq = self.equipment[i]
-        local style = ""
-        local item = equipment[i]
-        if i == selectedIndex then
-            style = "_active"
+function UI:UpdateEquipment(equipment)
+    
+    local spacing = 3
+    local icon_size = 27
+    local equipment_count = #equipment
+
+    if equipment_count == 0 then
+        if self.equipmentsui:isVisible() then
+            self.equipmentsui:setVisible(false)
         end
-        if style ~= eq.style then
-            if style == "" then
-                print("[UI] Equipment slot frame "..i.." updated to style none active")
-            else
-                print("[UI] Equipment slot frame "..i.." updated to style active")
-            end
-            eq.style = style
-            eq:setImage(AssetsLoader.LoadImage("images/UI/equip_slot"..style))
-        end       
-        if eq.icon.style ~= item then
-            print("[UI] Equipment slot icon "..i.." updated with item "..item)
-            eq.icon.style = item
-            eq.icon:setImage(AssetsLoader.LoadImage("images/UI/equip"..item))
+        return
+    else
+        if not self.equipmentsui:isVisible() then
+            self.equipmentsui:setVisible(true)
         end
     end
-    for i=1, #self.passiveitems do
-        local eq = self.passiveitems[i]
-        local item = passiveitems[i]
-        if eq.icon.style ~= item then
-            print("[UI] Passive item slot icon "..i.." updated with item "..item)
-            eq.icon.style = item
-            eq.icon:setImage(AssetsLoader.LoadImage("images/UI/passive"..item))
-        end
+
+    local imageW = (icon_size*equipment_count)+(spacing*equipment_count)
+    local image = gfx.image.new(imageW, icon_size)
+
+    local drawoffset = imageW-icon_size
+
+    local frame = AssetsLoader.LoadImage("images/UI/equip_slot")
+    self.equipmentpositionlookups = {}
+
+    local panelorigin = self.equipmentsui.x
+
+    for i=1, equipment_count do
+        gfx.pushContext(image)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
+
+        local item_index = equipment[i]
+        local icon = self.equipmenttable:getImage(item_index)
+        frame:draw(drawoffset,0)
+        icon:draw(drawoffset,0)
+        local lookup  = panelorigin-(icon_size*i)-(spacing*(i-1))
+        table.insert(self.equipmentpositionlookups, lookup)
+        print("[UI][UpdateEquipment] Draw Icon "..item_index.." on "..drawoffset)
+
+
+        drawoffset = drawoffset-icon_size-spacing
+
+        gfx.popContext()
     end
+    self.equipmentsui:setImage(image)
+    self.passivesui:moveTo(panelorigin-imageW-spacing, 9)
     ShouldUpdatePauseMenu = true
+end
+
+function UI:UpdatePassiveEquipment(passiveitems)
+    local spacing = 3
+    local icon_size = 20
+    local equipment_count = #passiveitems
+
+    if equipment_count == 0 then
+        if self.passivesui:isVisible() then
+            self.passivesui:setVisible(false)
+        end
+        return
+    else
+        if not self.passivesui:isVisible() then
+            self.passivesui:setVisible(true)
+        end
+    end
+
+    local imageW = (icon_size*equipment_count)+(spacing*equipment_count)
+    local image = gfx.image.new(imageW, icon_size)
+
+    local drawoffset = imageW-icon_size
+
+    local frame = AssetsLoader.LoadImage("images/UI/passive_slot")
+
+    for i=1, equipment_count do
+        gfx.pushContext(image)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
+
+        local item_index = passiveitems[i]
+        local icon = self.passivetable:getImage(item_index)
+        frame:draw(drawoffset,0)
+        icon:draw(drawoffset,0)
+
+        print("[UI][UpdatePassiveEquipment] Draw Icon "..item_index.." on "..drawoffset)
+
+
+        drawoffset = drawoffset-icon_size-spacing
+
+        gfx.popContext()
+    end
+    self.passivesui:setImage(image)
+    ShouldUpdatePauseMenu = true
+end
+
+function UI:UpdateEquipmentSelector(equipmentselected, force)
+    local equipment_count = #self.equipmentpositionlookups
+    if equipment_count == 0 then
+        if self.equipment_selectorsui:isVisible() then
+            self.equipment_selectorsui:setVisible(false)
+        end
+    else
+        if not self.equipment_selectorsui:isVisible() then
+            self.equipment_selectorsui:setVisible(true)
+        end
+        if equipmentselected ~= 0 then
+            local x_position = self.equipmentpositionlookups[equipmentselected]
+            self.selectorreachx = x_position
+            if force then
+                self.equipment_selectorsui:moveTo(x_position, 2)
+            end
+        end
+    end
 end
 
 function UI:PauseMenuDown(type, ori)
@@ -310,22 +387,12 @@ function UI:Update()
     
     local hearts = 0;
     local containers = 0
-    local equipment = {}
-    local selectedequipment = 1
     local passive = {}
     if MipaInst then
         containers = MipaInst.hpmax/2
-        equipment = MipaInst.equipment
-        selectedequipment = MipaInst.selectedequipment
         if MipaInst.hp > 0 then
             hearts = MipaInst.hp/2
         end
-        passive = MipaInst.passiveitems
-    end
-
-    if #self.equipment ~= #equipment or #self.passiveitems ~= #passive then
-        self:PopulateEquipment(equipment, passive)
-        self:UpdateEquipment(equipment, selectedequipment, passive)
     end
 
     if self.lasthearts ~= hearts then
@@ -333,6 +400,13 @@ function UI:Update()
         self.lasthearts = hearts
     end
     self:UpdateHeartFlash(self.lasthearts)
+    self:UpdateStaminaBar()
+
+    if self.equipment_selectorsui then
+        if self.equipment_selectorsui.x ~= self.selectorreachx then
+            self.equipment_selectorsui:moveTo(Lerp(self.equipment_selectorsui.x, self.selectorreachx, 3), 2)
+        end
+    end
 
     self:ProcessDialog()
     if self.glitchframes > 0 then
@@ -418,6 +492,29 @@ function UI:Update()
             end
             self:PauseSelector()
         end
+        
+        if self.pauseoverlay and self.pauseoverlay.selector then
+            local _x, _y = self.pauseoverlay.selector:getPosition()
+            local new_x = _x
+            local new_y = _y
+            if _x ~= self.pauseoverlay.reachX then
+                new_x = Lerp(_x, self.pauseoverlay.reachX, 2)
+            end
+            if _y ~= self.pauseoverlay.reachY then
+                new_y = Lerp(_y, self.pauseoverlay.reachY, 2)
+            end
+            if _x ~= new_x or _y ~= new_y then
+                self.pauseoverlay.selector:moveTo(new_x, new_y)
+            end
+            if self.pauseoverlay.frameIndex ~= self.pauseoverlay.reachIndex then
+                if self.pauseoverlay.frameIndex < self.pauseoverlay.reachIndex then
+                    self.pauseoverlay.frameIndex = self.pauseoverlay.frameIndex+1
+                else
+                    self.pauseoverlay.frameIndex = self.pauseoverlay.frameIndex-1
+                end
+                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImageTable("images/UI/pause/slotselectormoph"):getImage(self.pauseoverlay.frameIndex))
+            end
+        end
     end
     if self.startpixelfade then
         self.pixelfadeX = self.pixelfadeX+0.1
@@ -480,59 +577,6 @@ function UI:Death()
     end
     overlay.animationtimer.repeats = true
     overlay.animationtimer:start()
-end
-
-function UI:AddEquipment(style, ispassive)
-    local eq = gfx.sprite.new()
-    eq:setIgnoresDrawOffset(true)
-    eq:setCenter(0, 0)
-    if not ispassive then
-        eq:setImage(AssetsLoader.LoadImage("images/UI/equip_slot"))
-        eq:moveTo(371-30*#self.equipment, 2)
-    else
-        eq:setImage(AssetsLoader.LoadImage("images/UI/passive_slot"))
-        local lastEQPosition = 378-30*#self.equipment
-        eq:moveTo(lastEQPosition-23*#self.passiveitems, 9)
-    end
-    eq:add()
-    eq.style = ""
-    if not ispassive then
-        self.equipment[#self.equipment+1] = eq
-    else
-        self.passiveitems[#self.passiveitems+1] = eq
-    end
-    eq.icon = gfx.sprite.new()
-    eq.icon:setIgnoresDrawOffset(true)
-    eq.icon.style = 0
-    local imgSlice = AssetsLoader.LoadImage("images/UI/equip0")
-    eq.icon:setImage(imgSlice)
-    eq.icon:setCenter(0, 0)
-    eq.icon:moveTo(eq.x, eq.y)
-    eq.icon:add()
-end
-
-function UI:RemoveEquipment(ispassive)
-    if not ispassive then
-        local lastindex = #self.equipment
-        if lastindex > 0 then
-            local eq = self.equipment[lastindex]
-            if eq then
-                table.remove(self.equipment, lastindex)
-                gfx.sprite.removeSprite(eq.icon)
-                gfx.sprite.removeSprite(eq)
-            end
-        end
-    else
-        local lastindex = #self.passiveitems
-        if lastindex > 0 then
-            local p = self.passiveitems[lastindex]
-            if p then
-                table.remove(self.passiveitems, lastindex)
-                gfx.sprite.removeSprite(p.icon)
-                gfx.sprite.removeSprite(p)
-            end
-        end
-    end
 end
 
 function UI:DialogPosUpdate()
@@ -953,26 +997,37 @@ function UI:CanSkipDialog(dialogKey)
     return false
 end
 
-function UI:PauseSelector()
+
+function UI:PauseSelector(force)
     if self.pauseoverlay then
         if self.pauseoverlay.selector then
             if self.pauseoverlay.type == 1 then
-                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImage("images/UI/pause/slotselectora"))
-                self.pauseoverlay.selector:moveTo(178 + 30*self.pauseoverlay.selected, 30)
+                self.pauseoverlay.reachX = 178 + 30*self.pauseoverlay.selected
+                self.pauseoverlay.reachY = 30
+                self.pauseoverlay.reachIndex = 1
             elseif self.pauseoverlay.type == 2 then
-                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImage("images/UI/pause/slotselectorp"))
-                self.pauseoverlay.selector:moveTo(180 + 31*self.pauseoverlay.selected, 61)
+                self.pauseoverlay.reachX = 180 + 31*self.pauseoverlay.selected
+                self.pauseoverlay.reachY = 61
+                self.pauseoverlay.reachIndex = 3
             elseif self.pauseoverlay.type == 3 then
-                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImage("images/UI/pause/slotselectora"))
+                self.pauseoverlay.reachIndex = 1
                 if self.pauseoverlay.selected == 1 then
-                    self.pauseoverlay.selector:moveTo(221,178)
+                    self.pauseoverlay.reachX = 221
+                    self.pauseoverlay.reachY = 178
                 end
                 if self.pauseoverlay.selected == 2 then
-                    self.pauseoverlay.selector:moveTo(251,188)
+                    self.pauseoverlay.reachX = 251
+                    self.pauseoverlay.reachY = 188
                 end
                 if self.pauseoverlay.selected == 3 then
-                    self.pauseoverlay.selector:moveTo(281,176)
+                    self.pauseoverlay.reachX = 281
+                    self.pauseoverlay.reachY = 176
                 end
+            end
+            if force then
+                self.pauseoverlay.frameIndex = self.pauseoverlay.reachIndex
+                self.pauseoverlay.selector:moveTo(self.pauseoverlay.reachX, self.pauseoverlay.reachY)
+                self.pauseoverlay.selector:setImage(AssetsLoader.LoadImageTable("images/UI/pause/slotselectormoph"):getImage(self.pauseoverlay.frameIndex))
             end
         end
     end
@@ -1002,12 +1057,17 @@ function UI:ShowPauseMenu()
     self.pauseoverlay.type = 1
 
     self.pauseoverlay.selector = gfx.sprite.new()
+    self.pauseoverlay.selector:setImage(AssetsLoader.LoadImageTable("images/UI/pause/slotselectormoph"):getImage(1))
     self.pauseoverlay.selector:setIgnoresDrawOffset(true)
     self.pauseoverlay.selector:setCenter(0, 0)
     self.pauseoverlay.selector:moveTo(0, 0)
     self.pauseoverlay.selector:setZIndex(Z_Index.UI)
     self.pauseoverlay.selector:add()
-    self:PauseSelector()
+    self.pauseoverlay.reachX = 0
+    self.pauseoverlay.reachY = 0
+    self.pauseoverlay.reachIndex = 1
+    self.pauseoverlay.frameIndex = 1
+    self:PauseSelector(true)
 end
 
 function UI:PixelFade()
@@ -1163,6 +1223,73 @@ function UI:LoadConversationUI()
 
     self:SetConversationSelector(1)
 end
+
+function UI:UpdateStaminaBar()
+
+    local shouldDisplay = (MipaInst and MipaInst.JobeeCrank) or false
+
+    if shouldDisplay then
+        if self.staminabar == nil then
+            local bar = gfx.sprite.new()
+            bar:setIgnoresDrawOffset(true)
+            bar:setImage(AssetsLoader.LoadImage("images/Ui/staminabar"))
+            bar:setCenter(0, 0)
+            bar:moveTo(34, 13)
+            bar:setZIndex(Z_Index.UI)
+            bar:add()
+            self.staminabar = bar
+        end
+        if self.staminabarfill == nil then
+            local fillbar = gfx.sprite.new()
+            fillbar:setIgnoresDrawOffset(true)
+            fillbar:setCenter(0, 0)
+            fillbar:moveTo(36, 15)
+            fillbar:setZIndex(Z_Index.UI)
+            fillbar:add()
+            self.staminabarfill = fillbar
+        end
+        if self.staminaword == nil then
+            local word = gfx.sprite.new()
+            word:setIgnoresDrawOffset(true)
+            word:setImage(AssetsLoader.LoadImage("images/Ui/staminaword"))
+            word:setCenter(0, 0)
+            word:moveTo(34, 3)
+            word:setZIndex(Z_Index.UI)
+            word:add()
+            self.staminaword = word
+        end
+    else
+        if self.staminabar and self.staminabar:isVisible() then
+            self.staminabar:setVisible(false)
+        end
+        if self.staminabarfill and self.staminabarfill:isVisible() then
+            self.staminabarfill:setVisible(false)
+        end
+        if self.staminaword and self.staminaword:isVisible() then
+            self.staminaword:setVisible(false)
+        end
+    end
+    -- barfill Width 57 Height 5
+    if shouldDisplay and MipaInst then
+        
+        local max = MipaInst.staminamax
+        local current = MipaInst.stamina
+        local fillamount = 57-math.ceil((current / max) * 57)
+        local difference = 57-fillamount
+
+        if self.laststamina ~= fillamount then
+            self.laststamina = fillamount
+            --print("[UI][UpdateStaminaBar] current "..current.." max "..max.." fillamount "..fillamount.." difference "..difference)
+            local fillImage = gfx.image.new(57, 5)
+            gfx.pushContext(fillImage)
+                gfx.setColor(gfx.kColorWhite)
+                gfx.fillRect(difference, 0, fillamount, 5)
+            gfx.popContext()
+            self.staminabarfill:setImage(fillImage)
+        end
+    end
+end
+
 
 function UI:StartConversation(name, sequence)
     if sequence == nil then

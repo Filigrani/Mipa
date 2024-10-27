@@ -1,0 +1,21 @@
+{
+  "sequences": 
+  [
+    {
+      "sequence": "monday",
+      "options":
+	  [
+	    {
+			"text": "Every Monday is Mipa Monday?",
+			"dialog": "#Mipa_4\nYes!",
+			"action": "Level intro"
+	    },
+	    {
+			"text": "Just take me to the game!",
+			"dialog": "#Mipa_7\nYou so boring!",
+			"action": "Level intro"
+	    }
+	  ]
+    }
+  ]
+}

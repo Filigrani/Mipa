@@ -24,6 +24,8 @@ function PhysicalProp:init(x, y)
     self.movingflag = false
     self.onground = true
     self.freefall = 0
+    self.liquidsurfacesoftland = true
+    self.liquidsurfacefloat = true
     self.notapplyimpulses = false
     self.IsPhysProp = true
 end
@@ -153,17 +155,19 @@ function PhysicalProp:ApplyVelocity()
         end
         if collisionObject.IsLiquidSurface then
             self.onliquidsurface = true
-            if not hadsurfaceboost then
-                if collisionObject.y < _y then
-                    hadsurfaceboost = true
-                    local surfacedifference = _y-collisionObject.y
-                    if surfacedifference < 1 then
-                        surfacedifference = 1
+            if self.liquidsurfacefloat then
+                if not hadsurfaceboost then
+                    if collisionObject.y < _y then
+                        hadsurfaceboost = true
+                        local surfacedifference = _y-collisionObject.y
+                        if surfacedifference < 1 then
+                            surfacedifference = 1
+                        end
+    
+                        --print("Surface Y ", surfacedifference)
+                        self.velocityY = -surfacedifference/14
+                        --print("Velocity ", self.velocityY)
                     end
-
-                    --print("Surface Y ", surfacedifference)
-                    self.velocityY = -surfacedifference/14
-                    --print("Velocity ", self.velocityY)
                 end
             end
         end
@@ -296,7 +300,7 @@ function PhysicalProp:ApplyVelocity()
     if not self.onground then
         self.freefall = self.freefall + self:GetGravity()
     end
-    if lastinliquid ~= self.inliquid then
+    if self.liquidsurfacesoftland and lastinliquid ~= self.inliquid then
         AnimEffect(_x-7, _y-7, "Effects/ground", 1, true)
         if self.inliquid then
             self.velocityY = self.velocityY/3

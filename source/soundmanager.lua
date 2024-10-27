@@ -57,6 +57,7 @@ AddSound("Land")
 AddSound("Hit")
 AddSound("Scream")
 AddSound("Push",2)
+AddSound("PushShort",3)
 AddSound("MetalPush",1)
 AddSound("Door")
 AddSound("No")
@@ -94,6 +95,10 @@ AddSound("Dzip", 1, true)
 AddSound("ShockShot")
 AddSound("BossFight")
 AddSound("Commander",2)
+AddSound("Bounce",2)
+AddSound("Glass",3)
+AddSound("BuffetScream")
+AddSound("Error")
 
 function SoundManager:PlayMusic(name, smooth)
     if smooth == nil then
@@ -219,6 +224,11 @@ function SoundManager:PlaySound(name, vol, ignorecutscene)
     local volume = 1
     if vol ~= nil then
         volume = vol
+    end
+
+    if name == "Push" then
+        volume = 0.3
+        --name = "PushShort"
     end
 
     if sounds[name] ~= nil then

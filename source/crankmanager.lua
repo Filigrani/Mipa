@@ -17,8 +17,8 @@ CrankManager.Changed = function(num)
         CrankManager.crankables[i]:CrankChanged(num, CrankManager.Abosulte)
     end
     CrankManager.Abosulte = pd.getCrankPosition()
-    print("[CrankManager] Change "..num)
-    print("[CrankManager] Abosulte "..CrankManager.Abosulte)
+    --print("[CrankManager] Change "..num)
+    --print("[CrankManager] Abosulte "..CrankManager.Abosulte)
 
     DrawCrankSinus(num)
 end

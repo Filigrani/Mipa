@@ -27,6 +27,8 @@ EQUIPMENT =
 }
 
 function Mipa:init(x, y)
+    LowHpFXEnabled = SettingsManager:Get("lowhpglitches")
+    DamageGlitchesEnabled = SettingsManager:Get("damageglitches")
     self.mipaimages = AssetsLoader.LoadImageTable("images/mipa")
     self.mipaimagedithered = nil
     self:moveTo(x, y)
@@ -38,28 +40,39 @@ function Mipa:init(x, y)
     self.damagerectangle:setCenter(0.5, 0.5)
     self.damagerectangle:setCollideRect(3,3,8,11)
 
-    self.damagerectangle:setTag(TAG.Effect)  
+    self.damagerectangle:setTag(TAG.Effect)
     self.damagerectangle:add()
     --self:moveTo(x, y)
     -- Stats
     self.hp = 4
     self.hpmax = 4
 
+    self.equipment = {EQUIPMENT.MagnetHand}
+    self.passiveitems = {}
+
     if LIQUID_TEST then
-        self.equipment = {EQUIPMENT.Thunder}
-        self.passiveitems = {PASSIVEITEMS.Flippers}
-    else
-        self.equipment = {EQUIPMENT.MagnetHand}
-        self.passiveitems = {}
+        self:AddEquipment(EQUIPMENT.Thunder)
+        self:AddPassiveItem(PASSIVEITEMS.Flippers)
     end
-    
-    
+
     self.selectedequipment = 1
     -- Moving vars
     self.speed = 1.66
     self.pushingspeed = 1.12
     self.pullingspeed = 1.33
     self.airspeed = 1.99
+    self.sandspeed = 1.01
+    self.jobeeidlespeed = 2.99
+    self.jobeeforwardspeed = 4.99
+    self.jobeebackwardspeed = 1.99
+    self.stamina = 100
+    self.staminamax = 100
+    self.staminarequiredtocrank = 35
+    self.staminarequiredtoaccselerate = 0
+    self.staminarequiredtoaccseleratecap = self.staminarequiredtoaccselerate
+    self.staminaregeneration = 1
+    self.staminadrainaccseleartion = 3
+    self.staminadraindrowing = 8
     self.momentumX = 0
     self.velocityX = 0
     self.velocityY = 0
@@ -68,10 +81,12 @@ function Mipa:init(x, y)
     -- Physic
     self.maxjumpvelocity = -10
     self.maxjumpvelocityinliquid = -6
+    self.maxjumpvelocityinsand = -6
     self.maxjumpvelocityjobee = -1.3
     self.gravity = 1
     self.gravityinliquid = 0.3
-    self.gravityjobee = 1.6
+    self.gravityinliquidjobee = 2.9
+    self.gravityjobee = 0.5
     self.gravityjobeefall = 0.1
     self.pusing = false
     self.onground = true
@@ -128,26 +143,42 @@ function Mipa:init(x, y)
     self.physichybirnateframes = 2
 
     self.Jobee = nil
+    self.sinksendspeed = 5
+    self.nextsinksand = self.sinksendspeed
+    self.lastsinksand = 0
+
+    self.lasttilemapX = 0
+    self.lasttilemapY = 0
 
     self:add() -- Add to draw list
     CrankManager:AddCrankables(self)
 end
 
 function Mipa:Konami()
-    self.equipment = {EQUIPMENT.MagnetHand, EQUIPMENT.PowerRing, EQUIPMENT.Bomber, EQUIPMENT.Thunder}
-    --self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Honey, PASSIVEITEMS.AdjustableJump, PASSIVEITEMS.MidFallJump}
-    self.passiveitems = {PASSIVEITEMS.KoaKola, PASSIVEITEMS.Flippers}
+    self:AddEquipment(EQUIPMENT.PowerRing)
+    self:AddEquipment(EQUIPMENT.Bomber)
+    self:AddEquipment(EQUIPMENT.Thunder)
+
+    self:AddPassiveItem(PASSIVEITEMS.KoaKola)
+    self:AddPassiveItem(PASSIVEITEMS.Flippers)
 end
 
 function Mipa:AddPassiveItem(item)
     if not self:HasPassiveItem(item) then
         table.insert(self.passiveitems, item)
+        if UIIsnt then
+            UIIsnt:UpdatePassiveEquipment(self.passiveitems)
+        end
     end
 end
 
 function Mipa:AddEquipment(item)
     if not self:HasEquipment(item) then
         table.insert(self.equipment, item)
+        if UIIsnt then
+            UIIsnt:UpdateEquipment(self.equipment)
+            UIIsnt:UpdateEquipmentSelector(self.selectedequipment, true)
+        end
     end
 end
 
@@ -176,7 +207,7 @@ function Mipa:IsDead()
     return false
 end
 function Mipa:IsFalling()
-    if self.velocityY > 0 and not self:IsOnFloor() then
+    if self.velocityY > 0 and not self:IsOnFloor() and not self:InSinkSand() then
         return true
     end
     return false
@@ -201,7 +232,7 @@ function Mipa:IsDown()
 end
 
 function Mipa:IsMoving()
-    return self.movingflag
+    return self.velocityX ~= 0
 end
 
 function Mipa:IsPushing()
@@ -237,7 +268,9 @@ function Mipa:NextEquipment()
     else
         self.selectedequipment = self.selectedequipment +1;
     end
-    UIIsnt:UpdateEquipment(self.equipment, self.selectedequipment, self.passiveitems)
+    if UIIsnt then
+        UIIsnt:UpdateEquipmentSelector(self.selectedequipment)
+    end
 end
 
 function Mipa:AddAnimation(name, frames, speed, loop, pingpong)
@@ -385,6 +418,10 @@ function Mipa:PickAnimation()
         self:SetAnimation("jobeeflyidle")
         return
     end
+    --if self:InSinkSand() then
+    --    self:SetAnimation("falling")
+    --    return
+    --end
     if not self:IsDead() then
         if self.shootbombtimer then
             self:SetAnimation("shootbomb")
@@ -408,7 +445,11 @@ function Mipa:PickAnimation()
                     if self:IsPulling() then
                         self:SetAnimation("pull")
                     else
-                        self:SetAnimation("idle"..affix)
+                        if not self:InSinkSand() then
+                            self:SetAnimation("idle"..affix)
+                        else
+                            self:SetAnimation("falling")
+                        end
                     end
                 end
             end
@@ -423,7 +464,11 @@ function Mipa:PickAnimation()
                 self:SetAnimation("falling")
             end
         else
-            self:SetAnimation("idle")
+            if not self:InSinkSand() then
+                self:SetAnimation("idle")
+            else
+                self:SetAnimation("falling")
+            end
         end
     else
         if self.currentanimation ~= "deathstart" and self.currentanimation ~= "death" then
@@ -522,6 +567,14 @@ end
 
 function Mipa:GetSpeed()
     if not self:IsDown() then
+        if self:InSinkSand() then
+            if not self:IsPushing() then
+                return self.sandspeed
+            else
+                return self.pushingspeed
+            end
+        end
+        
         if not self:IsPushing() and not self:IsPulling() then
             if self:IsOnFloor() then
                 return self.speed
@@ -546,7 +599,15 @@ function Mipa:TryMoveRight()
     end
     if not self:IsDown() then
         self.velocityX = self:GetSpeed()
-        return true
+    end
+    if self.Jobee then
+        
+        if self.stamina > self.staminarequiredtoaccseleratecap then
+            self.velocityX = self.jobeeforwardspeed
+            self.staminarequiredtoaccseleratecap = self.staminadrainaccseleartion
+        else
+            self.staminarequiredtoaccseleratecap = 50
+        end
     end
     return false
 end
@@ -560,6 +621,9 @@ function Mipa:TryMoveLeft() -- So when push her body she not facing to motion di
     end
     if not self:IsDown() then
         self.velocityX = -self:GetSpeed()
+    end
+    if self.Jobee and self.stamina > self.staminarequiredtoaccselerate then
+        self.velocityX = self.jobeebackwardspeed
     end
     return false
 end
@@ -611,6 +675,9 @@ function Mipa:GetMaxJumpVelocity()
     if self:InLiquid() then
         return self.maxjumpvelocityinliquid
     end
+    if self:InSinkSand() then
+        return self.maxjumpvelocityinsand
+    end
     if self.Jobee then
         
         if self.JobeeCrank then
@@ -624,7 +691,6 @@ end
 
 
 function Mipa:TryJump()
-    
     if self.Jobee then
         if self.JobeeCrank then
             self.velocityY = 0
@@ -673,8 +739,12 @@ function Mipa:TryJump()
 end
 
 function Mipa:collisionResponse(other)
-    if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard or other:getTag() == TAG.ObstacleCastNoPlayer) or (other:getTag() == TAG.HazardNoColide) then
-        return gfx.sprite.kCollisionTypeOverlap
+    if other  then
+        if other.IsSinkSand then
+            return gfx.sprite.kCollisionTypeOverlap
+        elseif (other:getTag() == TAG.Effect or other:getTag() == TAG.Interactive or other:getTag() == TAG.Hazard or other:getTag() == TAG.ObstacleCastNoPlayer) or (other:getTag() == TAG.HazardNoColide) then
+            return gfx.sprite.kCollisionTypeOverlap
+        end
     end
     return gfx.sprite.kCollisionTypeSlide
 end
@@ -717,6 +787,19 @@ function Mipa:Damage(damage, ignoreimmune)
         SoundManager:PlaySound("MipaGameOver")
         SoundManager:PauseMusic()
         self:GetRidOffBox()
+
+        if self.Jobee then
+            self.Jobee:setCollideRect(3,6,8,11)
+            --gfx.sprite.removeSprite(self.Jobee)
+            self.Jobee.death = true
+            self.stamina = 0
+            self.Jobee.gravity = 0.53
+            self.Jobee.momentumX = -8
+            self.Jobee = nil
+            self.momentumX = -9
+            self:setCollideRect(3,3,8,11)
+            --self.JobeeCrank = false
+        end
     end
     SoundManager:PlaySound("Scream")
 end
@@ -733,13 +816,32 @@ function Mipa:InLiquid()
     return self.inliquid
 end
 
+function Mipa:InSinkSand()
+    return self.insinsand
+end
+
 function Mipa:GetGravity()
     if self:InLiquid() then
-        return self.gravityinliquid
+        if self.Jobee then
+            return self.gravityinliquidjobee
+        else
+            return self.gravityinliquid
+        end
+    end
+    if self:InSinkSand() then
+        if self:IsDown() then
+            return 0.6
+        else
+            return 0
+        end
     end
     if self.Jobee then
         if self.JobeeCrank then
-            return 0
+            if self.stamina > self.staminarequiredtocrank then
+                return 0
+            else
+                return self.gravityjobee
+            end
         else
             return self.gravityjobee
         end
@@ -767,8 +869,22 @@ function Mipa:TryClimb()
 end
 
 function Mipa:CrankChanged(change, absolute)
-    if self.Jobee and self.JobeeCrank then
+    if self.Jobee and self.JobeeCrank and self.stamina >= self.staminarequiredtocrank then
         self.velocityY = change
+    end
+end
+
+function Mipa:InstantGameOver()
+    self.skipdeathscreen = true
+    self.hp = 0
+    if not self.IsClone then
+        if UIIsnt ~= nil then
+            UIIsnt:CancleDialog()
+            UIIsnt:Death()
+        end
+        SoundManager:PlaySound("MipaGameOver")
+        SoundManager:PauseMusic()
+        self:GetRidOffBox()
     end
 end
 
@@ -778,9 +894,14 @@ function Mipa:ApplyVelocity()
     end
 
     if self.Jobee then
-        
-        if self.JobeeCrank then
-            self.velocityX = 2.99
+        if self.JobeeCrank then 
+            if self.velocityX == 0 then
+                self.velocityX = self.jobeeidlespeed
+            end
+            if self.velocityY == 0 then
+                self.velocityY = self:GetGravity()
+            end
+            self:UpdateJobeeStamina()
         else
             if self.velocityY >= 0 then
                 self.velocityY = self:GetGravity()
@@ -792,7 +913,6 @@ function Mipa:ApplyVelocity()
     else
         self.velocityY = self.velocityY+self:GetGravity()
     end
-    
 
     if self.lastframonwall and self:HasPassiveItem(PASSIVEITEMS.Honey) then
         if not pd.buttonIsPressed(pd.kButtonDown) then
@@ -828,6 +948,16 @@ function Mipa:ApplyVelocity()
             self.velocityXnextframe = 0
         end
     end
+    if self.velocityYnextframe ~= nil then
+        if self.velocityYnextframe ~= 0 then
+            self.velocityY = self.velocityY+self.velocityYnextframe
+            self.velocityYnextframe = 0
+        end
+    end
+
+    local appliedvelocityX = self.velocityX
+    local appliedvelocityY = self.velocityY
+
     local _x, _y = self:getPosition()
     local disiredX = _x + self.velocityX
     local disiredY = _y + self.velocityY
@@ -844,15 +974,6 @@ function Mipa:ApplyVelocity()
     end
     if disiredX ~= actualX then
         if self.Jobee and self.JobeeCrank then
-            self.Jobee:setCollideRect(3,6,8,11)
-            --gfx.sprite.removeSprite(self.Jobee)
-            self.Jobee.death = true
-            self.Jobee.gravity = 0.53
-            self.Jobee.momentumX = -8
-            self.Jobee = nil
-            self.momentumX = -9
-            self:setCollideRect(3,3,8,11)
-            --self.JobeeCrank = false
             self:FatalDamage()
         end
     end
@@ -862,6 +983,7 @@ function Mipa:ApplyVelocity()
     local lasthighestY = self.highestY
     local lastonwall = self.lastframonwall
     local lastinliquid = self.inliquid
+    local lastinsand = self.insinsand
     self.onground = false
     self.pusing = false
     self.lastframonwall = false
@@ -869,6 +991,11 @@ function Mipa:ApplyVelocity()
     self.inliquid = false
     self.onliquidsurface = false
     self.elevator = nil
+    self.insinsand = false
+    local TouchGround = false
+    local TouchSand = false
+
+
     for i=1,length do
         local collision = collisions[i]
         local collisionType = collision.type
@@ -887,6 +1014,10 @@ function Mipa:ApplyVelocity()
         end
         if collisionObject.IsLiquidSurface then
             self.onliquidsurface = true
+        end
+
+        if collisionObject.IsSinkSand then
+            TouchSand = true
         end
 
         if (collisionTag == TAG.Hazard or collisionTag == TAG.HazardNoColide) or (collisionObject.IsLiquid and collisionObject.IsElectrified) and not self:IsDead() then
@@ -927,6 +1058,11 @@ function Mipa:ApplyVelocity()
                 self.coyotetime = 0
                 self.candoublejump = true
                 self.velocityY = 0
+
+                if not collisionObject.IsSinkSand then
+                    TouchGround = true
+                end
+
                 self.highestY = self.y
 
                 if collisionObject.IsConveyorBelts then
@@ -1034,19 +1170,19 @@ function Mipa:ApplyVelocity()
             --print("highestY "..self.highestY)
         end
     end
-    if self.y > 400 and not self:IsDead() and not LoadNextLevel then
-        self.skipdeathscreen = true
-        self.hp = 0
-        if not self.IsClone then
-            if UIIsnt ~= nil then
-                UIIsnt:CancleDialog()
-                UIIsnt:Death()
+
+    if not self:IsDead() and not LoadNextLevel  then
+        if not self.Jobee then
+            if self.y > 400  then
+                self:InstantGameOver()
             end
-            SoundManager:PlaySound("MipaGameOver")
-            SoundManager:PauseMusic()
-            self:GetRidOffBox()
+        else
+            if self.y > 250  then
+                self:InstantGameOver()
+            end
         end
     end
+
     if self.y < 35 then
         self.velocityY = 0
         self.y = 35
@@ -1067,17 +1203,46 @@ function Mipa:ApplyVelocity()
     if self.JobeeCrank and self.Jobee then
         self.velocityY = 0
     end
+
+    self.insinsand = TouchSand and not TouchGround
+
+    if self.insinsand and not lastinsand then
+        
+        if appliedvelocityY > 3 then
+            self.velocityYnextframe = -appliedvelocityY*1.8
+            self:ApplyVelocity()
+        end
+    end
+
+    if self:InSinkSand() then
+        self.velocityY = 0
+        self.onground = true
+        self.canjump = true
+        self.coyotetime = 0
+        self.highestY = self.y
+        self.candoublejump = true
+        if self.nextsinksand > 0 then
+            self.nextsinksand = self.nextsinksand-1
+            if self.nextsinksand <= 0 then
+                self.nextsinksand = self.sinksendspeed
+                self.velocityY = 1
+            end
+        end
+    end
+    
 end
 
 function Mipa:ProcessPulling()
     if self:IsPulling() then
         local bullet = Bullet(self.x, self.y-2)
         bullet:setImage(AssetsLoader.LoadImage("images/Effects/pull"), self.mirrored)
-        bullet:setCollideRect(0, 0, 10, 10)
+        
         if not self:IsMirrored() then
             bullet.speed = 5
+            bullet:setCollideRect(0, 0, 10, 10)
         else
             bullet.speed = -5
+            bullet:setCollideRect(0, 0, 10, 10)
         end
         --SoundManager:PlaySound("BeamLoop")
         bullet.lifedistance = 49
@@ -1117,7 +1282,6 @@ function Mipa:Interact()
             end
         end
     end
-    --UIIsnt:ShowSpecificGroup()
 end
 function Mipa:ApplyHoldingBox()
     if self.holdingbox ~= nil then
@@ -1466,6 +1630,38 @@ function Mipa:CanControl()
     return not self:IsDead() and (UIIsnt == nil or (not UIIsnt:IsCutscene() and not UIIsnt:IsShowingPause() and not UIIsnt:IsConversation())) and not self:AnimStunLock()
 end
 
+function Mipa:UpdateJobeeStamina()
+    if self.stamina < self.staminamax then
+        self.stamina = self.stamina+self.staminaregeneration
+    end
+    if self.Jobee then
+        if self:InLiquid() then
+            self.stamina = self.stamina-self.staminadraindrowing
+        end
+        if self.velocityX > self.jobeeidlespeed then
+            self.stamina = self.stamina-self.staminadrainaccseleartion
+        end
+        if self.stamina < 0 then
+            self.stamina = 0
+        end
+    end
+end
+
+function Mipa:UpdateTilemapNear()
+    if CurrentLevel then
+        local _x, _y = self:getPosition()
+        local TileX, TileY = CurrentLevel:TransformWorldToTilemapCoordinates(_x, _y)
+
+        if self.lasttilemapX ~= TileX or self.lasttilemapY ~= TileY then
+            CurrentLevel:UpdateTilemapNear(self.lasttilemapX, self.lasttilemapY, 0)
+            self.lasttilemapX = TileX
+            self.lasttilemapY = TileY
+            
+            CurrentLevel:UpdateTilemapNear(TileX, TileY, 1)
+        end
+    end
+end
+
 function Mipa:update()
     self.velocityX = 0
     if self:CanControl() and self.physichybirnateframes == 0 then
@@ -1560,4 +1756,6 @@ function Mipa:update()
             end
         end
     end
+    --self:UpdateTilemapNear()
+    --self:MayUpdateColider()
 end

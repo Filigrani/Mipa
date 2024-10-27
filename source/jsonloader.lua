@@ -26,3 +26,24 @@ function GetJSONData(path)
 
 	return jsonTable
 end
+
+function GetLevelDisplayData(path, filenameIfFails)
+	
+	if filenameIfFails == nil then
+		filenameIfFails = "Unknown"
+	end
+	local LevelName = filenameIfFails
+	local Listed = true
+
+	local data = GetJSONData(path)
+	if data then
+		if data.name then
+			LevelName = data.name
+		end
+		if data.listed ~= nil then
+			Listed = data.listed
+		end
+	end
+
+	return LevelName, Listed
+end

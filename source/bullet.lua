@@ -39,8 +39,13 @@ end
 
 function Bullet:collisionResponse(other)
     if self.colnResponse == nil then
-        if other and (other:getTag() == TAG.Effect or other:getTag() == TAG.Player or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide or other:getTag() == TAG.ObstacleCastNoPlayer) then
-            return gfx.sprite.kCollisionTypeOverlap
+        if other then
+            if other.IsSinkSand then
+                return gfx.sprite.kCollisionTypeOverlap
+            end
+            if (other:getTag() == TAG.Effect or other:getTag() == TAG.Player or other:getTag() == TAG.Interactive or other:getTag() == TAG.HazardNoColide or other:getTag() == TAG.ObstacleCastNoPlayer) then
+                return gfx.sprite.kCollisionTypeOverlap
+            end
         end
         return gfx.sprite.kCollisionTypeSlide
     else

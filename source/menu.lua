@@ -9,6 +9,8 @@ function Menu:init()
     self.menus = {}
     self.currentmenu = "start"
     self.currentselectedindex = 1
+    self.currentSelectorX = 0
+    self.currentSelectorY = 0
     Menu.super.init(self)
     self:add()
 
@@ -52,7 +54,8 @@ function Menu:init()
     local startoptions = {}
     
     table.insert(startoptions, {posX = 13, posY = 80, fn = function()
-        self:SetMenu("level")
+        --self:SetMenu("level")
+        LevelList("levels")
     end})
 
     table.insert(startoptions, {posX = 13, posY = 125, fn = function()
@@ -402,13 +405,36 @@ function Menu:init()
         end
     end)
 
+    self.addonsbackgroundtilemaptable = AssetsLoader.LoadImageTable("images/UI/levelselectbg")
+
+    self.addonsbackgroundtilemap = pd.graphics.tilemap.new()
+    self.addonsbackgroundtilemap:setImageTable(self.addonsbackgroundtilemaptable)
+    self.addonsbackgroundtilemap:setSize(1, 5)
+
     self.addonsbackground = gfx.sprite.new()
     self.addonsbackground:setCenter(0, 0)
-    self.addonsbackground:moveTo(0, 0)
-    self.addonsbackground:setImage(AssetsLoader.LoadImage("images/UI/addons_bg"))
+    self.addonsbackground:moveTo(77, 0)
     self.addonsbackground:setZIndex(Z_Index.UI)
-    self.addonsbackground:add()
     self.addonsbackground:setVisible(false)
+    self.addonsbackground:setTilemap(self.addonsbackgroundtilemap)
+    self.addonsbackground:add()
+
+    self.addonsbackgroundmipa = gfx.sprite.new()
+    self.addonsbackgroundmipa:setCenter(0, 0)
+    self.addonsbackgroundmipa:moveTo(294, 147)
+    self.addonsbackgroundmipa:setImage(AssetsLoader.LoadImage("images/UI/MipaAddons"))
+    self.addonsbackgroundmipa:setZIndex(Z_Index.UI)
+    self.addonsbackgroundmipa:setIgnoresDrawOffset(true)
+    self.addonsbackgroundmipa:setVisible(false)
+    self.addonsbackgroundmipa:add()
+
+    self.levelsword = gfx.sprite.new()
+    self.levelsword:setCenter(0, 0)
+    self.levelsword:moveTo(84, 0)
+    self.levelsword:setImage(AssetsLoader.LoadImage("images/UI/levels"))
+    self.levelsword:setZIndex(Z_Index.UI)
+    self.levelsword:setVisible(false)
+    self.levelsword:add()
 
     self.addontextsprite = gfx.sprite.new()
     self.addontextsprite:setCenter(0, 0)
@@ -422,13 +448,17 @@ function Menu:init()
     table.insert(addonsOptions, 
     {posX = 20, posY = 90, fn = function()end})
 
-    self:AddMenu("addons", addonsOptions, {self.addonsbackground, self.addontextsprite}, function ()
+    self:AddMenu("addons", addonsOptions, {self.addonsbackground, self.addontextsprite, self.levelsword, self.addonsbackgroundmipa}, function ()
 
         if pd.buttonJustPressed(pd.kButtonB) then
+            CameraYMaxScroll = 0
+            UpdateCameraPosition(0, 0, true)
             self:SetMenu("start")
             SoundManager:PlayMusic("Intro")
         end
-    end, false)
+        UpdateCameraPosition(0, self.currentSelectorY)
+
+    end, false, true)
 
     self.animtimer = pd.frameTimer.new(7)
 	self.animtimer.timerEndedCallback = function(timer)
@@ -497,11 +527,12 @@ function Menu:ChangeLanguage()
     end
 end
 
-function Menu:AddMenu(name, options, objs, fn, selector_big)
+function Menu:AddMenu(name, options, objs, fn, selector_big, hidetitle)
     self.menus[name] = {}
     self.menus[name].options = options
     self.menus[name].objs = objs
     self.menus[name].fn = fn
+    self.menus[name].hidetitle = hidetitle
     if selector_big == nil then
         self.menus[name].selector_big = true
     else
@@ -522,6 +553,21 @@ function Menu:SetMenu(name)
     for i = 1, #currentMenuData.objs, 1 do
         currentMenuData.objs[i]:setVisible(true)
     end
+    if currentMenuData.hidetitle then
+        if self.title:isVisible() then
+            self.title:setVisible(false)
+        end
+        if self.bg:isVisible() then
+            self.bg:setVisible(false)
+        end
+    else
+        if not self.title:isVisible() then
+            self.title:setVisible(true)
+        end
+        if not self.bg:isVisible() then
+            self.bg:setVisible(true)
+        end
+    end
     self.currentselectedindex = 1
     self:SelectorPos()
 end
@@ -532,6 +578,8 @@ function Menu:SelectorPos()
         return
     end
     local optiondata = data.options[self.currentselectedindex]
+    self.currentSelectorX = optiondata.posX
+    self.currentSelectorY = optiondata.posY
     if data.selector_big then
         self.selector:moveTo(optiondata.posX, optiondata.posY)
         if not self.selector:isVisible() then
@@ -586,11 +634,11 @@ function Menu:InputSelect()
     if data == nil then
         return
     end
+    SoundManager:PlaySound("Pip")
     local fn = data.options[self.currentselectedindex].fn
     if fn then
         fn()
     end
-    SoundManager:PlaySound("Pip")
 end
 
 function Menu:Update()

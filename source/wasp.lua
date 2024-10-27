@@ -17,7 +17,7 @@ function Wasp:init(x, y)
     -- Movement
     self.speed = 1.66
     self.IsWasp = true
-    self.hp = 1
+    self.hp = 3
     self.maxhp = 3
     self.damagable = true
     self.damageimuneframes = 0

@@ -41,13 +41,14 @@ import "wasp"
 import "jobee"
 import "funnybridge"
 import "drop"
+import "dropper"
 
 local pd <const> = playdate;
 local gfx <const> = pd.graphics
 DEFAULT_FONT = nil
-LIQUID_TEST = false
-JOBEEFLY_TEST = true
+--DebugLevelToLoad = "lvl3"
 BACKGROUND_TEST = false
+
 gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 UIIsnt = nil
 MenuInst = nil
@@ -70,11 +71,15 @@ halfDisplayWidth = displayWidth / 2
 ShouldUpdatePauseMenu = false
 SeenDialogs = {}
 FoundNotes = SaveManager.Load("notes") or {}
+UnlockedLevels = SaveManager.Load("unlockedlevels") or {}
 DrawCrankFrames = 0
 CrankedThisFrame = false
 CameraX = 0
-CameraXMaxScroll = 392 - displayWidth
+CameraY = 0
+CameraXMaxScroll = 0
 CameraXMinScroll = 0
+CameraYMaxScroll = 0
+CameraYMinScroll = 0
 
 LeftEdge = 0
 RightEdge = 400
@@ -89,20 +94,100 @@ LastDeltaTime = 0
 --CurrentLevelName = "lvl14c"
 --NextLevel = "lvl14c"
 
-if LIQUID_TEST then
-	CurrentLevelName = "WaterElectricTest"
-    NextLevel = "WaterElectricTest"
-	DebugFlags.FPSCounter = true
+if DebugLevelToLoad and DebugLevelToLoad ~= "" then
+	CurrentLevelName = DebugLevelToLoad
+    NextLevel = DebugLevelToLoad
 end
 
-if JOBEEFLY_TEST then
-	CurrentLevelName = "JobeeFly"
-    NextLevel = "JobeeFly"
-end
-
-ScrollingMode = 2
+ScrollingMode = 1
 
 ScrollingSmoothRate = 4
+
+StoryLineLevels = {}
+
+AddStoryLineLevel = function (FileName, PrefixName, NeedUnlock)
+	if NeedUnlock == nil then
+		NeedUnlock = true
+	end
+	table.insert(StoryLineLevels, {name = FileName, prefix = PrefixName, requiresunlock = NeedUnlock})
+end
+
+AddStoryLineChapter = function (ChapterName)
+	table.insert(StoryLineLevels, {name = ChapterName, chapter = true})
+end
+
+RegisterStoryLine = function ()
+	AddStoryLineChapter("Outside")
+
+	AddStoryLineLevel("lvl-1", "", false)
+
+	AddStoryLineChapter("Cave")
+
+	AddStoryLineLevel("lvl0", "0")
+	AddStoryLineLevel("lvl1", "1")
+	AddStoryLineLevel("lvl2", "2")
+	AddStoryLineLevel("lvl3", "3")
+	AddStoryLineLevel("lvl4", "4")
+	AddStoryLineLevel("lvl5", "5")
+	AddStoryLineLevel("lvl6", "6")
+	AddStoryLineLevel("lvl7", "7")
+	AddStoryLineLevel("lvl8", "8")
+	AddStoryLineLevel("lvl9", "9")
+
+	AddStoryLineChapter("Soil")
+
+	AddStoryLineLevel("lvl10", "10")
+	AddStoryLineLevel("lvl11", "11")
+	AddStoryLineLevel("lvl12", "12")
+	AddStoryLineLevel("lvl13", "13")
+	AddStoryLineLevel("lvl14", "14")
+	AddStoryLineLevel("lvl15", "15")
+	AddStoryLineLevel("lvl16", "16")
+
+	AddStoryLineChapter("Hive")
+
+	AddStoryLineLevel("lvl17", "17")
+	AddStoryLineLevel("lvl18", "18")
+	AddStoryLineLevel("lvl19", "19")
+	AddStoryLineLevel("lvl20", "20")
+	AddStoryLineLevel("lvl21", "21")
+	AddStoryLineLevel("lvl22", "22")
+
+	AddStoryLineChapter("Dripstone Cave")
+
+	--AddStoryLineLevel("JobeeFly", "23")
+
+	--AddStoryLineChapter("Sand Drifts")
+
+	--AddStoryLineLevel("Sinksand", "23b")
+end
+
+RegisterStoryLine()
+
+Lerp = function (current, goal, frametoreachgoal, epsilon)
+	if epsilon == nil then
+		epsilon = 1
+	end
+	local delta = 0
+	local result = goal
+	if current < goal then
+		delta = (goal-current)/frametoreachgoal
+		result = current+delta+epsilon
+		if result > goal then
+			return goal
+		else
+			return result
+		end
+	elseif current > goal then
+		delta = (current-goal)/frametoreachgoal
+		result = current-delta-epsilon
+		if result < goal then
+			return goal
+		else
+			return result
+		end
+	end
+end
 
 InterpolateScrolling = function (current, goal)
 	local result = goal
@@ -123,19 +208,25 @@ InterpolateScrolling = function (current, goal)
 	end
 end
 
-UpdateCameraPosition = function (MipaX, force)
+UpdateCameraPosition = function (MipaX, MipaY, force)
 	local newX = math.floor(math.max(math.min(MipaX - halfDisplayWidth + 60, CameraXMaxScroll), CameraXMinScroll))
-	if newX ~= -CameraX or force then
+	local newY = math.floor(math.max(math.min(MipaY - halfDisplayWidth + 60, CameraYMaxScroll), CameraYMinScroll))
+	if (newX ~= -CameraX or newY ~= -CameraY) or force then
 		if not force then
-			local interpolated = InterpolateScrolling(CameraX, -newX)
-			--print("[UpdateCameraPosition] Going to Interpolate "..CameraX.." to "..newX.." result "..interpolated)
-
-			newX = -interpolated
+			if newX ~= -CameraX and ((newX ~= 0 and CameraX ~= 0) or (newX ~= 0 and CameraX == 0) or (newX == 0 and CameraX ~= 0)) then
+				local interpolatedX = InterpolateScrolling(CameraX, -newX)
+				newX = -interpolatedX
+			end
+			if newY ~= -CameraY and ((newY ~= 0 and CameraY ~= 0) or (newY ~= 0 and CameraY == 0)or (newY == 0 and CameraY ~= 0))  then
+				local interpolatedY = InterpolateScrolling(CameraY, -newY)
+				newY = -interpolatedY
+			end
 		end
 		if ScrollingMode == 1 then
 			CameraX = -newX
-			gfx.setDrawOffset(CameraX,0)
-			gfx.sprite.addDirtyRect(newX, 0, displayWidth, displayHeight)
+			CameraY = -newY
+			gfx.setDrawOffset(CameraX, CameraY)
+			gfx.sprite.addDirtyRect(newX, newY, displayWidth, displayHeight)
 		elseif ScrollingMode == 2 then
 			local d = newX + CameraX
 			CameraX = -newX
@@ -148,7 +239,8 @@ UpdateCameraPosition = function (MipaX, force)
 				playdate.graphics.sprite.addDirtyRect(newX, 0, -d, displayHeight)
 			end
 		end
-		print("[UpdateCameraPosition] Scroll X "..newX.." bounds: "..LeftEdge.." "..RightEdge)
+		--print("[UpdateCameraPosition] Scroll X "..newX.." bounds: "..LeftEdge.." "..RightEdge)
+		--print("[UpdateCameraPosition] Scroll Y "..newY)
 	end
 end
 
@@ -163,35 +255,119 @@ AddFoundNote = function (noteID)
 	SaveManager.Save("notes", FoundNotes)
 end
 
+AddUnlockedLevel = function (levelName)
+	if not LevelIsUnlocked(levelName) then
+		table.insert(UnlockedLevels, levelName)
+		SaveManager.Save("unlockedlevels", UnlockedLevels)
+	end
+end
+
+LevelIsUnlocked = function (levelName)
+	for i = 1, #UnlockedLevels, 1 do
+		if UnlockedLevels[i] == levelName then
+			return true
+		end
+	end
+	return false
+end
+
 local function OpenItemsMenu()
 	if UIIsnt then
 		UIIsnt:ShowPauseMenu()
 	end
 end
 
-local function OpenAddons()
+function LevelList(dir)
 	SoundManager:PlayMusic("Xband")
 	if MenuInst then
 		local addonsOptions = {}
 		local LevelNames = ""
-	    if playdate.file.isdir("/Shared/Mipa/Levels") then
-			print("[Add-ons] Scanning Levels Folder")
-			local files = playdate.file.listFiles("/Shared/Mipa/Levels")
-			for i = 1, #files, 1 do
-				if LevelNames == "" then
-					LevelNames = files[i]
-				else
-					LevelNames = LevelNames.."\n"..files[i]
+		local SelectorOffset = 20
+		if playdate.file.isdir(dir) then
+			print("Scanning Levels Folder")
+
+			local IsStoryLine = dir == "levels"
+
+			if not IsStoryLine then
+				local files = playdate.file.listFiles(dir)
+				for i = 1, #files, 1 do
+					local levelName, IsListed = GetLevelDisplayData(dir.."/"..files[i], files[i])
+	
+					if IsListed then
+						if LevelNames == "" then
+							LevelNames = levelName
+						else
+							LevelNames = LevelNames.."\n"..levelName
+						end
+						table.insert(addonsOptions, 
+						{
+						posX = 40, posY = SelectorOffset, fn = function()
+							NextLevel = dir.."/"..files[i]
+							StartGame()
+						end
+						})
+						SelectorOffset = SelectorOffset + 20
+					end
 				end
-				table.insert(addonsOptions, 
-				{
-				posX = 40, posY = i*20, fn = function()
-					NextLevel = "/Shared/Mipa/Levels/"..files[i]
-					StartGame()
+			else
+				for i = 1, #StoryLineLevels, 1 do
+					local Data = StoryLineLevels[i]
+
+					if not Data.chapter then
+						local Unlocked = not Data.requiresunlock or LevelIsUnlocked(Data.name)
+
+						local levelName, IsListed
+						if Unlocked then
+							levelName, IsListed = GetLevelDisplayData(dir.."/"..Data.name..".json", Data.name)
+						else
+							IsListed = true
+							levelName = ""
+						end
+		
+						if IsListed then
+							if Unlocked then
+								if Data.prefix ~= "" then
+									levelName = Data.prefix..". "..levelName
+								end
+							else
+								levelName = "⑦. ????????"
+							end
+
+							table.insert(addonsOptions, 
+							{
+							posX = 40, posY = SelectorOffset, fn = function()
+								
+								if Unlocked then
+									NextLevel = Data.name
+									StartGame()
+								else
+									SoundManager:PlaySound("Error")
+								end
+							end
+							})
+							
+							if LevelNames == "" then
+								LevelNames = levelName
+							else
+								LevelNames = LevelNames.."\n"..levelName
+							end
+
+							SelectorOffset = SelectorOffset + 20
+						end
+					else
+						local chapterName = "\n*"..Data.name.."*\n"
+						if LevelNames == "" then
+							LevelNames = chapterName
+						else
+							LevelNames = LevelNames.."\n"..chapterName
+						end
+						SelectorOffset = SelectorOffset + 60
+					end
 				end
-				})
 			end
 		end
+		local Pages = 1
+		local PageSize = 220
 		if #addonsOptions == 0 then
 			LevelNames = "No custom levels found"
 			table.insert(addonsOptions, 
@@ -202,19 +378,45 @@ local function OpenAddons()
 				AddSystemMenuButtons()
 			end
 			})
+			Pages = 1
+			CameraYMaxScroll = 0
+		else
+			Selectables = #addonsOptions
+			if SelectorOffset > PageSize then
+				Pages = math.ceil(SelectorOffset/PageSize)
+				print("Pages ", Pages)
+				CameraYMaxScroll = SelectorOffset
+			else
+				Pages = 1
+				CameraYMaxScroll = 0
+			end
 		end
+		MenuInst.addonsbackgroundtilemap:setSize(1, Pages)
+		for i = 1, Pages, 1 do
+			local bgIndex = math.floor(math.random(1,MenuInst.addonsbackgroundtilemaptable:getLength())+0.5)
+			MenuInst.addonsbackgroundtilemap:setTileAtPosition(1, i, bgIndex)
+		end
+		MenuInst.addonsbackground:setTilemap(MenuInst.addonsbackgroundtilemap)
 		MenuInst.menus["addons"].options = addonsOptions
 		MenuInst:SetMenu("addons")
-		local addontextimage = gfx.image.new(194, 213)
+		local addontextimage = gfx.image.new(194, SelectorOffset)
 		addontextimage:clear(gfx.kColorClear)
 		gfx.setImageDrawMode(gfx.kDrawModeCopy)
 		gfx.pushContext(addontextimage)
-			gfx.drawTextInRect(LevelNames, 0, 0, 194, 213, nil, "")
+			gfx.drawTextInRect(LevelNames, 3, 0, 194, SelectorOffset, nil, "")
 		gfx.popContext()
 		gfx.setImageDrawMode(gfx.kDrawModeBlackTransparent)
 		MenuInst.addontextsprite:setImage(addontextimage)
 	end
 	AddSystemMenuButtons()
+end
+
+local function OpenAddons()
+	LevelList("/Shared/Mipa/Levels")
+end
+
+local function OpenNewLevelSelect()
+	LevelList("levels")
 end
 
 AddSystemMenuButtons = function ()
@@ -255,6 +457,10 @@ AddSystemMenuButtons = function ()
 				NextLevel = "menu"
 				OpenAddons()
 			end)
+			--local menuItem, error = menu:addMenuItem(LocalizationManager.GetLine("Alt. Level list"), function()
+			--	NextLevel = "menu"
+			--	OpenNewLevelSelect()
+			--end)
 		end
 	end
 end
@@ -307,12 +513,15 @@ end
 
 StartGame = function ()
 	CameraX = 0
-	CameraXMaxScroll = 392 - displayWidth
+	CameraY = 0
+	CameraXMaxScroll = 0
 	CameraXMinScroll = 0
+	CameraYMaxScroll = 0
+	CameraYMinScroll = 0
 	CanScroll = false
 	LeftEdge = 0
     RightEdge = 400
-	UpdateCameraPosition(0, true)
+	UpdateCameraPosition(0, 0, true)
 	IsReplay = DebugFlags.ForceLikeReplay
 	InvertedColorsFrames = 0
 	gfx.sprite.removeAll()
@@ -377,13 +586,13 @@ StartGame = function ()
 	--DebugFlags.FrameByFrame = true
 	--SUPRESSCURRENTFRAME = true
 	CurrentLevelName = NextLevel
-	if string.find(CurrentLevelName, "Shared") == nil then
+
+	if string.find(CurrentLevelName, ".json") == nil then
 		CurrentLevel = Level("levels/"..CurrentLevelName..".json")
+		AddUnlockedLevel(CurrentLevelName)
 	else
 		CurrentLevel = Level(CurrentLevelName)
 	end
-
-	
 	
 	UIIsnt = UI()
 	AddSystemMenuButtons()
@@ -491,7 +700,7 @@ GetPauseMenuImage = function (extended)
 		if extended then
 			for i = 1, #MipaInst.equipment, 1 do
 				local slot = AssetsLoader.LoadImage("images/UI/pause/slota")
-				local item = AssetsLoader.LoadImage("images/UI/equip"..MipaInst.equipment[i])
+				local item = AssetsLoader.LoadImageTable("images/UI/equipment"):getImage(MipaInst.equipment[i])
 				local x = 178 + 30*i
 				local y = 30
 				if slot then
@@ -503,7 +712,7 @@ GetPauseMenuImage = function (extended)
 			end
 			for i = 1, #MipaInst.passiveitems, 1 do
 				local slot = AssetsLoader.LoadImage("images/UI/pause/slotp")
-				local item = AssetsLoader.LoadImage("images/UI/passive"..MipaInst.passiveitems[i])
+				local item = AssetsLoader.LoadImageTable("images/UI/passive"):getImage(MipaInst.passiveitems[i])
 				local x = 180 + 31*i
 				local y = 61
 				if slot then
@@ -553,16 +762,72 @@ function pd.gameWillResume()
 	UpdatePauseMenu()
 end
 
+function IsNightTime(clock)
+	return clock.hour > 22 or (clock.hour >= 0 and clock.hour < 4)
+end
+
+function IsEarlyMorning(clock)
+	return (clock.hour >= 5 and clock.hour <= 7)
+end
+
+function IsMipaMonday(clock)
+	return (clock.weekday == 1)
+end
+
 local function loadGame()
 	CheatsManager.RegisterCheats()
 	LocalizationManager.Load()
 	gfx.setFont(font)
 	pd.display.setInverted(true)
-	StartGame()
+
+	local CanHaveFun = false
+
+	local clock = playdate.getTime()
+	local previousvisit = SaveManager.Load("lastvisit")
+
+	if previousvisit then
+		if previousvisit.day ~= clock.day or previousvisit.month ~= clock.month then
+			CanHaveFun = true
+		end
+	end
+
+	SaveManager.Save("lastvisit", clock)
+
+	if not SettingsManager:Get("seenflashingwarning") and ReduceFlashingSystemSetting then
+		CurrentLevelName = "Warning"
+		UIIsnt = UI()
+		local Dialog = GetDialogDataFromString("#None\nWe noticed *Reduce Flashing* setting set on your system, and automatically disabled some in-game effects.                  \nYou always can re-enable this effects in game settings. This message shown only once. Be safe.   ")
+
+		UIIsnt:StartDialog(Dialog, nil, "Level intro")
+		SettingsManager:ApplyReduceFlashing()
+	else
+		if CanHaveFun then
+			if IsMipaMonday(clock) then
+				CurrentLevelName = "Funny"
+				UIIsnt = UI()
+				local Dialog = GetDialogDataFromString("#Mipa_4\nIt's Mipa Monday today!\nI hope start of your week is good!")
+				UIIsnt:StartDialog(Dialog, nil, "Conversation BootMipa monday")
+				return
+			elseif IsEarlyMorning(clock) then
+				CurrentLevelName = "Funny"
+				UIIsnt = UI()
+				local Dialog = GetDialogDataFromString("#Mipa_3\nWhat the deal of playing this early in the morning?\n#Mipa_4\nHowever, I hope you have good breakfast!")
+				UIIsnt:StartDialog(Dialog, nil, "Level intro")
+				return
+			elseif IsNightTime(clock) then
+				CurrentLevelName = "Funny"
+				UIIsnt = UI()
+				local Dialog = GetDialogDataFromString("#Mipa_3\nWhat the deal of playing this late?\n#Mipa_7\n... ... ...\nOkay, I will let game start anyway!")
+				UIIsnt:StartDialog(Dialog, nil, "Level intro")
+				return
+			end
+		end
+		StartGame()
+	end
 end
 
 local function updateGame()
-	if InvertedColorsFrames > 0 then
+	if InvertedColorsFrames > 0 and not ReduceFlashingSystemSetting then
 		InvertedColorsFrames = InvertedColorsFrames-1
 		if pd.display.getInverted() then
 			pd.display.setInverted(false)
@@ -573,7 +838,7 @@ local function updateGame()
 
 	if MipaInst then
 		if CanScroll then
-			UpdateCameraPosition(MipaInst.x)
+			UpdateCameraPosition(MipaInst.x, MipaInst.y)
 		end
 	end
 
@@ -643,8 +908,11 @@ end
 local lastTime = playdate.getCurrentTimeMilliseconds()
 
 function pd.debugDraw()
-	if pd.isSimulator == 1 and DebugFlags.DrawSpriteBounds then
+	if pd.isSimulator == 1 and (DebugFlags.DrawSpriteBounds or DebugFlags.DrawVisibleSpriteBounds) then
 		local debugdrawfunction = function (sp)
+			if DebugFlags.DrawVisibleSpriteBounds and not sp:isVisible() then
+				return
+			end
 			local x, y, width, height = sp:getBounds()
 			gfx.drawRect(x, y, width, height)
 		end
@@ -652,7 +920,18 @@ function pd.debugDraw()
 	end
 end
 
+function pd.gameWillTerminate()
+	print("[PlayDate] gameWillTerminate")
+	--SoundManager:PlaySound("BuffetScream")
+end
+
+function pd.deviceDidUnlock()
+	print("[PlayDate] deviceDidUnlock")
+	SoundManager:PlaySound("BuffetScream")
+end
+
 function pd.update()
+	--print("pd.update()")
 	if pd.isSimulator == 1 then
 		if DebugFlags.FrameByFrame then
 			if SUPRESSCURRENTFRAME then

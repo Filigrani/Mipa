@@ -46,5 +46,9 @@ if ($sim)
 # Remove Paint .net image source files.
 Remove-Item "$build\*" -Recurse -Include *.pdn
 
+# Copy to Game to folder
+Remove-Item "$Env:PLAYDATE_SDK_PATH\Disk\Games\Mipa.pdx" -Recurse
+Copy-Item "$pdx" "$Env:PLAYDATE_SDK_PATH\Disk\Games" -Recurse
+
 # Run (Simulator)
 & "$Env:PLAYDATE_SDK_PATH\bin\PlaydateSimulator.exe" "$pdx"

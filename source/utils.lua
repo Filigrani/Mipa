@@ -34,6 +34,7 @@ DebugFlags =
 	FrameByFrame = false,
 	ForceLikeReplay = false,
 	DrawSpriteBounds = false,
+	DrawVisibleSpriteBounds = false,
 }
 
 FONT_BUTTONS =
@@ -44,6 +45,7 @@ FONT_BUTTONS =
 	DOWN = "④",
 	LEFT = "⑤",
 	RIGHT = "⑥",
+	PaddleLock = "⑦",
 }
 
 null = nil

@@ -1,11 +1,14 @@
+ReduceFlashingSystemSetting = playdate.getReduceFlashing()
+
 DefaultSettings = 
 {
 	lang = "english",
 	dialogboxmode = "dyn",
-	damageglitches = true,
-	lowhpglitches = true,
+	damageglitches = not ReduceFlashingSystemSetting,
+	lowhpglitches = not ReduceFlashingSystemSetting,
 	musicvolume = 5,
     liquidvisualid = 800,
+    seenflashingwarning = false,
 }
 Settings = 
 {
@@ -13,6 +16,13 @@ Settings =
 }
 
 SettingsManager = {}
+
+function SettingsManager:ApplyReduceFlashing()
+    SettingsManager:Set("damageglitches", false)
+    SettingsManager:Set("lowhpglitches", false)
+    SettingsManager:Set("seenflashingwarning", true)
+    SaveManager.Save("settings", Settings)
+end
 
 
 function SettingsManager:Get(entrykey)
